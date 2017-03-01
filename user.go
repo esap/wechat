@@ -24,7 +24,7 @@ type UserOauth struct {
 // GetUserOauth 通过code鉴权
 func GetUserOauth(code string) (userOauth UserOauth, err error) {
 	url := fmt.Sprintf(WXAPI_GETUSER, GetAccessToken(), code)
-	if err = util.HttpGetJson(url, &userOauth); err != nil {
+	if err = util.GetJson(url, &userOauth); err != nil {
 		return
 	}
 	if userOauth.ErrCode != 0 {
@@ -57,7 +57,7 @@ type UserInfo struct {
 // GetUserInfo 通过userId获取用户信息
 func GetUserInfo(userId string) (userInfo UserInfo, err error) {
 	url := fmt.Sprintf(WXAPI_GETUSERINFO, GetAccessToken(), userId)
-	if err = util.HttpGetJson(url, &userInfo); err != nil {
+	if err = util.GetJson(url, &userInfo); err != nil {
 		return
 	}
 	if userInfo.ErrCode != 0 {
@@ -75,7 +75,7 @@ type UserList struct {
 // GetUserList 获取用户列表
 func GetUserList() (userList UserList, err error) {
 	url := fmt.Sprintf(WXAPI_USERLIST, GetAccessToken())
-	if err = util.HttpGetJson(url, &userList); err != nil {
+	if err = util.GetJson(url, &userList); err != nil {
 		return
 	}
 	if userList.ErrCode != 0 {

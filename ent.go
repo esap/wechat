@@ -19,9 +19,7 @@ func SetEnt(tk, id, sec, key string) (err error) {
 	if len(key) != 43 {
 		return errors.New("非法的AesKey")
 	}
-	safeMode = true
-	entMode = true
-	token, appId, secret = tk, id, sec
+	token, appId, secret, safeMode, entMode = tk, id, sec, true, true
 	msgUrl = WXAPI_MSG_ENT
 	uploadUrl = WXAPI_UPLOAD_ENT
 	aesKey, err = base64.StdEncoding.DecodeString(key + "=")

@@ -17,8 +17,6 @@ var (
 )
 
 // accessToken 回复体
-// 正常返回样式：{"access_token":"ACCESS_TOKEN","expires_in":7200}
-// 出错返回样式：{"errcode":40013,"errmsg":"invalid appid"}
 type accessToken struct {
 	AccessToken string `json:"access_token"`
 	ExpiresIn   int64  `json:"expires_in"`
@@ -37,7 +35,7 @@ func FetchAccessToken(url string) {
 	go func() {
 		for {
 			if err := fetchAccessToken(url, appId, secret); err != nil {
-				log.Println("FetchAccessToken...err:", err)
+				log.Println("FetchAccessToken...", err)
 			}
 			time.Sleep(fetchDelay)
 		}
@@ -47,7 +45,7 @@ func FetchAccessToken(url string) {
 func fetchAccessToken(url, appId, secret string) error {
 	url = fmt.Sprintf(url, appId, secret)
 	at := new(accessToken)
-	if err := util.HttpGetJson(url, at); err != nil {
+	if err := util.GetJson(url, at); err != nil {
 		return err
 	}
 	if at.ErrCode > 0 {

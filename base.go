@@ -42,17 +42,14 @@ var (
 
 // Set 设置token,appId,secret
 func Set(tk, id, sec string, key ...string) (err error) {
-	token = tk
-	appId = id
-	secret = sec
+	token, appId, secret = tk, id, sec
 	// 存在aesKey则开启加密安全模式
 	if len(key) > 0 {
 		safeMode = true
-		aesKey, err = base64.StdEncoding.DecodeString(key[0] + "=")
-		if err != nil {
+		if aesKey, err = base64.StdEncoding.DecodeString(key[0] + "="); err != nil {
 			return err
 		}
-		log.Println("已启动加密模式")
+		Println("启用加密模式")
 	}
 	FetchAccessToken(WXAPI_TOKEN)
 	return nil
@@ -61,20 +58,23 @@ func Set(tk, id, sec string, key ...string) (err error) {
 // VerifyURL 验证URL,验证成功则返回标准请求载体（Msg已解密）
 func VerifyURL(w http.ResponseWriter, r *http.Request) (ctx *Context) {
 	log.Println(r.Method, "|", r.URL.String())
-	ctx = new(Context)
-	ctx.Writer = w
-	ctx.Request = r
-	ctx.repCount = 0
-	ctx.Timestamp = r.FormValue("timestamp")
-	ctx.Nonce = r.FormValue("nonce")
-	signature := r.FormValue("signature")
-	if entMode {
-		signature = r.FormValue("msg_signature")
+	ctx = &Context{
+		Writer:    w,
+		Request:   r,
+		repCount:  0,
+		Timestamp: r.FormValue("timestamp"),
+		Nonce:     r.FormValue("nonce"),
+		Msg:       new(WxMsg),
+		MsgEnc:    new(WxMsgEnc),
 	}
+	signature := r.FormValue("signature") + r.FormValue("msg_signature")
 
 	echostr := r.FormValue("echostr")
 	if safeMode && r.Method == "POST" {
-		echostr = parseEncMsg(r).Encrypt // POST请求需解析消息体中的Encrypt
+		if err := xml.NewDecoder(r.Body).Decode(ctx.MsgEnc); err != nil {
+			Println("MsgEnc parse err:", err)
+		}
+		echostr = ctx.MsgEnc.Encrypt // POST请求需解析消息体中的Encrypt
 	}
 
 	// 验证signature
@@ -85,6 +85,11 @@ func VerifyURL(w http.ResponseWriter, r *http.Request) (ctx *Context) {
 		log.Println("Signature验证错误!(公众号)")
 		return
 	}
+	if r.Method == "GET" {
+		Println("write echostr:", echostr)
+		w.Write([]byte(echostr))
+		return
+	}
 	if entMode || (safeMode && r.Method == "POST") {
 		var err error
 		echostr, err = DecryptMsg(echostr)
@@ -93,13 +98,11 @@ func VerifyURL(w http.ResponseWriter, r *http.Request) (ctx *Context) {
 			return
 		}
 	}
-	if r.Method == "GET" {
-		Println("write echostr:", echostr)
-		w.Write([]byte(echostr))
-		return
+	Println("--Req:\n", echostr)
+	if err := xml.NewDecoder(r.Body).Decode(ctx.Msg); err != nil {
+		Println("parseWxMsg err:", err)
 	}
-	Println("--ReqEchostr:\n", echostr)
-	ctx.Msg = parseWxMsg(r)
+	//	ctx.Msg = parseWxMsg(r)
 	if safeMode {
 		body := []byte(echostr)
 		if err := xml.Unmarshal(body, ctx.Msg); err != nil {
@@ -152,11 +155,11 @@ type wxRespEnc struct {
 
 // EncryptMsg 加密普通回复(AES-CBC),打包成xml格式
 // AES加密的buf由16个字节的随机字符串、4个字节的msg_len(网络字节序)、msg和$AppId组成
-func EncryptMsg(msg []byte, timeStamp, nonce string) ([]byte, error) {
+func EncryptMsg(msg []byte, timeStamp, nonce string) (re *wxRespEnc, err error) {
 	buf := new(bytes.Buffer)
-	err := binary.Write(buf, binary.BigEndian, int32(len(msg)))
+	err = binary.Write(buf, binary.BigEndian, int32(len(msg)))
 	if err != nil {
-		return nil, err
+		return
 	}
 	l := buf.Bytes()
 
@@ -165,13 +168,13 @@ func EncryptMsg(msg []byte, timeStamp, nonce string) ([]byte, error) {
 	plain := bytes.Join([][]byte{rd, l, msg, []byte(appId)}, nil)
 	ae, _ := util.AesEncrypt(plain, aesKey)
 	encMsg := base64.StdEncoding.EncodeToString(ae)
-	re := &wxRespEnc{
+	re = &wxRespEnc{
 		Encrypt:      CDATA(encMsg),
 		MsgSignature: CDATA(sortSha1(token, timeStamp, nonce, encMsg)),
 		TimeStamp:    timeStamp,
 		Nonce:        CDATA(nonce),
 	}
-	return xml.MarshalIndent(re, " ", "  ")
+	return
 }
 
 // Println Debug输出

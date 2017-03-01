@@ -2,10 +2,6 @@ package wechat
 
 import (
 	"encoding/xml"
-	"log"
-	"net/http"
-
-	"github.com/esap/wechat/util"
 )
 
 // WxMsg 混合用户消息，业务判断的主体
@@ -40,29 +36,10 @@ type WxMsg struct {
 	}
 }
 
-// parseWxReq 解析http请求，返回请求体
-func parseWxMsg(r *http.Request) (msg *WxMsg) {
-	msg = new(WxMsg)
-	if err := util.HttpParseXml(r, msg); err != nil {
-		log.Println("parseWxMsg err:", err)
-	}
-	Println("ReqXml=\n", msg)
-	return
-}
-
-// wxMsgEnc 密文用户消息
-type wxMsgEnc struct {
+// WxMsgEnc 密文用户消息
+type WxMsgEnc struct {
 	XMLName    xml.Name `xml:"xml"`
 	ToUserName string
-	AgentID    string
+	AgentID    int
 	Encrypt    string
-}
-
-// parseEncReq 解析加密请求XML
-func parseEncMsg(r *http.Request) (msg *wxMsgEnc) {
-	msg = new(wxMsgEnc)
-	if err := util.HttpParseXml(r, msg); err != nil {
-		log.Println("parseEncMsg err:", err)
-	}
-	return
 }

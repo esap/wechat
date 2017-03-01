@@ -13,6 +13,7 @@ type Context struct {
 	Timestamp string
 	Nonce     string
 	Msg       *WxMsg
+	MsgEnc    *WxMsgEnc
 	Resp      interface{}
 	Writer    http.ResponseWriter
 	Request   *http.Request
@@ -24,7 +25,23 @@ func (c *Context) Reply() *Context {
 	if c.Request.Method != "POST" || c.repCount > 0 {
 		return c
 	}
-	c.write(c.Resp)
+	if safeMode {
+		b, err := xml.MarshalIndent(c.Resp, "", "  ")
+		if err != nil {
+			log.Println("Reply()->MarshalIndent err:", err)
+			c.Writer.Write([]byte{})
+		}
+		c.Resp, err = EncryptMsg(b, c.Timestamp, c.Nonce)
+		if err != nil {
+			log.Println("Reply()->EncryptMsg err:", err)
+			c.Writer.Write([]byte{})
+		}
+	}
+	c.Writer.Header().Set("Content-Type", "text/xml")
+	err := xml.NewEncoder(c.Writer).Encode(c.Resp)
+	if err != nil {
+		Println("Reply()->Encode err:", err)
+	}
 	c.repCount++
 	return c
 }
@@ -39,24 +56,6 @@ func (c *Context) ReplySuccess() *Context {
 func (c *Context) Send() *Context {
 	SendMsg(c.Resp)
 	return c
-}
-
-func (c *Context) write(v interface{}) {
-	b, err := xml.MarshalIndent(v, "", "  ")
-	if err != nil {
-		log.Println("write()->xmlMarsha1 error:", err)
-		c.Writer.Write([]byte{})
-	}
-	Println(string(b))
-	if safeMode {
-		b, err = EncryptMsg(b, c.Timestamp, c.Nonce)
-		if err != nil {
-			log.Println("write()->EncryptMsg error:", err)
-			c.Writer.Write([]byte("success"))
-		}
-	}
-	c.Writer.Header().Set("Content-Type", "text/xml")
-	c.Writer.Write(b)
 }
 
 func (c *Context) newResp(msgType string) wxResp {

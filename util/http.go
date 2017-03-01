@@ -12,26 +12,26 @@ import (
 	"os"
 )
 
-// HttpGetJson 发送GET请求解析json
-func HttpGetJson(uri string, v interface{}) error {
-	body, err := HttpGet(uri)
+// GetJson 发送GET请求解析json
+func GetJson(uri string, v interface{}) error {
+	r, err := http.Get(uri)
 	if err != nil {
 		return err
 	}
-	return json.Unmarshal(body, v)
+	return json.NewDecoder(r.Body).Decode(v)
 }
 
-// HttpGetXml 发送GET请求并解析xml
-func HttpGetXml(uri string, v interface{}) error {
-	body, err := HttpGet(uri)
+// GetXml 发送GET请求并解析xml
+func GetXml(uri string, v interface{}) error {
+	r, err := http.Get(uri)
 	if err != nil {
 		return err
 	}
-	return xml.Unmarshal(body, v)
+	return xml.NewDecoder(r.Body).Decode(v)
 }
 
-// HTTPGet 发送GET请求，返回body字节
-func HttpGet(uri string) ([]byte, error) {
+// GetBody 发送GET请求，返回body字节
+func GetBody(uri string) ([]byte, error) {
 	response, err := http.Get(uri)
 	if err != nil {
 		return nil, err
@@ -42,30 +42,6 @@ func HttpGet(uri string) ([]byte, error) {
 		return nil, fmt.Errorf("http get error : uri=%v , statusCode=%v", uri, response.StatusCode)
 	}
 	return ioutil.ReadAll(response.Body)
-}
-
-// HttpParseJson 解析json请求
-func HttpParseJson(r *http.Request, v interface{}) error {
-	body, err := HttpParse(r)
-	if err != nil {
-		return err
-	}
-	return json.Unmarshal(body, v)
-}
-
-// HttpParseXml 解析xml请求
-func HttpParseXml(r *http.Request, v interface{}) error {
-	body, err := HttpParse(r)
-	if err != nil {
-		return err
-	}
-	return xml.Unmarshal(body, v)
-}
-
-// HttpParse 解析请求，返回body
-func HttpParse(r *http.Request) ([]byte, error) {
-	defer r.Body.Close()
-	return ioutil.ReadAll(r.Body)
 }
 
 //PostJson 发送Json格式的POST请求

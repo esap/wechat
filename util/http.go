@@ -77,6 +77,22 @@ func PostFile(fieldname, filename, uri string) ([]byte, error) {
 	return PostMultipartForm(fields, uri)
 }
 
+// GetFile 下载文件
+func GetFile(filename, uri string) error {
+	res, err := http.Get(uri)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+	file, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	_, err = io.Copy(file, res.Body)
+	return err
+}
+
 // MultipartFormField 文件或其他表单数据
 type MultipartFormField struct {
 	IsFile    bool

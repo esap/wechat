@@ -70,6 +70,7 @@ func VerifyURL(w http.ResponseWriter, r *http.Request) (ctx *Context) {
 	signature := r.FormValue("signature") + r.FormValue("msg_signature")
 
 	echostr := r.FormValue("echostr")
+	//	if safeMode {
 	if safeMode && r.Method == "POST" {
 		if err := xml.NewDecoder(r.Body).Decode(ctx.MsgEnc); err != nil {
 			Println("MsgEnc parse err:", err)
@@ -79,15 +80,10 @@ func VerifyURL(w http.ResponseWriter, r *http.Request) (ctx *Context) {
 
 	// 验证signature
 	if entMode && signature != sortSha1(token, ctx.Timestamp, ctx.Nonce, echostr) {
-		log.Println("Signature验证错误!(企业号)")
+		log.Println("Signature验证错误!(企业号)", token, ctx.Timestamp, ctx.Nonce, echostr)
 		return
 	} else if !entMode && signature != sortSha1(token, ctx.Timestamp, ctx.Nonce) {
-		log.Println("Signature验证错误!(公众号)")
-		return
-	}
-	if r.Method == "GET" {
-		Println("write echostr:", echostr)
-		w.Write([]byte(echostr))
+		log.Println("Signature验证错误!(公众号)", token, ctx.Timestamp, ctx.Nonce)
 		return
 	}
 	if entMode || (safeMode && r.Method == "POST") {
@@ -97,6 +93,11 @@ func VerifyURL(w http.ResponseWriter, r *http.Request) (ctx *Context) {
 			log.Println("DecryptMsg error:", err)
 			return
 		}
+	}
+	if r.Method == "GET" {
+		Println("write echostr:", echostr)
+		w.Write([]byte(echostr))
+		return
 	}
 	Println("--Req:\n", echostr)
 	if err := xml.NewDecoder(r.Body).Decode(ctx.Msg); err != nil {

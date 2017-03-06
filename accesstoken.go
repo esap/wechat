@@ -12,6 +12,7 @@ import (
 
 var (
 	accesstoken string
+	tokenSvr    string
 	atlock      sync.Mutex
 	fetchDelay  time.Duration = 5400 * time.Second // 默认1.5小时获取一次
 )
@@ -56,4 +57,17 @@ func fetchAccessToken(url, appId, secret string) error {
 	atlock.Unlock()
 	Println("AccessToken:", GetAccessToken(), fetchDelay)
 	return nil
+}
+
+// SetAccessTokenSvr 设置token中心服务器
+func SetAccessTokenSvr(url string) {
+	tokenSvr = url
+}
+
+// GetAccessTokenSvr 获取token中心服务器
+func GetAccessTokenSvr() string {
+	if tokenSvr != "" {
+		return tokenSvr
+	}
+	return WXAPI_TOKEN_ENT
 }

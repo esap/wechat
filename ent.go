@@ -26,6 +26,6 @@ func SetEnt(tk, id, sec, key string) (err error) {
 	if err != nil {
 		return err
 	}
-	FetchAccessToken(WXAPI_TOKEN_ENT)
+	FetchAccessToken(GetAccessTokenSvr())
 	return nil
 }

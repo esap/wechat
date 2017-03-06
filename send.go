@@ -20,6 +20,7 @@ func SendMsg(v interface{}) *WxErr {
 	if err != nil {
 		return &WxErr{-1, err.Error()}
 	}
+	Println("发送消息:", v, "\n回执:", *rst)
 	return rst
 
 }

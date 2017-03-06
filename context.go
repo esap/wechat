@@ -54,7 +54,7 @@ func (c *Context) ReplySuccess() *Context {
 
 // Send 主动发送消息(客服)
 func (c *Context) Send() *Context {
-	SendMsg(c.Resp)
+	go SendMsg(c.Resp)
 	return c
 }
 

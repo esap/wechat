@@ -15,7 +15,7 @@ const (
 
 // UserOauth 用户鉴权信息
 type UserOauth struct {
-	wxErr
+	WxErr
 	UserId   string
 	DeviceId string
 	OpenId   string
@@ -35,7 +35,7 @@ func GetUserOauth(code string) (userOauth UserOauth, err error) {
 
 // UserInfo 用户信息
 type UserInfo struct {
-	wxErr
+	WxErr
 	UserId     string
 	Name       string
 	Department []int
@@ -68,7 +68,7 @@ func GetUserInfo(userId string) (userInfo UserInfo, err error) {
 
 // UserList 用户列表
 type UserList struct {
-	wxErr
+	WxErr
 	UserList []UserInfo
 }
 

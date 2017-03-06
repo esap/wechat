@@ -26,7 +26,7 @@ const (
 
 // Media 上传回复体
 type Media struct {
-	wxErr
+	WxErr
 	Type         MediaType `json:"type"`
 	MediaID      string    `json:"media_id"`
 	ThumbMediaId string    `json:"thumb_media_id"`

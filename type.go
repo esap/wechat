@@ -6,7 +6,7 @@ import (
 )
 
 // 通用错误
-type wxErr struct {
+type WxErr struct {
 	ErrCode int
 	ErrMsg  string
 }

@@ -11,6 +11,7 @@ const (
 	WXAPI_GETUSER     = WXAPI_ENT + "user/getuserinfo?access_token=%s&code=%s"
 	WXAPI_GETUSERINFO = WXAPI_ENT + "user/get?access_token=%s&userid=%s"
 	WXAPI_USERLIST    = WXAPI_ENT + `user/list?access_token=%s&department_id=1&fetch_child=1&status=0`
+	WXAPI_USERADD     = WXAPI_ENT + `user/create?access_token=`
 )
 
 // UserOauth 用户鉴权信息

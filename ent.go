@@ -3,15 +3,19 @@ package wechat
 import (
 	"encoding/base64"
 	"errors"
+	"fmt"
+
+	"github.com/esap/wechat/util"
 )
 
 // WXAPI_ENT 企业号接口
 const (
-	WXAPI_ENT        = "https://qyapi.weixin.qq.com/cgi-bin/"
-	WXAPI_TOKEN_ENT  = WXAPI_ENT + "gettoken?corpid=%s&corpsecret=%s"
-	WXAPI_MSG_ENT    = WXAPI_ENT + "message/send?access_token="
-	WXAPI_IP_ENT     = WXAPI_ENT + "getcallbackip?access_token="
-	WXAPI_UPLOAD_ENT = WXAPI_ENT + "media/upload?access_token=%s&type=%s"
+	WXAPI_ENT          = "https://qyapi.weixin.qq.com/cgi-bin/"
+	WXAPI_TOKEN_ENT    = WXAPI_ENT + "gettoken?corpid=%s&corpsecret=%s"
+	WXAPI_MSG_ENT      = WXAPI_ENT + "message/send?access_token="
+	WXAPI_IP_ENT       = WXAPI_ENT + "getcallbackip?access_token="
+	WXAPI_UPLOAD_ENT   = WXAPI_ENT + "media/upload?access_token=%s&type=%s"
+	WXAPI_GETMEDIA_ENT = WXAPI_ENT + "media/get?access_token=%s&media_id=%s"
 )
 
 // SetEnt 初始化企业号，设置token,corpid,secrat,aesKey
@@ -22,10 +26,16 @@ func SetEnt(tk, id, sec, key string) (err error) {
 	token, appId, secret, safeMode, entMode = tk, id, sec, true, true
 	msgUrl = WXAPI_MSG_ENT
 	uploadUrl = WXAPI_UPLOAD_ENT
+	getMedia = WXAPI_GETMEDIA_ENT
 	aesKey, err = base64.StdEncoding.DecodeString(key + "=")
 	if err != nil {
 		return err
 	}
 	FetchAccessToken(GetAccessTokenSvr())
 	return nil
+}
+
+func GetMedia(filename, mediaId string) error {
+	url := fmt.Sprintf(getMedia, GetAccessToken(), mediaId)
+	return util.GetFile(filename, url)
 }

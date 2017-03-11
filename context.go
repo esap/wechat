@@ -48,6 +48,9 @@ func (c *Context) Reply() *Context {
 
 // ReplySuccess 如果不能在5秒内处理完，应该先回复success，然后通过客服消息通知用户
 func (c *Context) ReplySuccess() *Context {
+	if c.Request.Method != "POST" || c.repCount > 0 {
+		return c
+	}
 	c.Writer.Write([]byte("success"))
 	return c
 }

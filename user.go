@@ -12,6 +12,7 @@ const (
 	WXAPI_GETUSERINFO = WXAPI_ENT + "user/get?access_token=%s&userid=%s"
 	WXAPI_USERLIST    = WXAPI_ENT + `user/list?access_token=%s&department_id=1&fetch_child=1&status=0`
 	WXAPI_USERADD     = WXAPI_ENT + `user/create?access_token=`
+	WXAPI_DEPT        = WXAPI_ENT + `department/list?access_token=%s&id=1`
 )
 
 // UserOauth 用户鉴权信息
@@ -81,6 +82,28 @@ func GetUserList() (userList UserList, err error) {
 	}
 	if userList.ErrCode != 0 {
 		err = fmt.Errorf("MediaUpload error : errcode=%v , errmsg=%v", userList.ErrCode, userList.ErrMsg)
+	}
+	return
+}
+
+type DeptList struct {
+	WxErr
+	Department []struct {
+		Id       int
+		Name     string
+		ParentId int
+		Order    int
+	}
+}
+
+// GetDeptList 获取部门列表
+func GetDeptList() (deptList DeptList, err error) {
+	url := fmt.Sprintf(WXAPI_DEPT, GetAccessToken())
+	if err = util.GetJson(url, &deptList); err != nil {
+		return
+	}
+	if deptList.ErrCode != 0 {
+		err = fmt.Errorf("MediaUpload error : errcode=%v , errmsg=%v", deptList.ErrCode, deptList.ErrMsg)
 	}
 	return
 }

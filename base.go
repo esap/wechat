@@ -72,7 +72,6 @@ func VerifyURL(w http.ResponseWriter, r *http.Request) (ctx *Context) {
 	signature := r.FormValue("signature") + r.FormValue("msg_signature")
 
 	echostr := r.FormValue("echostr")
-	//	if safeMode {
 	if safeMode && r.Method == "POST" {
 		if err := xml.NewDecoder(r.Body).Decode(ctx.MsgEnc); err != nil {
 			Println("MsgEnc parse err:", err)
@@ -105,10 +104,8 @@ func VerifyURL(w http.ResponseWriter, r *http.Request) (ctx *Context) {
 	if err := xml.NewDecoder(r.Body).Decode(ctx.Msg); err != nil {
 		Println("parseWxMsg err:", err)
 	}
-	//	ctx.Msg = parseWxMsg(r)
 	if safeMode {
-		body := []byte(echostr)
-		if err := xml.Unmarshal(body, ctx.Msg); err != nil {
+		if err := xml.Unmarshal([]byte(echostr), ctx.Msg); err != nil {
 			log.Println("Msg parse err:", err)
 		}
 	}

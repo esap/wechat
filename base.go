@@ -11,6 +11,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"sort"
@@ -41,6 +42,10 @@ var (
 	// Debug is a flag to Println()
 	Debug bool = false
 )
+
+func SetLog(l io.Writer) {
+	log.SetOutput(l)
+}
 
 // Set 设置token,appId,secret
 func Set(tk, id, sec string, key ...string) (err error) {

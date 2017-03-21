@@ -11,6 +11,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"sort"
@@ -42,6 +43,10 @@ var (
 	Debug bool = false
 )
 
+func SetLog(l io.Writer) {
+	log.SetOutput(l)
+}
+
 // Set 设置token,appId,secret
 func Set(tk, id, sec string, key ...string) (err error) {
 	token, appId, secret = tk, id, sec
@@ -69,7 +74,11 @@ func VerifyURL(w http.ResponseWriter, r *http.Request) (ctx *Context) {
 		Msg:       new(WxMsg),
 		MsgEnc:    new(WxMsgEnc),
 	}
-	signature := r.FormValue("signature") + r.FormValue("msg_signature")
+	if !safeMode && r.Method == "POST" {
+		if err := xml.NewDecoder(r.Body).Decode(ctx.Msg); err != nil {
+			Println("parseWxMsg err:", err)
+		}
+	}
 
 	echostr := r.FormValue("echostr")
 	if safeMode && r.Method == "POST" {
@@ -80,6 +89,7 @@ func VerifyURL(w http.ResponseWriter, r *http.Request) (ctx *Context) {
 	}
 
 	// 验证signature
+	signature := r.FormValue("signature") + r.FormValue("msg_signature")
 	if entMode && signature != sortSha1(token, ctx.Timestamp, ctx.Nonce, echostr) {
 		log.Println("Signature验证错误!(企业号)", token, ctx.Timestamp, ctx.Nonce, echostr)
 		return
@@ -101,9 +111,6 @@ func VerifyURL(w http.ResponseWriter, r *http.Request) (ctx *Context) {
 		return
 	}
 	Println("--Req:\n", echostr)
-	if err := xml.NewDecoder(r.Body).Decode(ctx.Msg); err != nil {
-		Println("parseWxMsg err:", err)
-	}
 	if safeMode {
 		if err := xml.Unmarshal([]byte(echostr), ctx.Msg); err != nil {
 			log.Println("Msg parse err:", err)

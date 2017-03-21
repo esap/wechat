@@ -1,8 +1,7 @@
 # WeChat SDK
 [![Build Status](https://travis-ci.org/esap/wechat.svg?branch=master)](https://travis-ci.org/esap/wechat)
 [![Go Report Card](https://goreportcard.com/badge/github.com/esap/wechat)](https://goreportcard.com/report/github.com/esap/wechat)
-[![GoDoc]
-(http://godoc.org/github.com/esap/wechat?status.svg)](http://godoc.org/github.com/esap/wechat)
+[![GoDoc](http://godoc.org/github.com/esap/wechat?status.svg)](http://godoc.org/github.com/esap/wechat)
 
 微信SDK的golang实现
 

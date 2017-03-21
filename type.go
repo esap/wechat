@@ -5,6 +5,19 @@ import (
 	"strings"
 )
 
+// Type io类型汇总
+const (
+	TypeText   = "text"
+	TypeImage  = "image"
+	TypeVoice  = "voice"
+	TypeMusic  = "music"
+	TypeVideo  = "video"
+	TypeFile   = "file" // 仅企业号可用
+	TypeNews   = "news"
+	TypeMpNews = "mpnews" // 仅企业号可用
+	TypeThumb  = "thumb"
+)
+
 // 通用错误
 type WxErr struct {
 	ErrCode int
@@ -51,7 +64,7 @@ type content struct {
 // NewText Text 文本消息
 func NewText(to string, id int, msg ...string) Text {
 	return Text{
-		newWxResp("text", to, id),
+		newWxResp(TypeText, to, id),
 		content{CDATA(strings.Join(msg, ""))},
 	}
 }
@@ -69,7 +82,7 @@ type media struct {
 // NewImage Image 消息
 func NewImage(to string, id int, mediaId string) Image {
 	return Image{
-		newWxResp("image", to, id),
+		newWxResp(TypeImage, to, id),
 		media{CDATA(mediaId)},
 	}
 }
@@ -83,7 +96,7 @@ type Voice struct {
 // NewVoice Voice消息
 func NewVoice(to string, id int, mediaId string) Voice {
 	return Voice{
-		newWxResp("voice", to, id),
+		newWxResp(TypeVoice, to, id),
 		media{CDATA(mediaId)},
 	}
 }
@@ -97,7 +110,7 @@ type File struct {
 // NewFile File消息
 func NewFile(to string, id int, mediaId string) File {
 	return File{
-		newWxResp("file", to, id),
+		newWxResp(TypeFile, to, id),
 		media{CDATA(mediaId)},
 	}
 }
@@ -117,7 +130,7 @@ type video struct {
 // NewVideo Video消息
 func NewVideo(to string, id int, mediaId, title, desc string) Video {
 	return Video{
-		newWxResp("video", to, id),
+		newWxResp(TypeVideo, to, id),
 		video{CDATA(mediaId), CDATA(title), CDATA(desc)},
 	}
 }
@@ -139,7 +152,7 @@ type music struct {
 // NewMusic Music消息
 func NewMusic(to string, id int, mediaId, title, desc, musicUrl, qhMusicUrl string) Music {
 	return Music{
-		newWxResp("music", to, id),
+		newWxResp(TypeMusic, to, id),
 		music{CDATA(title), CDATA(desc), CDATA(musicUrl), CDATA(qhMusicUrl), CDATA(mediaId)},
 	}
 }
@@ -155,7 +168,7 @@ type News struct {
 
 // NewNews news消息
 func NewNews(to string, id int, arts ...Article) News {
-	news := News{wxResp: newWxResp("news", to, id), ArticleCount: len(arts)}
+	news := News{wxResp: newWxResp(TypeNews, to, id), ArticleCount: len(arts)}
 	news.Articles.Item = arts
 	return news
 }
@@ -183,7 +196,7 @@ type MpNews struct {
 
 // NewMpNews 加密新闻mpnews消息(仅企业号可用)
 func NewMpNews(to string, id int, arts ...MpArticle) MpNews {
-	news := MpNews{wxResp: newWxResp("mpnews", to, id)}
+	news := MpNews{wxResp: newWxResp(TypeMpNews, to, id)}
 	news.MpNews.Articles = arts
 	return news
 }

@@ -12,7 +12,7 @@ const (
 	WXAPI_GETUSERINFO = WXAPI_ENT + "user/get?access_token=%s&userid=%s"
 	WXAPI_USERLIST    = WXAPI_ENT + `user/list?access_token=%s&department_id=1&fetch_child=1&status=0`
 	WXAPI_USERADD     = WXAPI_ENT + `user/create?access_token=`
-	WXAPI_DEPT        = WXAPI_ENT + `department/list?access_token=%s&id=1`
+	WXAPI_DEPTLIST    = WXAPI_ENT + `department/list?access_token=%s&id=1`
 )
 
 // UserOauth 用户鉴权信息
@@ -98,7 +98,7 @@ type DeptList struct {
 
 // GetDeptList 获取部门列表
 func GetDeptList() (deptList DeptList, err error) {
-	url := fmt.Sprintf(WXAPI_DEPT, GetAccessToken())
+	url := fmt.Sprintf(WXAPI_DEPTLIST, GetAccessToken())
 	if err = util.GetJson(url, &deptList); err != nil {
 		return
 	}

@@ -23,6 +23,7 @@ type Context struct {
 // Reply 被动回复消息
 func (c *Context) Reply() *Context {
 	if c.Request.Method != "POST" || c.repCount > 0 {
+		log.Println("not reply...")
 		return c
 	}
 	if safeMode {
@@ -37,6 +38,7 @@ func (c *Context) Reply() *Context {
 			c.Writer.Write([]byte{})
 		}
 	}
+	Printf("reply msg:%+v", c.Resp)
 	c.Writer.Header().Set("Content-Type", "text/xml")
 	err := xml.NewEncoder(c.Writer).Encode(c.Resp)
 	if err != nil {
@@ -68,13 +70,14 @@ func (c *Context) newResp(msgType string) wxResp {
 		MsgType:      CDATA(msgType),
 		CreateTime:   time.Now().Unix(),
 		AgentId:      c.Msg.AgentID,
+		//		Safe:         1,
 	}
 }
 
 // NewText Text消息
 func (c *Context) NewText(text ...string) *Context {
 	c.Resp = &Text{
-		wxResp:  c.newResp("text"),
+		wxResp:  c.newResp(TypeText),
 		content: content{CDATA(strings.Join(text, ""))}}
 	return c
 }
@@ -82,7 +85,7 @@ func (c *Context) NewText(text ...string) *Context {
 // NewImage Image消息
 func (c *Context) NewImage(mediaId string) *Context {
 	c.Resp = &Image{
-		wxResp: c.newResp("image"),
+		wxResp: c.newResp(TypeImage),
 		Image:  media{CDATA(mediaId)}}
 	return c
 }
@@ -90,7 +93,7 @@ func (c *Context) NewImage(mediaId string) *Context {
 // NewVoice Voice消息
 func (c *Context) NewVoice(mediaId string) *Context {
 	c.Resp = &Voice{
-		wxResp: c.newResp("voice"),
+		wxResp: c.newResp(TypeVoice),
 		Voice:  media{CDATA(mediaId)}}
 	return c
 }
@@ -98,7 +101,7 @@ func (c *Context) NewVoice(mediaId string) *Context {
 // NewFile File消息
 func (c *Context) NewFile(mediaId string) *Context {
 	c.Resp = &File{
-		wxResp: c.newResp("file"),
+		wxResp: c.newResp(TypeFile),
 		File:   media{CDATA(mediaId)}}
 	return c
 }
@@ -106,7 +109,7 @@ func (c *Context) NewFile(mediaId string) *Context {
 // NewVideo Video消息
 func (c *Context) NewVideo(mediaId, title, desc string) *Context {
 	c.Resp = &Video{
-		wxResp: c.newResp("video"),
+		wxResp: c.newResp(TypeVideo),
 		Video:  video{CDATA(mediaId), CDATA(title), CDATA(desc)}}
 	return c
 }
@@ -114,7 +117,7 @@ func (c *Context) NewVideo(mediaId, title, desc string) *Context {
 // NewNews News消息
 func (c *Context) NewNews(arts ...Article) *Context {
 	new := News{
-		wxResp:       c.newResp("news"),
+		wxResp:       c.newResp(TypeNews),
 		ArticleCount: len(arts),
 	}
 	new.Articles.Item = arts
@@ -125,7 +128,7 @@ func (c *Context) NewNews(arts ...Article) *Context {
 // NewMusic Music消息
 func (c *Context) NewMusic(mediaId, title, desc, musicUrl, hqMusicUrl string) *Context {
 	c.Resp = &Music{
-		wxResp: c.newResp("music"),
+		wxResp: c.newResp(TypeMusic),
 		Music:  music{CDATA(mediaId), CDATA(title), CDATA(desc), CDATA(musicUrl), CDATA(hqMusicUrl)}}
 	return c
 }

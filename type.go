@@ -3,6 +3,7 @@ package wechat
 import (
 	"encoding/xml"
 	"strings"
+	"sync"
 )
 
 // Type io类型汇总
@@ -34,6 +35,22 @@ func (c CDATA) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	}{string(c)}, start)
 }
 
+var (
+	safe int = 0
+	mu   sync.Mutex
+)
+
+func SafeOpen() {
+	mu.Lock()
+	defer mu.Unlock()
+	safe = 1
+}
+func SafeClose() {
+	mu.Lock()
+	defer mu.Unlock()
+	safe = 0
+}
+
 // wxResp 响应消息共用字段
 // 响应消息被动回复为XML结构，文本类型采用CDATA编码规范
 // 响应消息主动发送为json结构，即客服消息
@@ -48,7 +65,7 @@ type wxResp struct {
 }
 
 func newWxResp(msgType, toUser string, agentId int) wxResp {
-	return wxResp{ToUserName: CDATA(toUser), MsgType: CDATA(msgType), AgentId: agentId}
+	return wxResp{ToUserName: CDATA(toUser), MsgType: CDATA(msgType), AgentId: agentId, Safe: safe}
 }
 
 // Text 文本消息

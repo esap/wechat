@@ -37,6 +37,10 @@ func FetchAccessToken(url string) {
 		for {
 			if err := fetchAccessToken(url, appId, secret); err != nil {
 				log.Println("FetchAccessToken...", err)
+			} else {
+				if err = UpdateDeptList(); err == nil {
+					err = UpdateUserList()
+				}
 			}
 			time.Sleep(fetchDelay)
 		}

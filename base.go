@@ -59,7 +59,7 @@ func Set(tk, id, sec string, key ...string) (err error) {
 		Println("启用加密模式")
 	}
 	FetchAccessToken(WXAPI_TOKEN)
-	return nil
+	return
 }
 
 // VerifyURL 验证URL,验证成功则返回标准请求载体（Msg已解密）

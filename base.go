@@ -106,7 +106,7 @@ func VerifyURL(w http.ResponseWriter, r *http.Request) (ctx *Context) {
 		}
 	}
 	if r.Method == "GET" {
-		Println("write echostr:", echostr)
+		Println("api echostr:", echostr)
 		w.Write([]byte(echostr))
 		return
 	}
@@ -115,6 +115,10 @@ func VerifyURL(w http.ResponseWriter, r *http.Request) (ctx *Context) {
 		if err := xml.Unmarshal([]byte(echostr), ctx.Msg); err != nil {
 			log.Println("Msg parse err:", err)
 		}
+	}
+	if r.Method == "POST" && ctx.Msg != nil && ctx.Msg.AgentType == "chat" {
+		Println("Chat echostr:", ctx.Msg.PackageId)
+		w.Write([]byte(ctx.Msg.PackageId))
 	}
 	return
 }

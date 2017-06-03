@@ -160,7 +160,7 @@ var toUserReplacer = strings.NewReplacer("|", ",", "，", ",")
 // GetToUser 获取acl所包含的所有用户
 func GetToUser(acl interface{}) (touser string) {
 	s1 := strings.TrimSpace(fmt.Sprint(acl))
-	if s1 == "@all" {
+	if strings.ToLower(s1) == "@all" {
 		return "@all"
 	}
 	arr := strings.Split(toUserReplacer.Replace(s1), ",")
@@ -180,7 +180,7 @@ func CheckUserAcl(userid, acl string) bool {
 	if acl == "" {
 		return false
 	}
-	if acl == "@all" {
+	if strings.ToLower(acl) == "@all" {
 		return true
 	}
 	acl = "," + strings.Replace(acl, "，", ",", -1) + ","

@@ -35,6 +35,7 @@ func SetEnt(tk, id, sec, key string) (err error) {
 	return nil
 }
 
+//GetMedia 下载媒体
 func GetMedia(filename, mediaId string) error {
 	url := fmt.Sprintf(getMedia, GetAccessToken(), mediaId)
 	return util.GetFile(filename, url)

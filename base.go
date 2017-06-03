@@ -43,6 +43,7 @@ var (
 	Debug bool = false
 )
 
+//SetLog 设置log
 func SetLog(l io.Writer) {
 	log.SetOutput(l)
 }

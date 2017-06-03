@@ -50,6 +50,11 @@ func SendVideo(to string, id int, mediaId, title, desc string) *WxErr {
 	return SendMsg(NewVideo(to, id, mediaId, title, desc))
 }
 
+// SendTextcard 发送客服extcard消息
+func SendTextcard(to string, id int, title, desc, url string) *WxErr {
+	return SendMsg(NewTextcard(to, id, title, desc, url))
+}
+
 // SendMusic 发送客服Music消息
 func SendMusic(to string, id int, mediaId, title, desc, musicUrl, qhMusicUrl string) *WxErr {
 	return SendMsg(NewMusic(to, id, mediaId, title, desc, musicUrl, qhMusicUrl))

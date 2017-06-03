@@ -8,18 +8,19 @@ import (
 
 // Type io类型汇总
 const (
-	TypeText   = "text"
-	TypeImage  = "image"
-	TypeVoice  = "voice"
-	TypeMusic  = "music"
-	TypeVideo  = "video"
-	TypeFile   = "file" // 仅企业号可用
-	TypeNews   = "news"
-	TypeMpNews = "mpnews" // 仅企业号可用
-	TypeThumb  = "thumb"
+	TypeText     = "text"
+	TypeImage    = "image"
+	TypeVoice    = "voice"
+	TypeMusic    = "music"
+	TypeVideo    = "video"
+	TypeTextcard = "textcard" // 仅企业号可用
+	TypeFile     = "file"     // 仅企业号可用
+	TypeNews     = "news"
+	TypeMpNews   = "mpnews" // 仅企业号可用
+	TypeThumb    = "thumb"
 )
 
-// 通用错误
+//WxErr 通用错误
 type WxErr struct {
 	ErrCode int
 	ErrMsg  string
@@ -40,11 +41,14 @@ var (
 	mu   sync.Mutex
 )
 
+//SafeOpen 打开加密
 func SafeOpen() {
 	mu.Lock()
 	defer mu.Unlock()
 	safe = 1
 }
+
+//SafeClose 关闭加密
 func SafeClose() {
 	mu.Lock()
 	defer mu.Unlock()
@@ -149,6 +153,26 @@ func NewVideo(to string, id int, mediaId, title, desc string) Video {
 	return Video{
 		newWxResp(TypeVideo, to, id),
 		video{CDATA(mediaId), CDATA(title), CDATA(desc)},
+	}
+}
+
+// Textcard 视频消息
+type Textcard struct {
+	wxResp
+	Textcard textcard `json:"textcard"`
+}
+
+type textcard struct {
+	Title       CDATA `json:"title"`
+	Description CDATA `json:"description"`
+	Url         CDATA `json:"url"`
+}
+
+// NewTextcard Textcard消息
+func NewTextcard(to string, id int, title, description, url string) Textcard {
+	return Textcard{
+		newWxResp(TypeTextcard, to, id),
+		textcard{CDATA(title), CDATA(description), CDATA(url)},
 	}
 }
 

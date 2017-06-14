@@ -110,7 +110,7 @@ type DepartmentList struct {
 		Id       int
 		Name     string
 		ParentId int
-		Order    int
+		Order    int64
 	}
 }
 

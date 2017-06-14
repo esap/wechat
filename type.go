@@ -41,14 +41,14 @@ var (
 	mu   sync.Mutex
 )
 
-//SafeOpen 打开加密
+//SafeOpen 打开保密消息
 func SafeOpen() {
 	mu.Lock()
 	defer mu.Unlock()
 	safe = 1
 }
 
-//SafeClose 关闭加密
+//SafeClose 关闭保密消息
 func SafeClose() {
 	mu.Lock()
 	defer mu.Unlock()

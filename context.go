@@ -70,7 +70,7 @@ func (c *Context) newResp(msgType string) wxResp {
 		MsgType:      CDATA(msgType),
 		CreateTime:   time.Now().Unix(),
 		AgentId:      c.Msg.AgentID,
-		//		Safe:         1,
+		Safe:         safe,
 	}
 }
 

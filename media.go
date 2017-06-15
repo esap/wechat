@@ -13,7 +13,7 @@ type Media struct {
 	Type         string `json:"type"`
 	MediaID      string `json:"media_id"`
 	ThumbMediaId string `json:"thumb_media_id"`
-	CreatedAt    string `json:"created_at"`
+	CreatedAt    int64  `json:"created_at"`
 }
 
 // MediaUpload 临时素材上传，mediaType可选项：

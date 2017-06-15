@@ -4,17 +4,15 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"sync"
 	"time"
 
 	"github.com/esap/wechat/util"
 )
 
 var (
-	accesstoken string
-	tokenSvr    string
-	atlock      sync.Mutex
-	fetchDelay  time.Duration = 5400 * time.Second // 默认1.5小时获取一次
+	accessTokenMap               = make(map[int]*accessToken)
+	AgentsMap                    = make(map[int]string)
+	fetchDelay     time.Duration = 1200 * time.Second // 默认20分钟同步一次
 )
 
 // accessToken 回复体
@@ -26,52 +24,48 @@ type accessToken struct {
 
 // GetAccessToken 读取AccessToken
 func GetAccessToken() string {
-	atlock.Lock()
-	defer atlock.Unlock()
-	return accesstoken
-}
-
-// FetchAccessToken 定期获取AccessToken
-func FetchAccessToken(url string) {
-	go func() {
-		for {
-			if err := fetchAccessToken(url, appId, secret); err != nil {
-				log.Println("FetchAccessToken...", err)
-			} else {
-				if err = UpdateDeptList(); err == nil {
-					err = UpdateUserList()
-				}
-			}
-			time.Sleep(fetchDelay)
+	i := 0
+	for i < 3 {
+		i++
+		at, err := GetAgentAccessToken(999999)
+		if err != nil {
+			log.Println("GetAccessToken err:", err)
+			continue
 		}
-	}()
+		return at
+	}
+	return ""
 }
 
-func fetchAccessToken(url, appId, secret string) error {
-	url = fmt.Sprintf(url, appId, secret)
+// GetAgentAccessToken 读取AgentAccessToken
+func GetAgentAccessToken(agentId int) (accesstoken string, err error) {
+	if _, ok := accessTokenMap[agentId]; !ok {
+		accessTokenMap[agentId] = new(accessToken)
+	}
+
+	if accessTokenMap[agentId].ExpiresIn < time.Now().Unix() {
+		if err = fetchAccessToken(agentId); err != nil {
+			return
+		}
+	}
+	accesstoken = accessTokenMap[agentId].AccessToken
+	return
+}
+
+func fetchAccessToken(agentId int) (err error) {
+	if _, ok := AgentsMap[agentId]; !ok {
+		AgentsMap[agentId] = secret
+	}
+	url := fmt.Sprintf(tokenUrl, appId, AgentsMap[agentId])
 	at := new(accessToken)
-	if err := util.GetJson(url, at); err != nil {
-		return err
+	if err = util.GetJson(url, at); err != nil {
+		return
 	}
 	if at.ErrCode > 0 {
 		return errors.New(at.ErrMsg)
 	}
-	atlock.Lock()
-	accesstoken = at.AccessToken
-	atlock.Unlock()
-	Println("AccessToken:", GetAccessToken(), fetchDelay)
+	Printf("AccessToken:%+v", at)
+	at.ExpiresIn += time.Now().Unix() - 1
+	accessTokenMap[agentId] = at
 	return nil
-}
-
-// SetAccessTokenSvr 设置token中心服务器
-func SetAccessTokenSvr(url string) {
-	tokenSvr = url
-}
-
-// GetAccessTokenSvr 获取token中心服务器
-func GetAccessTokenSvr() string {
-	if tokenSvr != "" {
-		return tokenSvr
-	}
-	return WXAPI_TOKEN_ENT
 }

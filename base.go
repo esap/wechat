@@ -37,6 +37,7 @@ var (
 	safeMode  bool   = false
 	entMode   bool   = false
 	msgUrl    string = WXAPI_MSG
+	tokenUrl  string = WXAPI_TOKEN
 	uploadUrl string = WXAPI_UPLOAD
 	getMedia  string = WXAPI_GETMEDIA
 	// Debug is a flag to Println()
@@ -59,7 +60,6 @@ func Set(tk, id, sec string, key ...string) (err error) {
 		}
 		Println("启用加密模式")
 	}
-	FetchAccessToken(WXAPI_TOKEN)
 	return
 }
 
@@ -94,7 +94,7 @@ func VerifyURL(w http.ResponseWriter, r *http.Request) (ctx *Context) {
 	if entMode && signature != sortSha1(token, ctx.Timestamp, ctx.Nonce, echostr) {
 		log.Println("Signature验证错误!(企业号)", token, ctx.Timestamp, ctx.Nonce, echostr)
 		return
-	} else if !entMode && signature != sortSha1(token, ctx.Timestamp, ctx.Nonce) {
+	} else if !entMode && r.FormValue("signature") != sortSha1(token, ctx.Timestamp, ctx.Nonce) {
 		log.Println("Signature验证错误!(公众号)", token, ctx.Timestamp, ctx.Nonce)
 		return
 	}

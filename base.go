@@ -37,6 +37,7 @@ var (
 	safeMode  bool   = false
 	entMode   bool   = false
 	msgUrl    string = WXAPI_MSG
+	tokenUrl  string = WXAPI_TOKEN
 	uploadUrl string = WXAPI_UPLOAD
 	getMedia  string = WXAPI_GETMEDIA
 	// Debug is a flag to Println()
@@ -59,7 +60,7 @@ func Set(tk, id, sec string, key ...string) (err error) {
 		}
 		Println("启用加密模式")
 	}
-	FetchAccessToken(WXAPI_TOKEN)
+	FetchUserList()
 	return
 }
 

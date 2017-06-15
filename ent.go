@@ -26,12 +26,13 @@ func SetEnt(tk, id, sec, key string) (err error) {
 	token, appId, secret, safeMode, entMode = tk, id, sec, true, true
 	msgUrl = WXAPI_MSG_ENT
 	uploadUrl = WXAPI_UPLOAD_ENT
+	tokenUrl = WXAPI_TOKEN_ENT
 	getMedia = WXAPI_GETMEDIA_ENT
 	aesKey, err = base64.StdEncoding.DecodeString(key + "=")
 	if err != nil {
 		return err
 	}
-	FetchAccessToken(GetAccessTokenSvr())
+	FetchUserList()
 	return nil
 }
 

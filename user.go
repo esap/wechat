@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/esap/wechat/util"
 )
@@ -14,7 +15,12 @@ const (
 	WXAPI_GETUSERINFO = WXAPI_ENT + "user/get?access_token=%s&userid=%s"
 	WXAPI_USERLIST    = WXAPI_ENT + `user/list?access_token=%s&department_id=1&fetch_child=1&status=0`
 	WXAPI_USERADD     = WXAPI_ENT + `user/create?access_token=`
+	WXAPI_USERUPDATE  = WXAPI_ENT + `user/update?access_token=`
+	WXAPI_USERDEL     = WXAPI_ENT + `user/delete?access_token=`
 	WXAPI_DEPTLIST    = WXAPI_ENT + `department/list?access_token=%s&id=1`
+	WXAPI_DEPTADD     = WXAPI_ENT + `department/create?access_token=`
+	WXAPI_DEPTUPDATE  = WXAPI_ENT + `department/update?access_token=`
+	WXAPI_DEPTDEL     = WXAPI_ENT + `department/delete?access_token=%s&id=%d`
 )
 
 // UserOauth 用户鉴权信息
@@ -39,23 +45,24 @@ func GetUserOauth(code string) (userOauth UserOauth, err error) {
 
 // UserInfo 用户信息
 type UserInfo struct {
-	WxErr
-	UserId     string
-	Name       string
-	Department []int
-	Position   string
-	Mobile     string
-	Gender     string
-	Email      string
-	WeixinId   string
-	Avatar     string
-	Status     int
+	WxErr      `json:"-"`
+	UserId     string `json:"userid"`
+	Name       string `json:"name"`
+	Department []int  `json:"department"`
+	Dept       int    `json:"dept"`
+	Position   string `json:"position,omitempty"`
+	Mobile     string `json:"mobile"`
+	Gender     string `json:"gender,omitempty"`
+	Email      string `json:"email,omitempty"`
+	WeixinId   string `json:"-"`
+	Avatar     string `json:"avatar_mediaid,omitempty"`
+	Status     int    `json:"-"`
 	ExtAttr    struct {
 		Attrs []struct {
 			Name  string
 			Value string
 		}
-	}
+	} `json:"-"`
 }
 
 // GetUserInfo 通过userId获取用户信息
@@ -79,8 +86,8 @@ type userList struct {
 	UserList []UserInfo
 }
 
-// UpdateUserList 获取用户列表
-func UpdateUserList() (err error) {
+// SyncUserList 获取用户列表
+func SyncUserList() (err error) {
 	UserList, err = GetUserList()
 	if err != nil {
 		log.Println("同步通讯录失败:", err)
@@ -100,22 +107,48 @@ func GetUserList() (u userList, err error) {
 	return
 }
 
+// UserAdd 添加用户
+func UserAdd(user *UserInfo) (err error) {
+	return doUpdate(WXAPI_USERADD, user)
+}
+
+// UserUpdate 添加用户
+func UserUpdate(user *UserInfo) (err error) {
+	return doUpdate(WXAPI_USERUPDATE, user)
+}
+
 // DeptList 部门列表
 var DeptList DepartmentList
 
 // DepartmentList 部门列表
-type DepartmentList struct {
-	WxErr
-	Department []struct {
-		Id       int
-		Name     string
-		ParentId int
-		Order    int64
+type (
+	DepartmentList struct {
+		WxErr
+		Department []Department
 	}
+
+	Department struct {
+		Id       int    `json:"id"`
+		Name     string `json:"name"`
+		ParentId int    `json:"parentid"`
+		Order1   int64  `json:"order"`
+	}
+)
+
+// FetchUserList 定期获取AccessToken
+func FetchUserList() {
+	go func() {
+		for {
+			if SyncDeptList() == nil {
+				SyncUserList()
+			}
+			time.Sleep(fetchDelay)
+		}
+	}()
 }
 
-// UpdateDeptList 更新部门列表
-func UpdateDeptList() (err error) {
+// SyncDeptList 更新部门列表
+func SyncDeptList() (err error) {
 	DeptList, err = GetDeptList()
 	if err != nil {
 		log.Println("获取部门列表失败:", err)
@@ -133,6 +166,25 @@ func GetDeptList() (deptList DepartmentList, err error) {
 		err = fmt.Errorf("GetDeptList error : errcode=%v , errmsg=%v", deptList.ErrCode, deptList.ErrMsg)
 	}
 	return
+}
+
+// DeptAdd 获取部门列表
+func DeptAdd(dept *Department) (err error) {
+	return doUpdate(WXAPI_DEPTADD, dept)
+}
+
+// DeptUpdate 获取部门列表
+func DeptUpdate(dept *Department) (err error) {
+	return doUpdate(WXAPI_DEPTUPDATE, dept)
+}
+
+func doUpdate(uri string, i interface{}) (err error) {
+	url := uri + GetAccessToken()
+	wxerr := new(WxErr)
+	if err = util.PostJsonPtr(url, i, wxerr); err != nil {
+		return
+	}
+	return wxerr.Error()
 }
 
 // GetDeptName 通过部门id获取部门名称

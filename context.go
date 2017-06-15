@@ -59,7 +59,7 @@ func (c *Context) ReplySuccess() *Context {
 
 // Send 主动发送消息(客服)
 func (c *Context) Send() *Context {
-	go SendMsg(c.Resp)
+	go SendMsg(c.Resp, c.Msg.AgentID)
 	return c
 }
 

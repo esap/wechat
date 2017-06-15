@@ -2,6 +2,7 @@ package wechat
 
 import (
 	"encoding/xml"
+	"fmt"
 	"strings"
 	"sync"
 )
@@ -24,6 +25,13 @@ const (
 type WxErr struct {
 	ErrCode int
 	ErrMsg  string
+}
+
+func (w *WxErr) Error() error {
+	if w.ErrCode != 0 {
+		return fmt.Errorf("err: errcode=%v , errmsg=%v", w.ErrCode, w.ErrMsg)
+	}
+	return nil
 }
 
 // CDATA 标准规范，XML编码成 `<![CDATA[消息内容]]>`

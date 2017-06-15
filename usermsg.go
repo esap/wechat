@@ -81,7 +81,7 @@ type (
 		}
 	}
 
-	// WxMsgEnc 密文用户消息
+	// WxMsgEnc 加密的用户消息
 	WxMsgEnc struct {
 		XMLName    xml.Name `xml:"xml"`
 		ToUserName string

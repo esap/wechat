@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"sync"
 	"time"
 
 	"github.com/esap/wechat/util"
@@ -21,7 +20,6 @@ type accessToken struct {
 	AccessToken string `json:"access_token"`
 	ExpiresIn   int64  `json:"expires_in"`
 	WxErr
-	sync.Mutex
 }
 
 // GetAccessToken 读取AccessToken
@@ -44,8 +42,7 @@ func GetAgentAccessToken(agentId int) (accesstoken string, err error) {
 	if _, ok := accessTokenMap[agentId]; !ok {
 		accessTokenMap[agentId] = new(accessToken)
 	}
-	accessTokenMap[agentId].Lock()
-	defer accessTokenMap[agentId].Unlock()
+
 	if accessTokenMap[agentId].ExpiresIn < time.Now().Unix() {
 		if err = fetchAccessToken(agentId); err != nil {
 			return

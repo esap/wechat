@@ -18,7 +18,7 @@ Package wechat provide wechat sdk for golang
 	}
 
 	func WxHandler(w http.ResponseWriter, r *http.Request) {
-		wechat.VerifyURL(w, r).NewText("正在查询...").Reply().NewText("客服消息1").Send().NewText("客服消息2").Send()
+		wechat.VerifyURL(w, r).NewText("客服消息1").Send().NewText("客服消息2").Send().NewText("查询结果...").Reply()
 	}
 
 More info:https://github.com/esap/wechat

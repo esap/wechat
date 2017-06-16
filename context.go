@@ -2,7 +2,7 @@ package wechat
 
 import (
 	"encoding/xml"
-	"log"
+	"errors"
 	"net/http"
 	"strings"
 	"time"
@@ -21,39 +21,35 @@ type Context struct {
 }
 
 // Reply 被动回复消息
-func (c *Context) Reply() *Context {
+func (c *Context) Reply() (err error) {
 	if c.Request.Method != "POST" || c.repCount > 0 {
-		log.Println("not reply...")
-		return c
+		return errors.New("Reply err: no reply")
 	}
 	Printf("Resp msg:%+v", c.Resp)
 	if safeMode {
 		b, err := xml.MarshalIndent(c.Resp, "", "  ")
 		if err != nil {
-			log.Println("Reply()->MarshalIndent err:", err)
 			c.Writer.Write([]byte{})
+			return err
 		}
 		c.Resp, err = EncryptMsg(b, c.Timestamp, c.Nonce)
 		if err != nil {
-			log.Println("Reply()->EncryptMsg err:", err)
 			c.Writer.Write([]byte{})
+			return err
 		}
 	}
 	c.Writer.Header().Set("Content-Type", "application/xml;charset=UTF-8")
-	if err := xml.NewEncoder(c.Writer).Encode(c.Resp); err != nil {
-		Println("Reply()->Encode err:", err)
-	}
 	c.repCount++
-	return c
+	return xml.NewEncoder(c.Writer).Encode(c.Resp)
 }
 
 // ReplySuccess 如果不能在5秒内处理完，应该先回复success，然后通过客服消息通知用户
-func (c *Context) ReplySuccess() *Context {
+func (c *Context) ReplySuccess() (err error) {
 	if c.Request.Method != "POST" || c.repCount > 0 {
-		return c
+		return errors.New("Reply err: no reply")
 	}
-	c.Writer.Write([]byte("success"))
-	return c
+	_, err = c.Writer.Write([]byte("success"))
+	return
 }
 
 // Send 主动发送消息(客服)

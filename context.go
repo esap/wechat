@@ -109,7 +109,7 @@ func (c *Context) NewVideo(mediaId, title, desc string) *Context {
 	return c
 }
 
-// NewVideo Video消息
+// NewTextcard Textcard消息
 func (c *Context) NewTextcard(title, description, url string) *Context {
 	c.Resp = &Textcard{
 		wxResp:   c.newResp(TypeTextcard),

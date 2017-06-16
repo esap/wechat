@@ -9,9 +9,10 @@ import (
 	"github.com/esap/wechat/util"
 )
 
+// AgentsMap 应用代理，主要用于企业号
 var (
-	accessTokenMap               = make(map[int]*accessToken)
 	AgentsMap                    = make(map[int]string)
+	accessTokenMap               = make(map[int]*accessToken)
 	fetchDelay     time.Duration = 1200 * time.Second // 默认20分钟同步一次
 )
 

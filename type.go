@@ -45,7 +45,7 @@ func (c CDATA) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 }
 
 var (
-	safe int = 0
+	safe int
 	mu   sync.Mutex
 )
 

@@ -25,7 +25,7 @@ func main() {
 }
 
 func WxHandler(w http.ResponseWriter, r *http.Request) {
-	wechat.VerifyURL(w, r).NewText("这是被动回复").Reply().NewText("这是客服消息").Send()
+	wechat.VerifyURL(w, r).NewText("这是客服消息").Send().NewText("这是被动回复").Reply()
 }
 
 ```
@@ -96,7 +96,8 @@ type WxMsg struct {
 * 支持链式调用，但Reply()只有第一次有效。
 
 ```go
-	ctx.NewText("正在查询中...").Reply().NewText("客服消息1").Send().NewText("客服消息2").Send()
+	ctx.NewText("正在查询中...").Reply()
+	ctx.NewText("客服消息1").Send().NewText("客服消息2").Send()
 ```
 
 * 被动回复可直接调用ReplySuccess()，表示已收到，然后调用客服消息。

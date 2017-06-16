@@ -120,13 +120,14 @@ func UserUpdate(user *UserInfo) (err error) {
 // DeptList 部门列表
 var DeptList DepartmentList
 
-// DepartmentList 部门列表
 type (
+	// DepartmentList 部门列表
 	DepartmentList struct {
 		WxErr
 		Department []Department
 	}
 
+	// Department 部门
 	Department struct {
 		Id       int    `json:"id"`
 		Name     string `json:"name"`

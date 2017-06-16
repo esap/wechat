@@ -65,7 +65,7 @@ func PostJson(uri string, obj interface{}) ([]byte, error) {
 	return ioutil.ReadAll(resp.Body)
 }
 
-//PostJson 发送Json格式的POST请求
+//PostJsonPtr 发送Json格式的POST请求并解析结果到result指针
 func PostJsonPtr(uri string, obj interface{}, result interface{}) (err error) {
 	buf := new(bytes.Buffer)
 	enc := json.NewEncoder(buf)

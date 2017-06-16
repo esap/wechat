@@ -26,6 +26,7 @@ func (c *Context) Reply() *Context {
 		log.Println("not reply...")
 		return c
 	}
+	Printf("Resp msg:%+v", c.Resp)
 	if safeMode {
 		b, err := xml.MarshalIndent(c.Resp, "", "  ")
 		if err != nil {
@@ -38,10 +39,8 @@ func (c *Context) Reply() *Context {
 			c.Writer.Write([]byte{})
 		}
 	}
-	Printf("reply msg:%+v", c.Resp)
-	c.Writer.Header().Set("Content-Type", "text/xml")
-	err := xml.NewEncoder(c.Writer).Encode(c.Resp)
-	if err != nil {
+	c.Writer.Header().Set("Content-Type", "application/xml;charset=UTF-8")
+	if err := xml.NewEncoder(c.Writer).Encode(c.Resp); err != nil {
 		Println("Reply()->Encode err:", err)
 	}
 	c.repCount++

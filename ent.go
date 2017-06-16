@@ -30,7 +30,7 @@ func SetEnt(tk, id, sec, key string) (err error) {
 	getMedia = WXAPI_GETMEDIA_ENT
 	aesKey, err = base64.StdEncoding.DecodeString(key + "=")
 	if err != nil {
-		return err
+		return
 	}
 	FetchUserList()
 	return nil

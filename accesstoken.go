@@ -65,7 +65,7 @@ func fetchAccessToken(agentId int) (err error) {
 	if at.ErrCode > 0 {
 		return errors.New(at.ErrMsg)
 	}
-	Printf("AccessToken:%+v", at)
+	Printf("AccessToken[%v]:%+v", agentId, at)
 	at.ExpiresIn += time.Now().Unix() - 1
 	accessTokenMap[agentId] = at
 	return nil

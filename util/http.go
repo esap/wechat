@@ -74,10 +74,18 @@ func PostJsonPtr(uri string, obj interface{}, result interface{}) (err error) {
 	if err != nil {
 		return
 	}
+
+	// debug
+	//	println("post body:", buf.String())
+
 	resp, err := http.Post(uri, "application/json;charset=utf-8", buf)
 	if err != nil {
 		return err
 	}
+
+	// debug
+	//	bd, _ := ioutil.ReadAll(resp.Body)
+	//	println("resp body:", string(bd))
 
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("http post error : uri=%v , statusCode=%v", uri, resp.StatusCode)

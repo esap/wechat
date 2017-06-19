@@ -3,9 +3,7 @@ package wechat
 import (
 	"encoding/base64"
 	"errors"
-	"fmt"
-
-	"github.com/esap/wechat/util"
+	"time"
 )
 
 // WXAPI_ENT 企业号接口
@@ -36,8 +34,14 @@ func SetEnt(tk, id, sec, key string) (err error) {
 	return nil
 }
 
-//GetMedia 下载媒体
-func GetMedia(filename, mediaId string) error {
-	url := fmt.Sprintf(getMedia, GetAccessToken(), mediaId)
-	return util.GetFile(filename, url)
+// FetchUserList 定期获取AccessToken
+func FetchUserList() {
+	go func() {
+		for {
+			if SyncDeptList() == nil {
+				SyncUserList()
+			}
+			time.Sleep(fetchDelay)
+		}
+	}()
 }

@@ -164,7 +164,7 @@ func NewVideo(to string, id int, mediaId, title, desc string) Video {
 	}
 }
 
-// Textcard 视频消息
+// Textcard 卡片消息，仅企业微信客户端有效
 type Textcard struct {
 	wxResp
 	Textcard textcard `json:"textcard"`

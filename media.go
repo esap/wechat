@@ -37,3 +37,9 @@ func MediaUpload(mediaType string, filename string) (media Media, err error) {
 	}
 	return
 }
+
+//GetMedia 下载媒体
+func GetMedia(filename, mediaId string) error {
+	url := fmt.Sprintf(getMedia, GetAccessToken(), mediaId)
+	return util.GetFile(filename, url)
+}

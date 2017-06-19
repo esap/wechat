@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"strings"
-	"time"
 
 	"github.com/esap/wechat/util"
 )
@@ -65,6 +64,16 @@ type UserInfo struct {
 	} `json:"-"`
 }
 
+// UserAdd 添加用户
+func UserAdd(user *UserInfo) (err error) {
+	return doUpdate(WXAPI_USERADD, user)
+}
+
+// UserUpdate 添加用户
+func UserUpdate(user *UserInfo) (err error) {
+	return doUpdate(WXAPI_USERUPDATE, user)
+}
+
 // GetUserInfo 通过userId获取用户信息
 func GetUserInfo(userId string) (userInfo UserInfo, err error) {
 	url := fmt.Sprintf(WXAPI_GETUSERINFO, GetAccessToken(), userId)
@@ -75,6 +84,26 @@ func GetUserInfo(userId string) (userInfo UserInfo, err error) {
 		err = fmt.Errorf("GetUserId error : errcode=%v , errmsg=%v", userInfo.ErrCode, userInfo.ErrMsg)
 	}
 	return
+}
+
+// GetUser 通过账号获取用户信息
+func GetUser(userid string) *UserInfo {
+	for _, v := range UserList.UserList {
+		if v.UserId == userid {
+			return &v
+		}
+	}
+	return nil
+}
+
+// GetUser 通过账号获取用户信息
+func GetUserName(userid string) string {
+	for _, v := range UserList.UserList {
+		if v.UserId == userid {
+			return v.Name
+		}
+	}
+	return ""
 }
 
 // UserList 用户列表
@@ -107,14 +136,13 @@ func GetUserList() (u userList, err error) {
 	return
 }
 
-// UserAdd 添加用户
-func UserAdd(user *UserInfo) (err error) {
-	return doUpdate(WXAPI_USERADD, user)
-}
-
-// UserUpdate 添加用户
-func UserUpdate(user *UserInfo) (err error) {
-	return doUpdate(WXAPI_USERUPDATE, user)
+// GetUserNameList 获取用户列表
+func GetUserNameList() (userlist []string) {
+	userlist = make([]string, 0)
+	for _, v := range UserList.UserList {
+		userlist = append(userlist, v.UserId)
+	}
+	return
 }
 
 // DeptList 部门列表
@@ -135,18 +163,6 @@ type (
 		Order1   int64  `json:"order"`
 	}
 )
-
-// FetchUserList 定期获取AccessToken
-func FetchUserList() {
-	go func() {
-		for {
-			if SyncDeptList() == nil {
-				SyncUserList()
-			}
-			time.Sleep(fetchDelay)
-		}
-	}()
-}
 
 // SyncDeptList 更新部门列表
 func SyncDeptList() (err error) {
@@ -198,14 +214,15 @@ func GetDeptName(id int) string {
 	return ""
 }
 
-// GetUser 通过账号获取用户信息
-func GetUser(userid string) *UserInfo {
-	for _, v := range UserList.UserList {
-		if v.UserId == userid {
-			return &v
-		}
+// GetGender 获取性别
+func GetGender(s string) string {
+	if s == "1" {
+		return "男"
 	}
-	return nil
+	if s == "2" {
+		return "女"
+	}
+	return "未定义"
 }
 
 var toUserReplacer = strings.NewReplacer("|", ",", "，", ",")

@@ -96,7 +96,7 @@ func GetUser(userid string) *UserInfo {
 	return nil
 }
 
-// GetUser 通过账号获取用户信息
+// GetUserName 通过账号获取用户信息
 func GetUserName(userid string) string {
 	for _, v := range UserList.UserList {
 		if v.UserId == userid {

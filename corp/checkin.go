@@ -6,10 +6,10 @@ import (
 )
 
 const (
-	// WXAPI_CheckIn 企业号打开数据获取接口
-	WXAPI_CheckIn = wechat.WXAPI_ENT + "checkin/getcheckindata?access_token="
-	// Corp_GetCheckIn_agentId 打卡AgentId
-	Corp_GetCheckIn_agentId = 3010011
+	// WXAPICheckIn 企业号打开数据获取接口
+	WXAPICheckIn = wechat.WXAPI_ENT + "checkin/getcheckindata?access_token="
+	// CorpGetCheckInAgentID  打卡AgentId
+	CorpGetCheckInAgentID = 3010011
 )
 
 type (
@@ -42,15 +42,15 @@ type (
 	}
 )
 
-// GetCheckIn 获取打卡数据
-func GetCheckIn(opType, start, end int64) (dkdata []DkData, err error) {
-	at, err := wechat.GetAgentAccessToken(Corp_GetCheckIn_agentId)
+// GetCheckIn 获取打卡数据,Namelist用户列表不超过100个。若用户超过100个，请分批获取
+func GetCheckIn(opType, start, end int64, Namelist []string) (dkdata []DkData, err error) {
+	at, err := wechat.GetAgentAccessToken(CorpGetCheckInAgentID)
 	if err != nil {
 		return nil, err
 	}
-	url := WXAPI_CheckIn + at
+	url := WXAPICheckIn + at
 	data := new(DkDataRet)
-	if err = util.PostJsonPtr(url, dkDataReq{opType, start, end, wechat.GetUserNameList()}, data); err != nil {
+	if err = util.PostJsonPtr(url, dkDataReq{opType, start, end, Namelist}, data); err != nil {
 		return
 	}
 	if data.ErrCode != 0 {
@@ -58,4 +58,29 @@ func GetCheckIn(opType, start, end int64) (dkdata []DkData, err error) {
 	}
 	dkdata = data.Result
 	return
+}
+
+// GetAllCheckIn 获取所有人的打卡数据
+func GetAllCheckIn(opType, start, end int64) (dkdata []DkData, err error) {
+	ul := wechat.GetUserNameList()
+	l := len(ul)
+	for i := 0; i*100 < l; i++ {
+		dk, e := GetCheckIn(opType, start, end, ul[i:min(l, i+100)])
+		if e != nil {
+			err = e
+			return
+		}
+		dkdata = append(dkdata, dk...)
+	}
+	return
+}
+
+// golang min int
+func min(first int, args ...int) int {
+	for _, v := range args {
+		if first > v {
+			first = v
+		}
+	}
+	return first
 }

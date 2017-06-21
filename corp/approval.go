@@ -8,18 +8,18 @@ import (
 )
 
 const (
-	// WXAPI_GetApproval 企业号审批数据获取接口
-	WXAPI_GetApproval = wechat.WXAPI_ENT + "corp/getapprovaldata?access_token="
-	// Corp_Approval_agentId 审批AgentId
-	Corp_Approval_agentId = 3010040
+	// WXAPIGetApproval  企业号审批数据获取接口
+	WXAPIGetApproval = wechat.WXAPI_ENT + "corp/getapprovaldata?access_token="
+	// CorpApprovalAgentID  审批AgentId
+	CorpApprovalAgentID = 3010040
 )
 
 type (
 	// spDataReq 审批请求数据
 	spDataReq struct {
-		Starttime int64  `json:"starttime"`
-		Endtime   int64  `json:"endtime"`
-		NextSpNum string `json:"next_spnum,omitempty"`
+		Starttime int64 `json:"starttime"`
+		Endtime   int64 `json:"endtime"`
+		NextSpNum int64 `json:"next_spnum,omitempty"`
 	}
 
 	// SpDataRet 审批返回数据
@@ -84,12 +84,12 @@ type (
 )
 
 // GetApproval 获取审批数据
-func GetApproval(start, end int64, nextNum string) (spData *SpDataRet, err error) {
-	at, err := wechat.GetAgentAccessToken(Corp_Approval_agentId)
+func GetApproval(start, end, nextNum int64) (spData *SpDataRet, err error) {
+	at, err := wechat.GetAgentAccessToken(CorpApprovalAgentID)
 	if err != nil {
 		return nil, err
 	}
-	url := WXAPI_GetApproval + at
+	url := WXAPIGetApproval + at
 	spData = new(SpDataRet)
 	if err = util.PostJsonPtr(url, spDataReq{start, end, nextNum}, spData); err != nil {
 		log.Println("PostJsonPtr err:", err)

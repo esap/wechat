@@ -36,10 +36,16 @@ func SetEnt(tk, id, sec, key string) (err error) {
 
 // FetchUserList 定期获取AccessToken
 func FetchUserList() {
+	i := 0
 	go func() {
 		for {
 			if SyncDeptList() == nil {
-				SyncUserList()
+				if SyncUserList() != nil && i < 3 {
+					i++
+					Println("尝试再次获取用户列表(", i, ")")
+					continue
+				}
+				i = 0
 			}
 			time.Sleep(fetchDelay)
 		}

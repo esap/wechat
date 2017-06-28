@@ -2,14 +2,40 @@ package wechat
 
 import (
 	"encoding/json"
-	"time"
 
 	"github.com/esap/wechat/util"
 )
 
+// MsgToDo 队列消息
+type MsgToDo struct {
+	Msg     interface{}
+	AgentId int
+}
+
+// MsgQueue 主动消息队列
+var MsgQueue chan *MsgToDo
+
+// MsgQueueAdd 添加队列消息消息
+func MsgQueueAdd(v interface{}, ag ...int) {
+	agent := 0
+	if len(ag) > 0 {
+		agent = ag[0]
+	}
+	MsgQueue <- &MsgToDo{v, agent}
+}
+
+func init() {
+	MsgQueue = make(chan *MsgToDo, 10000)
+	go func() {
+		for {
+			msg := <-MsgQueue
+			SendMsg(msg.Msg, msg.AgentId)
+		}
+	}()
+}
+
 // SendMsg 发送消息
 func SendMsg(v interface{}, ag ...int) *WxErr {
-	time.Sleep(1 * time.Second)
 	agent := 0
 	if len(ag) > 0 {
 		agent = ag[0]

@@ -58,6 +58,12 @@ func (c *Context) Send() *Context {
 	return c
 }
 
+// SendAdd 添加主动消息队列(客服)
+func (c *Context) SendAdd() *Context {
+	MsgQueueAdd(c.Resp, c.Msg.AgentID)
+	return c
+}
+
 func (c *Context) newResp(msgType string) wxResp {
 	return wxResp{
 		FromUserName: CDATA(c.Msg.ToUserName),

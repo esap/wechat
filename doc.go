@@ -1,7 +1,7 @@
 /*
-Package wechat provide wechat sdk for golang
+Package wechat provide wechat-sdk for go
 
-5行代码，链式消息，快速开启微信API示例:
+5行代码，开启微信API示例:
 
 	package main
 

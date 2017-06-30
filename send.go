@@ -103,3 +103,8 @@ func SendNews(to string, id int, arts ...Article) *WxErr {
 func SendMpNews(to string, id int, arts ...MpArticle) *WxErr {
 	return SendMsg(NewMpNews(to, id, arts...), id)
 }
+
+// SendMpNews2 发送加密新闻mpnews消息(直接使用mediaId)
+func SendMpNews2(to string, id int, mediaId string) *WxErr {
+	return SendMsg(NewMpNews2(to, id, mediaId), id)
+}

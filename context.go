@@ -25,7 +25,7 @@ func (c *Context) Reply() (err error) {
 	if c.Request.Method != "POST" || c.repCount > 0 {
 		return errors.New("Reply err: no reply")
 	}
-	Printf("Resp msg:%+v", c.Resp)
+	Printf("Reply msg:%+v", c.Resp)
 	if safeMode {
 		b, err := xml.MarshalIndent(c.Resp, "", "  ")
 		if err != nil {
@@ -125,12 +125,22 @@ func (c *Context) NewTextcard(title, description, url string) *Context {
 
 // NewNews News消息
 func (c *Context) NewNews(arts ...Article) *Context {
-	new := News{
+	news := News{
 		wxResp:       c.newResp(TypeNews),
 		ArticleCount: len(arts),
 	}
-	new.Articles.Item = arts
-	c.Resp = &new
+	news.Articles.Item = arts
+	c.Resp = &news
+	return c
+}
+
+// NewMpNews News消息
+func (c *Context) NewMpNews(mediaId string) *Context {
+	news := MpNews2{
+		wxResp: c.newResp(TypeNews),
+	}
+	news.MpNews.MediaId = CDATA(mediaId)
+	c.Resp = &news
 	return c
 }
 

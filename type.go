@@ -4,7 +4,6 @@ import (
 	"encoding/xml"
 	"fmt"
 	"strings"
-	"sync"
 )
 
 // Type io类型汇总
@@ -15,6 +14,7 @@ const (
 	TypeMusic    = "music"
 	TypeVideo    = "video"
 	TypeTextcard = "textcard" // 仅企业号可用
+	TypeWxCard   = "wxcard"   // 仅服务号可用
 	TypeFile     = "file"     // 仅企业号可用
 	TypeNews     = "news"
 	TypeMpNews   = "mpnews" // 仅企业号可用
@@ -44,22 +44,15 @@ func (c CDATA) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	}{string(c)}, start)
 }
 
-var (
-	safe int
-	mu   sync.Mutex
-)
+var safe int
 
 //SafeOpen 打开保密消息
 func SafeOpen() {
-	mu.Lock()
-	defer mu.Unlock()
 	safe = 1
 }
 
 //SafeClose 关闭保密消息
 func SafeClose() {
-	mu.Lock()
-	defer mu.Unlock()
 	safe = 0
 }
 
@@ -216,10 +209,11 @@ type News struct {
 }
 
 // NewNews news消息
-func NewNews(to string, id int, arts ...Article) News {
-	news := News{wxResp: newWxResp(TypeNews, to, id), ArticleCount: len(arts)}
+func NewNews(to string, id int, arts ...Article) (news News) {
+	news.wxResp = newWxResp(TypeNews, to, id)
+	news.ArticleCount = len(arts)
 	news.Articles.Item = arts
-	return news
+	return
 }
 
 // Article 文章
@@ -235,19 +229,36 @@ func NewArticle(title, desc, picUrl, url string) Article {
 	return Article{CDATA(title), CDATA(desc), CDATA(picUrl), CDATA(url)}
 }
 
-// MpNews 加密新闻消息，仅企业号支持
-type MpNews struct {
-	wxResp
+type (
+	// MpNews 加密新闻消息，仅企业号支持
 	MpNews struct {
-		Articles []MpArticle `json:"articles"`
-	} `json:"mpnews"`
+		wxResp
+		MpNews struct {
+			Articles []MpArticle `json:"articles"`
+		} `json:"mpnews"`
+	}
+
+	// MpNews2 加密新闻消息(通过mediaId直接发)
+	MpNews2 struct {
+		wxResp
+		MpNews struct {
+			MediaId CDATA `json:"media_id"`
+		} `json:"mpnews"`
+	}
+)
+
+// NewMpNews 加密新闻mpnews消息(仅企业号可用)
+func NewMpNews(to string, id int, arts ...MpArticle) (news MpNews) {
+	news.wxResp = newWxResp(TypeMpNews, to, id)
+	news.MpNews.Articles = arts
+	return
 }
 
 // NewMpNews 加密新闻mpnews消息(仅企业号可用)
-func NewMpNews(to string, id int, arts ...MpArticle) MpNews {
-	news := MpNews{wxResp: newWxResp(TypeMpNews, to, id)}
-	news.MpNews.Articles = arts
-	return news
+func NewMpNews2(to string, id int, mediaId string) (news MpNews2) {
+	news.wxResp = newWxResp(TypeMpNews, to, id)
+	news.MpNews.MediaId = CDATA(mediaId)
+	return
 }
 
 // MpArticle 加密文章
@@ -264,4 +275,19 @@ type MpArticle struct {
 // NewMpArticle 先创建加密文章，再传给NewMpNews()
 func NewMpArticle(title, mediaId, author, url, content, digest string, showCoverPic int) MpArticle {
 	return MpArticle{title, mediaId, author, url, content, digest, showCoverPic}
+}
+
+// WxCard 卡券
+type WxCard struct {
+	wxResp
+	WxCard struct {
+		CardId string `json:"card_id"`
+	} `json:"wxcard"`
+}
+
+// NewWxCard 卡券消息，服务号可用
+func NewWxCard(to string, id int, cardId string) (c WxCard) {
+	c.wxResp = newWxResp(TypeWxCard, to, id)
+	c.WxCard.CardId = cardId
+	return
 }

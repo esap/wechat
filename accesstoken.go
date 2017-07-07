@@ -24,11 +24,15 @@ type accessToken struct {
 }
 
 // GetAccessToken 读取AccessToken
-func GetAccessToken() string {
+func GetAccessToken(id ...int) string {
 	i := 0
+	ag := 999999
+	if len(id) > 0 {
+		ag = id[0]
+	}
 	for i < 3 {
 		i++
-		at, err := GetAgentAccessToken(999999)
+		at, err := GetAgentAccessToken(ag)
 		if err != nil {
 			log.Println("GetAccessToken err:", err)
 			continue
@@ -66,7 +70,7 @@ func fetchAccessToken(agentId int) (err error) {
 		return errors.New(at.ErrMsg)
 	}
 	Printf("AccessToken[%v]:%+v", agentId, at)
-	at.ExpiresIn += time.Now().Unix() - 1
+	at.ExpiresIn += time.Now().Unix() - 1800
 	accessTokenMap[agentId] = at
 	return nil
 }

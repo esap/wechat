@@ -32,16 +32,16 @@ func GetXml(uri string, v interface{}) error {
 
 // GetBody 发送GET请求，返回body字节
 func GetBody(uri string) ([]byte, error) {
-	response, err := http.Get(uri)
+	resp, err := http.Get(uri)
 	if err != nil {
 		return nil, err
 	}
 
-	defer response.Body.Close()
-	if response.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("http get error : uri=%v , statusCode=%v", uri, response.StatusCode)
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("http get error : uri=%v , statusCode=%v", uri, resp.StatusCode)
 	}
-	return ioutil.ReadAll(response.Body)
+	return ioutil.ReadAll(resp.Body)
 }
 
 //PostJson 发送Json格式的POST请求
@@ -107,17 +107,17 @@ func PostFile(fieldname, filename, uri string) ([]byte, error) {
 
 // GetFile 下载文件
 func GetFile(filename, uri string) error {
-	res, err := http.Get(uri)
+	resp, err := http.Get(uri)
 	if err != nil {
 		return err
 	}
-	defer res.Body.Close()
+	defer resp.Body.Close()
 	file, err := os.Create(filename)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
-	_, err = io.Copy(file, res.Body)
+	_, err = io.Copy(file, resp.Body)
 	return err
 }
 

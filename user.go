@@ -32,7 +32,7 @@ type UserOauth struct {
 
 // GetUserOauth 通过code鉴权
 func GetUserOauth(code string) (userOauth UserOauth, err error) {
-	url := fmt.Sprintf(WXAPI_GETUSER, GetAccessToken(), code)
+	url := fmt.Sprintf(WXAPI_GETUSER, GetAccessToken(0), code)
 	if err = util.GetJson(url, &userOauth); err != nil {
 		return
 	}

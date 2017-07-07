@@ -111,7 +111,7 @@ func VerifyURL(w http.ResponseWriter, r *http.Request) (ctx *Context) {
 		w.Write([]byte(echostr))
 		return
 	}
-	Println("--Req:\n", echostr)
+	Println("Wechat ==>", echostr)
 	if safeMode {
 		if err := xml.Unmarshal([]byte(echostr), ctx.Msg); err != nil {
 			log.Println("Msg parse err:", err)

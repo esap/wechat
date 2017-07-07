@@ -29,7 +29,10 @@ func init() {
 	go func() {
 		for {
 			msg := <-MsgQueue
-			SendMsg(msg.Msg, msg.AgentId)
+			e := SendMsg(msg.Msg, msg.AgentId)
+			if e.ErrCode != 0 {
+				Println("SendMsg err:", e.ErrMsg)
+			}
 		}
 	}()
 }

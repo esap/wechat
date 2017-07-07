@@ -25,7 +25,7 @@ func (c *Context) Reply() (err error) {
 	if c.Request.Method != "POST" || c.repCount > 0 {
 		return errors.New("Reply err: no reply")
 	}
-	Printf("Reply msg:%+v", c.Resp)
+	Printf("Wechat <== %+v", c.Resp)
 	if safeMode {
 		b, err := xml.MarshalIndent(c.Resp, "", "  ")
 		if err != nil {
@@ -137,7 +137,7 @@ func (c *Context) NewNews(arts ...Article) *Context {
 // NewMpNews News消息
 func (c *Context) NewMpNews(mediaId string) *Context {
 	news := MpNews2{
-		wxResp: c.newResp(TypeNews),
+		wxResp: c.newResp(TypeMpNews),
 	}
 	news.MpNews.MediaId = CDATA(mediaId)
 	c.Resp = &news

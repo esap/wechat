@@ -137,7 +137,7 @@ func (c *Context) NewNews(arts ...Article) *Context {
 // NewMpNews News消息
 func (c *Context) NewMpNews(mediaId string) *Context {
 	news := MpNews2{
-		wxResp: c.newResp(TypeNews),
+		wxResp: c.newResp(TypeMpNews),
 	}
 	news.MpNews.MediaId = CDATA(mediaId)
 	c.Resp = &news

@@ -10,10 +10,10 @@ import (
 // Media 上传回复体
 type Media struct {
 	WxErr
-	Type         string `json:"type"`
-	MediaID      string `json:"media_id"`
-	ThumbMediaId string `json:"thumb_media_id"`
-	CreatedAt    string `json:"created_at"`
+	Type         string      `json:"type"`
+	MediaID      string      `json:"media_id"`
+	ThumbMediaId string      `json:"thumb_media_id"`
+	CreatedAt    interface{} `json:"created_at"` // 企业号是string,服务号是int,采用interface{}统一接收
 }
 
 // MediaUpload 临时素材上传，mediaType可选项：

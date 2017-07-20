@@ -43,3 +43,9 @@ func GetMedia(filename, mediaId string) error {
 	url := fmt.Sprintf(getMedia, GetAccessToken(), mediaId)
 	return util.GetFile(filename, url)
 }
+
+//GetMediaBytes 下载媒体
+func GetMediaBytes(mediaId string) ([]byte, error) {
+	url := fmt.Sprintf(getMedia, GetAccessToken(), mediaId)
+	return util.GetBody(url)
+}

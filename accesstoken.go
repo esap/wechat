@@ -11,66 +11,42 @@ import (
 
 // AgentsMap 应用代理，主要用于企业号
 var (
-	AgentsMap                    = make(map[int]string)
-	accessTokenMap               = make(map[int]*accessToken)
-	fetchDelay     time.Duration = 1200 * time.Second // 默认20分钟同步一次
+	FetchDelay time.Duration = 1200 * time.Second // 默认20分钟同步一次
 )
 
-// accessToken 回复体
-type accessToken struct {
+// AccessToken 回复体
+type AccessToken struct {
 	AccessToken string `json:"access_token"`
 	ExpiresIn   int64  `json:"expires_in"`
 	WxErr
 }
 
 // GetAccessToken 读取AccessToken
-func GetAccessToken(id ...int) string {
-	i := 0
-	ag := 999999
-	if len(id) > 0 {
-		ag = id[0]
-	}
-	for i < 3 {
-		i++
-		at, err := GetAgentAccessToken(ag)
-		if err != nil {
-			log.Println("GetAccessToken err:", err)
-			continue
-		}
-		return at
-	}
-	return ""
-}
-
-// GetAgentAccessToken 读取AgentAccessToken
-func GetAgentAccessToken(agentId int) (accesstoken string, err error) {
-	if _, ok := accessTokenMap[agentId]; !ok {
-		accessTokenMap[agentId] = new(accessToken)
-	}
-
-	if accessTokenMap[agentId].ExpiresIn < time.Now().Unix() {
-		if err = fetchAccessToken(agentId); err != nil {
-			return
+func (s *Server) GetAccessToken() string {
+	if s.accessToken == nil || s.accessToken.ExpiresIn < time.Now().Unix() {
+		for i := 0; i < 3; i++ {
+			err := s.getAccessToken()
+			if err != nil {
+				log.Printf("GetAccessToken[%v] err:%v", s.AgentId, err)
+				continue
+			}
+			break
 		}
 	}
-	accesstoken = accessTokenMap[agentId].AccessToken
-	return
+	return s.accessToken.AccessToken
 }
 
-func fetchAccessToken(agentId int) (err error) {
-	if _, ok := AgentsMap[agentId]; !ok {
-		AgentsMap[agentId] = secret
-	}
-	url := fmt.Sprintf(tokenUrl, appId, AgentsMap[agentId])
-	at := new(accessToken)
+func (s *Server) getAccessToken() (err error) {
+	url := fmt.Sprintf(s.TokenUrl, s.AppId, s.Secret)
+	at := new(AccessToken)
 	if err = util.GetJson(url, at); err != nil {
 		return
 	}
 	if at.ErrCode > 0 {
 		return errors.New(at.ErrMsg)
 	}
-	Printf("AccessToken[%v]:%+v", agentId, at)
-	at.ExpiresIn += time.Now().Unix() - 1800
-	accessTokenMap[agentId] = at
-	return nil
+	Printf("[%v::%v]:%+v", s.AppId, s.AgentId, *at)
+	at.ExpiresIn = time.Now().Unix() + 600
+	s.accessToken = at
+	return
 }

@@ -10,6 +10,7 @@ import (
 
 // Context 消息上下文
 type Context struct {
+	*Server
 	Timestamp string
 	Nonce     string
 	Msg       *WxMsg
@@ -26,13 +27,13 @@ func (c *Context) Reply() (err error) {
 		return errors.New("Reply err: no reply")
 	}
 	Printf("Wechat <== %+v", c.Resp)
-	if safeMode {
+	if c.SafeMode {
 		b, err := xml.MarshalIndent(c.Resp, "", "  ")
 		if err != nil {
 			c.Writer.Write([]byte{})
 			return err
 		}
-		c.Resp, err = EncryptMsg(b, c.Timestamp, c.Nonce)
+		c.Resp, err = c.EncryptMsg(b, c.Timestamp, c.Nonce)
 		if err != nil {
 			c.Writer.Write([]byte{})
 			return err
@@ -54,13 +55,13 @@ func (c *Context) ReplySuccess() (err error) {
 
 // Send 主动发送消息(客服)
 func (c *Context) Send() *Context {
-	go SendMsg(c.Resp, c.Msg.AgentID)
+	go c.SendMsg(c.Resp)
 	return c
 }
 
 // SendAdd 添加主动消息队列(客服)
 func (c *Context) SendAdd() *Context {
-	MsgQueueAdd(c.Resp, c.Msg.AgentID)
+	c.MsgQueueAdd(c.Resp)
 	return c
 }
 
@@ -71,7 +72,7 @@ func (c *Context) newResp(msgType string) wxResp {
 		MsgType:      CDATA(msgType),
 		CreateTime:   time.Now().Unix(),
 		AgentId:      c.Msg.AgentID,
-		Safe:         safe,
+		Safe:         c.Safe,
 	}
 }
 
@@ -136,7 +137,7 @@ func (c *Context) NewNews(arts ...Article) *Context {
 
 // NewMpNews News消息
 func (c *Context) NewMpNews(mediaId string) *Context {
-	news := MpNews2{
+	news := MpNewsId{
 		wxResp: c.newResp(TypeMpNews),
 	}
 	news.MpNews.MediaId = CDATA(mediaId)

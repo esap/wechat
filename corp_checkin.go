@@ -1,13 +1,12 @@
-package corp
+package wechat
 
 import (
-	"github.com/esap/wechat"
 	"github.com/esap/wechat/util"
 )
 
 const (
 	// WXAPICheckIn 企业号打开数据获取接口
-	WXAPICheckIn = wechat.WXAPI_ENT + "checkin/getcheckindata?access_token="
+	WXAPICheckIn = WXAPI_ENT + "checkin/getcheckindata?access_token="
 	// CorpGetCheckInAgentID  打卡AgentId
 	CorpGetCheckInAgentID = 3010011
 )
@@ -23,8 +22,8 @@ type (
 
 	// DkDataRet 审批返回数据
 	DkDataRet struct {
-		wechat.WxErr `json:"-"`
-		Result       []DkData `json:"checkindata""`
+		WxErr  `json:"-"`
+		Result []DkData `json:"checkindata""`
 	}
 
 	// DkData 审批数据
@@ -43,12 +42,8 @@ type (
 )
 
 // GetCheckIn 获取打卡数据,Namelist用户列表不超过100个。若用户超过100个，请分批获取
-func GetCheckIn(opType, start, end int64, Namelist []string) (dkdata []DkData, err error) {
-	at, err := wechat.GetAgentAccessToken(CorpGetCheckInAgentID)
-	if err != nil {
-		return nil, err
-	}
-	url := WXAPICheckIn + at
+func (s *Server) GetCheckIn(opType, start, end int64, Namelist []string) (dkdata []DkData, err error) {
+	url := WXAPICheckIn + s.GetAccessToken()
 	data := new(DkDataRet)
 	if err = util.PostJsonPtr(url, dkDataReq{opType, start, end, Namelist}, data); err != nil {
 		return
@@ -61,11 +56,11 @@ func GetCheckIn(opType, start, end int64, Namelist []string) (dkdata []DkData, e
 }
 
 // GetAllCheckIn 获取所有人的打卡数据
-func GetAllCheckIn(opType, start, end int64) (dkdata []DkData, err error) {
-	ul := wechat.GetUserNameList()
+func (s *Server) GetAllCheckIn(opType, start, end int64) (dkdata []DkData, err error) {
+	ul := s.GetUserIdList()
 	l := len(ul)
 	for i := 0; i*100 < l; i++ {
-		dk, e := GetCheckIn(opType, start, end, ul[i:min(l, i+100)])
+		dk, e := s.GetCheckIn(opType, start, end, ul[i:min(l, i+100)])
 		if e != nil {
 			err = e
 			return

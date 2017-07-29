@@ -30,19 +30,54 @@ const (
 )
 
 var (
-	token     string // 默认token
-	appId     string // 企业号填corpId
-	secret    string // 管理连接密钥
-	aesKey    []byte // 解密的AesKey
-	safeMode  bool   = false
-	entMode   bool   = false
-	msgUrl    string = WXAPI_MSG
-	tokenUrl  string = WXAPI_TOKEN
-	uploadUrl string = WXAPI_UPLOAD
-	getMedia  string = WXAPI_GETMEDIA
 	// Debug is a flag to Println()
 	Debug bool = false
+	std        = NewServer()
 )
+
+// Server 微信服务容器
+type Server struct {
+	AppId          string
+	AgentId        int
+	Secret         string
+	Token          string
+	EncodingAESKey string
+	AesKey         []byte // 解密的AesKey
+	SafeMode       bool
+	EntMode        bool
+	MsgUrl         string
+	TokenUrl       string
+	UploadUrl      string
+	GetMediaUrl    string
+	Safe           int
+	accessToken    *AccessToken
+	UserList       userList
+	DeptList       DepartmentList
+	MsgQueue       chan interface{}
+}
+
+// New 微信服务容器，根据agentId判断是企业号或服务号
+func New(token, appid, secret, key string, agentId ...int) (s *Server) {
+	s = NewServer()
+	if len(agentId) > 0 {
+		s.SetEnt(token, appid, secret, key, agentId[0])
+	} else {
+		s.Set(token, appid, secret, key)
+	}
+	return s
+}
+
+// NewServer 空容器
+func NewServer() *Server {
+	s := &Server{
+		MsgUrl:      WXAPI_MSG,
+		TokenUrl:    WXAPI_TOKEN,
+		UploadUrl:   WXAPI_UPLOAD,
+		GetMediaUrl: WXAPI_GETMEDIA,
+	}
+	s.init()
+	return s
+}
 
 //SetLog 设置log
 func SetLog(l io.Writer) {
@@ -50,12 +85,12 @@ func SetLog(l io.Writer) {
 }
 
 // Set 设置token,appId,secret
-func Set(tk, id, sec string, key ...string) (err error) {
-	token, appId, secret = tk, id, sec
-	// 存在aesKey则开启加密安全模式
+func (s *Server) Set(tk, id, sec string, key ...string) (err error) {
+	s.Token, s.AppId, s.Secret = tk, id, sec
+	// 存在EncodingAESKey则开启加密安全模式
 	if len(key) > 0 {
-		safeMode = true
-		if aesKey, err = base64.StdEncoding.DecodeString(key[0] + "="); err != nil {
+		s.SafeMode = true
+		if s.AesKey, err = base64.StdEncoding.DecodeString(key[0] + "="); err != nil {
 			return err
 		}
 		Println("启用加密模式")
@@ -63,10 +98,16 @@ func Set(tk, id, sec string, key ...string) (err error) {
 	return
 }
 
+// Set 设置token,appId,secret
+func Set(tk, id, sec string, key ...string) (err error) {
+	return std.Set(tk, id, sec, key...)
+}
+
 // VerifyURL 验证URL,验证成功则返回标准请求载体（Msg已解密）
-func VerifyURL(w http.ResponseWriter, r *http.Request) (ctx *Context) {
-	log.Println(r.Method, "|", r.URL.String())
+func (s *Server) VerifyURL(w http.ResponseWriter, r *http.Request) (ctx *Context) {
+	Println(r.Method, "|", r.URL.String())
 	ctx = &Context{
+		Server:    s,
 		Writer:    w,
 		Request:   r,
 		repCount:  0,
@@ -75,32 +116,32 @@ func VerifyURL(w http.ResponseWriter, r *http.Request) (ctx *Context) {
 		Msg:       new(WxMsg),
 		MsgEnc:    new(WxMsgEnc),
 	}
-	if !safeMode && r.Method == "POST" {
+	if !s.SafeMode && r.Method == "POST" {
 		if err := xml.NewDecoder(r.Body).Decode(ctx.Msg); err != nil {
-			Println("parseWxMsg err:", err)
+			Println("Decode WxMsg err:", err)
 		}
 	}
 
 	echostr := r.FormValue("echostr")
-	if safeMode && r.Method == "POST" {
+	if s.SafeMode && r.Method == "POST" {
 		if err := xml.NewDecoder(r.Body).Decode(ctx.MsgEnc); err != nil {
-			Println("MsgEnc parse err:", err)
+			Println("Decode MsgEnc err:", err)
 		}
 		echostr = ctx.MsgEnc.Encrypt // POST请求需解析消息体中的Encrypt
 	}
 
 	// 验证signature
 	signature := r.FormValue("signature") + r.FormValue("msg_signature")
-	if entMode && signature != sortSha1(token, ctx.Timestamp, ctx.Nonce, echostr) {
-		log.Println("Signature验证错误!(企业号)", token, ctx.Timestamp, ctx.Nonce, echostr)
+	if s.EntMode && signature != sortSha1(s.Token, ctx.Timestamp, ctx.Nonce, echostr) {
+		log.Println("Signature验证错误!(企业号)", s.Token, ctx.Timestamp, ctx.Nonce, echostr)
 		return
-	} else if !entMode && r.FormValue("signature") != sortSha1(token, ctx.Timestamp, ctx.Nonce) {
-		log.Println("Signature验证错误!(公众号)", token, ctx.Timestamp, ctx.Nonce)
+	} else if !s.EntMode && r.FormValue("signature") != sortSha1(s.Token, ctx.Timestamp, ctx.Nonce) {
+		log.Println("Signature验证错误!(公众号)", s.Token, ctx.Timestamp, ctx.Nonce)
 		return
 	}
-	if entMode || (safeMode && r.Method == "POST") {
+	if s.EntMode || (s.SafeMode && r.Method == "POST") {
 		var err error
-		echostr, err = DecryptMsg(echostr)
+		echostr, err = s.DecryptMsg(echostr)
 		if err != nil {
 			log.Println("DecryptMsg error:", err)
 			return
@@ -112,7 +153,7 @@ func VerifyURL(w http.ResponseWriter, r *http.Request) (ctx *Context) {
 		return
 	}
 	Println("Wechat ==>", echostr)
-	if safeMode {
+	if s.SafeMode {
 		if err := xml.Unmarshal([]byte(echostr), ctx.Msg); err != nil {
 			log.Println("Msg parse err:", err)
 		}
@@ -122,6 +163,11 @@ func VerifyURL(w http.ResponseWriter, r *http.Request) (ctx *Context) {
 		w.Write([]byte(ctx.Msg.PackageId))
 	}
 	return
+}
+
+// VerifyURL 验证URL,验证成功则返回标准请求载体（Msg已解密）
+func VerifyURL(w http.ResponseWriter, r *http.Request) (ctx *Context) {
+	return std.VerifyURL(w, r)
 }
 
 // sortSha1 排序并sha1，主要用于计算signature
@@ -134,13 +180,13 @@ func sortSha1(s ...string) string {
 
 // DecryptMsg 解密微信消息,密文string->base64Dec->aesDec->去除头部随机字串
 // AES加密的buf由16个字节的随机字符串、4个字节的msg_len(网络字节序)、msg和$AppId组成
-func DecryptMsg(s string) (string, error) {
-	aesMsg, err := base64.StdEncoding.DecodeString(s)
+func (s *Server) DecryptMsg(msg string) (string, error) {
+	aesMsg, err := base64.StdEncoding.DecodeString(msg)
 	if err != nil {
 		return "", err
 	}
 
-	buf, err := util.AesDecrypt(aesMsg, aesKey)
+	buf, err := util.AesDecrypt(aesMsg, s.AesKey)
 	if err != nil {
 		return "", err
 	}
@@ -150,7 +196,7 @@ func DecryptMsg(s string) (string, error) {
 	if msgLen < 0 || msgLen > 1000000 {
 		return "", errors.New("AesKey is invalid")
 	}
-	if string(buf[20+msgLen:]) != appId {
+	if string(buf[20+msgLen:]) != s.AppId {
 		return "", errors.New("AppId is invalid")
 	}
 	return string(buf[20 : 20+msgLen]), nil
@@ -167,7 +213,7 @@ type wxRespEnc struct {
 
 // EncryptMsg 加密普通回复(AES-CBC),打包成xml格式
 // AES加密的buf由16个字节的随机字符串、4个字节的msg_len(网络字节序)、msg和$AppId组成
-func EncryptMsg(msg []byte, timeStamp, nonce string) (re *wxRespEnc, err error) {
+func (s *Server) EncryptMsg(msg []byte, timeStamp, nonce string) (re *wxRespEnc, err error) {
 	buf := new(bytes.Buffer)
 	err = binary.Write(buf, binary.BigEndian, int32(len(msg)))
 	if err != nil {
@@ -177,12 +223,12 @@ func EncryptMsg(msg []byte, timeStamp, nonce string) (re *wxRespEnc, err error) 
 
 	rd := []byte("welcometoesapsys")
 
-	plain := bytes.Join([][]byte{rd, l, msg, []byte(appId)}, nil)
-	ae, _ := util.AesEncrypt(plain, aesKey)
+	plain := bytes.Join([][]byte{rd, l, msg, []byte(s.AppId)}, nil)
+	ae, _ := util.AesEncrypt(plain, s.AesKey)
 	encMsg := base64.StdEncoding.EncodeToString(ae)
 	re = &wxRespEnc{
 		Encrypt:      CDATA(encMsg),
-		MsgSignature: CDATA(sortSha1(token, timeStamp, nonce, encMsg)),
+		MsgSignature: CDATA(sortSha1(s.Token, timeStamp, nonce, encMsg)),
 		TimeStamp:    timeStamp,
 		Nonce:        CDATA(nonce),
 	}

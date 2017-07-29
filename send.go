@@ -6,48 +6,27 @@ import (
 	"github.com/esap/wechat/util"
 )
 
-// MsgToDo 队列消息
-type MsgToDo struct {
-	Msg     interface{}
-	AgentId int
-}
-
-// MsgQueue 主动消息队列
-var MsgQueue chan *MsgToDo
-
 // MsgQueueAdd 添加队列消息消息
-func MsgQueueAdd(v interface{}, ag ...int) {
-	agent := 0
-	if len(ag) > 0 {
-		agent = ag[0]
-	}
-	MsgQueue <- &MsgToDo{v, agent}
+func (s *Server) MsgQueueAdd(v interface{}) {
+	s.MsgQueue <- v
 }
 
-func init() {
-	MsgQueue = make(chan *MsgToDo, 10000)
+func (s *Server) init() {
+	s.MsgQueue = make(chan interface{}, 10000)
 	go func() {
 		for {
-			msg := <-MsgQueue
-			e := SendMsg(msg.Msg, msg.AgentId)
+			msg := <-s.MsgQueue
+			e := s.SendMsg(msg)
 			if e.ErrCode != 0 {
-				Println("SendMsg err:", e.ErrMsg)
+				Println("MsgQueueSend err:", e.ErrMsg)
 			}
 		}
 	}()
 }
 
 // SendMsg 发送消息
-func SendMsg(v interface{}, ag ...int) *WxErr {
-	agent := 0
-	if len(ag) > 0 {
-		agent = ag[0]
-	}
-	at, err := GetAgentAccessToken(agent)
-	if err != nil {
-		return &WxErr{-1, err.Error()}
-	}
-	url := msgUrl + at
+func (s *Server) SendMsg(v interface{}) *WxErr {
+	url := s.MsgUrl + s.GetAccessToken()
 	body, err := util.PostJson(url, v)
 	if err != nil {
 		return &WxErr{-1, err.Error()}
@@ -59,55 +38,109 @@ func SendMsg(v interface{}, ag ...int) *WxErr {
 	}
 	Printf("发送消息:%+v\n回执:%+v", v, *rst)
 	return rst
+}
 
+// SendText 发送客服text消息
+func (s *Server) SendText(to string, id int, msg ...string) *WxErr {
+	return s.SendMsg(NewText(to, id, msg...))
+}
+
+// SendImage 发送客服Image消息
+func (s *Server) SendImage(to string, id int, mediaId string) *WxErr {
+	return s.SendMsg(NewImage(to, id, mediaId))
+}
+
+// SendVoice 发送客服Voice消息
+func (s *Server) SendVoice(to string, id int, mediaId string) *WxErr {
+	return s.SendMsg(NewVoice(to, id, mediaId))
+}
+
+// SendFile 发送客服File消息
+func (s *Server) SendFile(to string, id int, mediaId string) *WxErr {
+	return s.SendMsg(NewFile(to, id, mediaId))
+}
+
+// SendVideo 发送客服Video消息
+func (s *Server) SendVideo(to string, id int, mediaId, title, desc string) *WxErr {
+	return s.SendMsg(NewVideo(to, id, mediaId, title, desc))
+}
+
+// SendTextcard 发送客服extcard消息
+func (s *Server) SendTextcard(to string, id int, title, desc, url string) *WxErr {
+	return s.SendMsg(NewTextcard(to, id, title, desc, url))
+}
+
+// SendMusic 发送客服Music消息
+func (s *Server) SendMusic(to string, id int, mediaId, title, desc, musicUrl, qhMusicUrl string) *WxErr {
+	return s.SendMsg(NewMusic(to, id, mediaId, title, desc, musicUrl, qhMusicUrl))
+}
+
+// SendNews 发送客服news消息
+func (s *Server) SendNews(to string, id int, arts ...Article) *WxErr {
+	return s.SendMsg(NewNews(to, id, arts...))
+}
+
+// SendMpNews 发送加密新闻mpnews消息(仅企业号可用)
+func (s *Server) SendMpNews(to string, id int, arts ...MpArticle) *WxErr {
+	return s.SendMsg(NewMpNews(to, id, arts...))
+}
+
+// SendMpNewsId 发送加密新闻mpnews消息(直接使用mediaId)
+func (s *Server) SendMpNewsId(to string, id int, mediaId string) *WxErr {
+	return s.SendMsg(NewMpNewsId(to, id, mediaId))
+}
+
+// SendMsg 发送消息
+func SendMsg(v interface{}) *WxErr {
+	return std.SendMsg(v)
 }
 
 // SendText 发送客服text消息
 func SendText(to string, id int, msg ...string) *WxErr {
-	return SendMsg(NewText(to, id, msg...), id)
+	return std.SendText(to, id, msg...)
 }
 
 // SendImage 发送客服Image消息
 func SendImage(to string, id int, mediaId string) *WxErr {
-	return SendMsg(NewImage(to, id, mediaId), id)
+	return std.SendImage(to, id, mediaId)
 }
 
 // SendVoice 发送客服Voice消息
 func SendVoice(to string, id int, mediaId string) *WxErr {
-	return SendMsg(NewVoice(to, id, mediaId), id)
+	return std.SendVoice(to, id, mediaId)
 }
 
 // SendFile 发送客服File消息
 func SendFile(to string, id int, mediaId string) *WxErr {
-	return SendMsg(NewFile(to, id, mediaId), id)
+	return std.SendFile(to, id, mediaId)
 }
 
 // SendVideo 发送客服Video消息
 func SendVideo(to string, id int, mediaId, title, desc string) *WxErr {
-	return SendMsg(NewVideo(to, id, mediaId, title, desc), id)
+	return std.SendVideo(to, id, mediaId, title, desc)
 }
 
 // SendTextcard 发送客服extcard消息
 func SendTextcard(to string, id int, title, desc, url string) *WxErr {
-	return SendMsg(NewTextcard(to, id, title, desc, url), id)
+	return std.SendTextcard(to, id, title, desc, url)
 }
 
 // SendMusic 发送客服Music消息
 func SendMusic(to string, id int, mediaId, title, desc, musicUrl, qhMusicUrl string) *WxErr {
-	return SendMsg(NewMusic(to, id, mediaId, title, desc, musicUrl, qhMusicUrl), id)
+	return std.SendMusic(to, id, mediaId, title, desc, musicUrl, qhMusicUrl)
 }
 
 // SendNews 发送客服news消息
 func SendNews(to string, id int, arts ...Article) *WxErr {
-	return SendMsg(NewNews(to, id, arts...), id)
+	return std.SendNews(to, id, arts...)
 }
 
 // SendMpNews 发送加密新闻mpnews消息(仅企业号可用)
 func SendMpNews(to string, id int, arts ...MpArticle) *WxErr {
-	return SendMsg(NewMpNews(to, id, arts...), id)
+	return std.SendMpNews(to, id, arts...)
 }
 
 // SendMpNews2 发送加密新闻mpnews消息(直接使用mediaId)
-func SendMpNews2(to string, id int, mediaId string) *WxErr {
-	return SendMsg(NewMpNews2(to, id, mediaId), id)
+func SendMpNewsId(to string, id int, mediaId string) *WxErr {
+	return std.SendMpNewsId(to, id, mediaId)
 }

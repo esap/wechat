@@ -1,15 +1,14 @@
-package corp
+package wechat
 
 import (
 	"log"
 
-	"github.com/esap/wechat"
 	"github.com/esap/wechat/util"
 )
 
 const (
 	// WXAPIGetApproval  企业号审批数据获取接口
-	WXAPIGetApproval = wechat.WXAPI_ENT + "corp/getapprovaldata?access_token="
+	WXAPIGetApproval = WXAPI_ENT + "corp/getapprovaldata?access_token="
 	// CorpApprovalAgentID  审批AgentId
 	CorpApprovalAgentID = 3010040
 )
@@ -24,11 +23,11 @@ type (
 
 	// SpDataRet 审批返回数据
 	SpDataRet struct {
-		wechat.WxErr `json:"-"`
-		Count        int64    `json:"count"`
-		Total        int64    `json:"total"`
-		NextSpnum    int64    `json:"next_spnum"`
-		Data         []SpData `json:"data""`
+		WxErr     `json:"-"`
+		Count     int64    `json:"count"`
+		Total     int64    `json:"total"`
+		NextSpnum int64    `json:"next_spnum"`
+		Data      []SpData `json:"data""`
 	}
 
 	// SpData 审批数据
@@ -84,12 +83,8 @@ type (
 )
 
 // GetApproval 获取审批数据
-func GetApproval(start, end, nextNum int64) (spData *SpDataRet, err error) {
-	at, err := wechat.GetAgentAccessToken(CorpApprovalAgentID)
-	if err != nil {
-		return nil, err
-	}
-	url := WXAPIGetApproval + at
+func (s *Server) GetApproval(start, end, nextNum int64) (spData *SpDataRet, err error) {
+	url := WXAPIGetApproval + s.GetAccessToken()
 	spData = new(SpDataRet)
 	if err = util.PostJsonPtr(url, spDataReq{start, end, nextNum}, spData); err != nil {
 		log.Println("PostJsonPtr err:", err)

@@ -58,6 +58,7 @@ type UserInfo struct {
 	Mobile     string `json:"mobile"`
 	Gender     string `json:"gender,omitempty"`
 	Email      string `json:"email,omitempty"`
+	Telephone  string `json:"telephone,omitempty"`
 	WeixinId   string `json:"-"`
 	Avatar     string `json:"avatar_mediaid,omitempty"`
 	Status     int    `json:"-"`

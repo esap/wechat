@@ -80,6 +80,15 @@ func (s *Server) UserUpdate(user *UserInfo) (err error) {
 	return s.doUpdate(WXAPI_USERUPDATE, user)
 }
 
+// UserDelete 删除用户
+func (s *Server) UserDelete(user string) (err error) {
+	e := new(WxErr)
+	if err = util.GetJson(WXAPI_USERDEL+s.GetAccessToken()+"&userid="+user, e); err != nil {
+		return
+	}
+	return e.Error()
+}
+
 // GetUserInfo 通过userId获取用户信息
 func (s *Server) GetUserInfo(userId string) (user UserInfo, err error) {
 	url := fmt.Sprintf(WXAPI_GETUSERINFO, s.GetAccessToken(), userId)

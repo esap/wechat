@@ -52,7 +52,8 @@ type Server struct {
 	Safe           int
 	accessToken    *AccessToken
 	UserList       userList
-	DeptList       DepartmentList
+	DeptList       DeptList
+	TagList        TagList
 	MsgQueue       chan interface{}
 }
 

@@ -50,6 +50,8 @@ func (c CDATA) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 type wxResp struct {
 	XMLName      xml.Name `xml:"xml" json:"-"`
 	ToUserName   CDATA    `json:"touser"`
+	ToParty      CDATA    `xml:"-" json:"toparty"`
+	ToTag        CDATA    `xml:"-" json:"totag"`
 	FromUserName CDATA    `json:"-"`
 	CreateTime   int64    `json:"-"`
 	MsgType      CDATA    `json:"msgtype"`
@@ -57,8 +59,18 @@ type wxResp struct {
 	Safe         int      `xml:"-" json:"safe"`
 }
 
-func (s *Server) newWxResp(msgType, toUser string, agentId int) wxResp {
-	return wxResp{ToUserName: CDATA(toUser), MsgType: CDATA(msgType), AgentId: agentId, Safe: s.Safe}
+func (s *Server) newWxResp(msgType, to string, agentId int) (r wxResp) {
+	toArr := strings.Split(to, "$$")
+	r = wxResp{
+		ToUserName: CDATA(toArr[0]),
+		MsgType:    CDATA(msgType),
+		AgentId:    agentId,
+		Safe:       s.Safe}
+	if len(toArr) > 3 {
+		r.ToParty = CDATA(toArr[1])
+		r.ToTag = CDATA(toArr[2])
+	}
+	return
 }
 func newWxResp(msgType, toUser string, agentId int) wxResp {
 	return std.newWxResp(msgType, toUser, agentId)

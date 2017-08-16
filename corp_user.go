@@ -10,16 +10,12 @@ import (
 
 // WXAPI 企业号用户列表接口
 const (
-	WXAPI_GETUSER     = WXAPI_ENT + "user/getuserinfo?access_token=%s&code=%s"
-	WXAPI_GETUSERINFO = WXAPI_ENT + "user/get?access_token=%s&userid=%s"
-	WXAPI_USERLIST    = WXAPI_ENT + `user/list?access_token=%s&department_id=1&fetch_child=1&status=0`
-	WXAPI_USERADD     = WXAPI_ENT + `user/create?access_token=`
-	WXAPI_USERUPDATE  = WXAPI_ENT + `user/update?access_token=`
-	WXAPI_USERDEL     = WXAPI_ENT + `user/delete?access_token=`
-	WXAPI_DEPTLIST    = WXAPI_ENT + `department/list?access_token=%s&id=1`
-	WXAPI_DEPTADD     = WXAPI_ENT + `department/create?access_token=`
-	WXAPI_DEPTUPDATE  = WXAPI_ENT + `department/update?access_token=`
-	WXAPI_DEPTDEL     = WXAPI_ENT + `department/delete?access_token=%s&id=%d`
+	WXAPI_GetUser     = WXAPI_ENT + "user/getuserinfo?access_token=%s&code=%s"
+	WXAPI_GetUserInfo = WXAPI_ENT + "user/get?access_token=%s&userid=%s"
+	WXAPI_UserList    = WXAPI_ENT + `user/list?access_token=%s&department_id=1&fetch_child=1&status=0`
+	WXAPI_UserAdd     = WXAPI_ENT + `user/create?access_token=`
+	WXAPI_UserUpdate  = WXAPI_ENT + `user/update?access_token=`
+	WXAPI_UserDel     = WXAPI_ENT + `user/delete?access_token=`
 )
 
 // UserOauth 用户鉴权信息
@@ -32,7 +28,7 @@ type UserOauth struct {
 
 // GetUserOauth 通过code鉴权
 func (s *Server) GetUserOauth(code string) (o UserOauth, err error) {
-	url := fmt.Sprintf(WXAPI_GETUSER, s.GetAccessToken(), code)
+	url := fmt.Sprintf(WXAPI_GetUser, s.GetAccessToken(), code)
 	if err = util.GetJson(url, &o); err != nil {
 		return
 	}
@@ -72,18 +68,18 @@ type UserInfo struct {
 
 // UserAdd 添加用户
 func (s *Server) UserAdd(user *UserInfo) (err error) {
-	return s.doUpdate(WXAPI_USERADD, user)
+	return s.doUpdate(WXAPI_UserAdd, user)
 }
 
 // UserUpdate 添加用户
 func (s *Server) UserUpdate(user *UserInfo) (err error) {
-	return s.doUpdate(WXAPI_USERUPDATE, user)
+	return s.doUpdate(WXAPI_UserUpdate, user)
 }
 
 // UserDelete 删除用户
 func (s *Server) UserDelete(user string) (err error) {
 	e := new(WxErr)
-	if err = util.GetJson(WXAPI_USERDEL+s.GetAccessToken()+"&userid="+user, e); err != nil {
+	if err = util.GetJson(WXAPI_UserDel+s.GetAccessToken()+"&userid="+user, e); err != nil {
 		return
 	}
 	return e.Error()
@@ -91,7 +87,7 @@ func (s *Server) UserDelete(user string) (err error) {
 
 // GetUserInfo 通过userId获取用户信息
 func (s *Server) GetUserInfo(userId string) (user UserInfo, err error) {
-	url := fmt.Sprintf(WXAPI_GETUSERINFO, s.GetAccessToken(), userId)
+	url := fmt.Sprintf(WXAPI_GetUserInfo, s.GetAccessToken(), userId)
 	if err = util.GetJson(url, &user); err != nil {
 		return
 	}
@@ -121,8 +117,8 @@ func (s *Server) GetUserName(userid string) string {
 	return ""
 }
 
-// UserList 用户列表
-var UserList userList
+// Users 用户列表
+var Users userList
 
 // UserList 用户列表
 type userList struct {
@@ -141,7 +137,7 @@ func (s *Server) SyncUserList() (err error) {
 
 // GetUserList 获取用户列表
 func (s *Server) GetUserList() (u userList, err error) {
-	url := fmt.Sprintf(WXAPI_USERLIST, s.GetAccessToken())
+	url := fmt.Sprintf(WXAPI_UserList, s.GetAccessToken())
 	if err = util.GetJson(url, &u); err != nil {
 		return
 	}
@@ -160,56 +156,6 @@ func (s *Server) GetUserNameList() (userlist []string) {
 	return
 }
 
-// DeptList 部门列表
-var DeptList DepartmentList
-
-type (
-	// DepartmentList 部门列表
-	DepartmentList struct {
-		WxErr
-		Department []Department
-	}
-
-	// Department 部门
-	Department struct {
-		Id       int    `json:"id"`
-		Name     string `json:"name"`
-		ParentId int    `json:"parentid"`
-		Order1   int64  `json:"order"`
-	}
-)
-
-// SyncDeptList 更新部门列表
-func (s *Server) SyncDeptList() (err error) {
-	s.DeptList, err = s.GetDeptList()
-	if err != nil {
-		log.Println("获取部门列表失败:", err)
-	}
-	return
-}
-
-// GetDeptList 获取部门列表
-func (s *Server) GetDeptList() (dl DepartmentList, err error) {
-	url := fmt.Sprintf(WXAPI_DEPTLIST, s.GetAccessToken())
-	if err = util.GetJson(url, &dl); err != nil {
-		return
-	}
-	if dl.ErrCode != 0 {
-		err = fmt.Errorf("GetDeptList error : errcode=%v , errmsg=%v", dl.ErrCode, dl.ErrMsg)
-	}
-	return
-}
-
-// DeptAdd 获取部门列表
-func (s *Server) DeptAdd(dept *Department) (err error) {
-	return s.doUpdate(WXAPI_DEPTADD, dept)
-}
-
-// DeptUpdate 获取部门列表
-func (s *Server) DeptUpdate(dept *Department) (err error) {
-	return s.doUpdate(WXAPI_DEPTUPDATE, dept)
-}
-
 func (s *Server) doUpdate(uri string, i interface{}) (err error) {
 	url := uri + s.GetAccessToken()
 	wxerr := new(WxErr)
@@ -217,16 +163,6 @@ func (s *Server) doUpdate(uri string, i interface{}) (err error) {
 		return
 	}
 	return wxerr.Error()
-}
-
-// GetDeptName 通过部门id获取部门名称
-func (s *Server) GetDeptName(id int) string {
-	for _, v := range s.DeptList.Department {
-		if v.Id == id {
-			return v.Name
-		}
-	}
-	return ""
 }
 
 // GetGender 获取性别
@@ -240,7 +176,7 @@ func GetGender(s string) string {
 	return "未定义"
 }
 
-var toUserReplacer = strings.NewReplacer("|", ",", "，", ",")
+var toUserReplacer = strings.NewReplacer(",", "|", "，", "|")
 
 // GetToUser 获取acl所包含的所有用户
 func (s *Server) GetToUser(acl interface{}) (touser string) {
@@ -248,7 +184,7 @@ func (s *Server) GetToUser(acl interface{}) (touser string) {
 	if strings.ToLower(s1) == "@all" {
 		return "@all"
 	}
-	arr := strings.Split(toUserReplacer.Replace(s1), ",")
+	arr := strings.Split(toUserReplacer.Replace(s1), "|")
 	for _, toUser := range arr {
 		for _, v := range s.UserList.UserList {
 			if s.CheckUserAcl(v.UserId, toUser) {

@@ -12,7 +12,7 @@ Package wechat provide wechat-sdk for go
 
 	func main() {
 		wechat.Debug = true
-		wechat.Set("esap", "yourAppID", "yourSecret", "yourAesKey")
+		wechat.Set("yourToken", "yourAppID", "yourSecret", "yourEncodingAesKey")
 		http.HandleFunc("/", WxHandler)
 		http.ListenAndServe(":9090", nil)
 	}
@@ -21,7 +21,7 @@ Package wechat provide wechat-sdk for go
 		wechat.VerifyURL(w, r).NewText("客服消息1").Send().NewText("客服消息2").Send().NewText("查询结果...").Reply()
 	}
 
-More info:https://github.com/esap/wechat
+More info: https://github.com/esap/wechat
 
 */
 package wechat

@@ -7,12 +7,9 @@ import (
 
 // WXAPI_ENT 企业号接口
 const (
-	WXAPI_ENT          = "https://qyapi.weixin.qq.com/cgi-bin/"
-	WXAPI_TOKEN_ENT    = WXAPI_ENT + "gettoken?corpid=%s&corpsecret=%s"
-	WXAPI_MSG_ENT      = WXAPI_ENT + "message/send?access_token="
-	WXAPI_IP_ENT       = WXAPI_ENT + "getcallbackip?access_token="
-	WXAPI_UPLOAD_ENT   = WXAPI_ENT + "media/upload?access_token=%s&type=%s"
-	WXAPI_GETMEDIA_ENT = WXAPI_ENT + "media/get?access_token=%s&media_id=%s"
+	WXAPI_ENT       = "https://qyapi.weixin.qq.com/cgi-bin/"
+	WXAPI_TOKEN_ENT = WXAPI_ENT + "gettoken?corpid=%s&corpsecret=%s"
+	WXAPI_MSG_ENT   = WXAPI_ENT + "message/send?access_token="
 )
 
 // SetEnt 初始化企业号，设置token,corpid,secrat,aesKey
@@ -21,10 +18,9 @@ func (s *Server) SetEnt(token, appId, secret, aeskey string, agentId ...int) (er
 	if len(agentId) > 0 {
 		s.AgentId = agentId[0]
 	}
+	s.RootUrl = WXAPI_ENT
 	s.MsgUrl = WXAPI_MSG_ENT
-	s.UploadUrl = WXAPI_UPLOAD_ENT
 	s.TokenUrl = WXAPI_TOKEN_ENT
-	s.GetMediaUrl = WXAPI_GETMEDIA_ENT
 	if aeskey != "" {
 		s.AesKey, err = base64.StdEncoding.DecodeString(aeskey + "=")
 		if err != nil {

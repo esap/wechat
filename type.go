@@ -50,8 +50,8 @@ func (c CDATA) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 type wxResp struct {
 	XMLName      xml.Name `xml:"xml" json:"-"`
 	ToUserName   CDATA    `json:"touser"`
-	ToParty      CDATA    `xml:"-" json:"toparty"`
-	ToTag        CDATA    `xml:"-" json:"totag"`
+	ToParty      CDATA    `xml:"-" json:"toparty"` // 企业号专用
+	ToTag        CDATA    `xml:"-" json:"totag"`   // 企业号专用
 	FromUserName CDATA    `json:"-"`
 	CreateTime   int64    `json:"-"`
 	MsgType      CDATA    `json:"msgtype"`

@@ -1,7 +1,6 @@
 package wechat
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -9,10 +8,8 @@ import (
 	"github.com/esap/wechat/util"
 )
 
-// AgentsMap 应用代理，主要用于企业号
-var (
-	FetchDelay time.Duration = 1200 * time.Second // 默认20分钟同步一次
-)
+// FetchDelay 默认5分钟同步一次
+var FetchDelay time.Duration = 5 * time.Minute
 
 // AccessToken 回复体
 type AccessToken struct {
@@ -28,6 +25,7 @@ func (s *Server) GetAccessToken() string {
 			err := s.getAccessToken()
 			if err != nil {
 				log.Printf("GetAccessToken[%v] err:%v", s.AgentId, err)
+				time.Sleep(time.Second)
 				continue
 			}
 			break
@@ -43,10 +41,10 @@ func (s *Server) getAccessToken() (err error) {
 		return
 	}
 	if at.ErrCode > 0 {
-		return errors.New(at.ErrMsg)
+		return at.Error()
 	}
 	Printf("[%v::%v]:%+v", s.AppId, s.AgentId, *at)
-	at.ExpiresIn = time.Now().Unix() + 600
+	at.ExpiresIn = time.Now().Unix() + 500
 	s.accessToken = at
 	return
 }

@@ -3,7 +3,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/esap/wechat)](https://goreportcard.com/report/github.com/esap/wechat)
 [![GoDoc](http://godoc.org/github.com/esap/wechat?status.svg)](http://godoc.org/github.com/esap/wechat)
 
-微信SDK的golang实现
+**微信SDK的golang实现，短小精悍，同时兼容【企业号/服务号/订阅号/小程序】**
 
 ## 快速开始
 
@@ -19,7 +19,7 @@ import (
 
 func main() {
 	wechat.Debug = true
-	wechat.Set("esap", "yourAppID", "yourSecret", "yourAesKey")
+	wechat.Set("yourToken", "yourAppID", "yourSecret", "yourAesKey")
 	http.HandleFunc("/", WxHandler)
 	http.ListenAndServe(":9090", nil)
 }
@@ -135,18 +135,18 @@ type WxMsg struct {
 
 ```go
 	// 先创建三个文章
-	art1 := wechat.NewArticle("ESAP第十五弹 玩转微信企业号对接ES",
-		"来自村长的ESAP系统最新技术分享。",
-		"https://iesap.net/img/esap15-1.jpg",
-		"https://iesap.net/2016/01/28/esap15/")
-	art2 := wechat.NewArticle("ESAP第十四弹 手把手教你玩转ES微信开发",
-		"来自村长的ESAP系统最新技术分享。",
-		"https://iesap.net/img/esap14-1.jpg",
-		"https://iesap.net/2015/12/28/esap14/")
-	art3 := wechat.NewArticle("我与ES不吐不快的槽",
-		"来自村长的工作日志。",
-		"https://iesap.net/img/esdiediedie-2.jpg",
-		"https://iesap.net/2014/10/31/EsDiediedie/")
+	art1 := wechat.NewArticle("拥抱AI，享受工作",
+		"来自村长的ESAP系统最新技术分享",
+		"http://ylin.wang/img/esap18-1.png",
+		"http://ylin.wang/2017/07/13/esap18/")
+	art2 := wechat.NewArticle("用企业微信代替pda实现扫描入库",
+		"来自村长的ESAP系统最新技术分享",
+		"http://ylin.wang/img/esap17-2.png",
+		"http://ylin.wang/2017/06/23/esap17/")
+	art3 := wechat.NewArticle("大道至简的哲学",
+		"来自村长的工作日志",
+		"http://ylin.wang/img/golang.jpg",
+		"http://ylin.wang/2017/01/29/log7/")
 	// 打包成新闻
 	ctx.NewNews(art1, art2, art3)
 ```

@@ -60,14 +60,16 @@ type wxResp struct {
 }
 
 func (s *Server) newWxResp(msgType, to string, agentId int) (r wxResp) {
-	toArr := strings.Split(to, "$$")
+	toArr := strings.Split(to, " ")
 	r = wxResp{
 		ToUserName: CDATA(toArr[0]),
 		MsgType:    CDATA(msgType),
 		AgentId:    agentId,
 		Safe:       s.Safe}
-	if len(toArr) > 3 {
+	if len(toArr) > 2 {
 		r.ToParty = CDATA(toArr[1])
+	}
+	if len(toArr) > 3 {
 		r.ToTag = CDATA(toArr[2])
 	}
 	return

@@ -3,6 +3,7 @@ package wechat
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/esap/wechat/util"
 )
@@ -16,7 +17,7 @@ const (
 )
 
 // DeptList 部门列表
-var Depts DeptList
+//var Depts DeptList
 
 type (
 	// DeptList 部门列表
@@ -55,6 +56,15 @@ func (s *Server) GetDeptList() (dl DeptList, err error) {
 	return
 }
 
+// GetDeptIdList 获取部门id列表
+func (s *Server) GetDeptIdList() (deptIdlist []int) {
+	deptIdlist = make([]int, 0)
+	for _, v := range s.DeptList.Department {
+		deptIdlist = append(deptIdlist, v.Id)
+	}
+	return
+}
+
 // DeptAdd 获取部门列表
 func (s *Server) DeptAdd(dept *Department) (err error) {
 	return s.doUpdate(WXAPI_DeptAdd, dept)
@@ -66,9 +76,9 @@ func (s *Server) DeptUpdate(dept *Department) (err error) {
 }
 
 // DeptDelete 删除部门
-func (s *Server) DeptDelete(Id string) (err error) {
+func (s *Server) DeptDelete(Id int) (err error) {
 	e := new(WxErr)
-	if err = util.GetJson(WXAPI_DeptDel+s.GetAccessToken()+"&id="+Id, e); err != nil {
+	if err = util.GetJson(WXAPI_DeptDel+s.GetAccessToken()+"&id="+fmt.Sprint(Id), e); err != nil {
 		return
 	}
 	return e.Error()
@@ -82,4 +92,18 @@ func (s *Server) GetDeptName(id int) string {
 		}
 	}
 	return ""
+}
+
+// GetToParty 获取acl所包含的所有部门ID，结果形式：tagId1|tagId2|tagId3...
+func (s *Server) GetToParty(acl interface{}) string {
+	s1 := strings.TrimSpace(acl.(string))
+	arr := strings.Split(toUserReplacer.Replace(s1), "|")
+	for k, totag := range arr {
+		for _, v := range s.DeptList.Department {
+			if v.Name == totag {
+				arr[k] = fmt.Sprint(v.Id)
+			}
+		}
+	}
+	return strings.Join(arr, "|")
 }

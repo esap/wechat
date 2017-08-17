@@ -118,7 +118,7 @@ func (s *Server) GetUserName(userid string) string {
 }
 
 // Users 用户列表
-var Users userList
+//var Users userList
 
 // UserList 用户列表
 type userList struct {
@@ -148,7 +148,7 @@ func (s *Server) GetUserList() (u userList, err error) {
 }
 
 // GetUserNameList 获取用户列表
-func (s *Server) GetUserNameList() (userlist []string) {
+func (s *Server) GetUserIdList() (userlist []string) {
 	userlist = make([]string, 0)
 	for _, v := range s.UserList.UserList {
 		userlist = append(userlist, v.UserId)
@@ -178,24 +178,24 @@ func GetGender(s string) string {
 
 var toUserReplacer = strings.NewReplacer(",", "|", "，", "|")
 
-// GetToUser 获取acl所包含的所有用户
-func (s *Server) GetToUser(acl interface{}) (touser string) {
-	s1 := strings.TrimSpace(fmt.Sprint(acl))
+// GetToUser 获取acl所包含的所有用户ID,结果形式：userId1|userId2|userId3...
+func (s *Server) GetToUser(acl interface{}) string {
+	s1 := strings.TrimSpace(acl.(string))
 	if strings.ToLower(s1) == "@all" {
 		return "@all"
 	}
 	arr := strings.Split(toUserReplacer.Replace(s1), "|")
-	for _, toUser := range arr {
+	for k, toUser := range arr {
 		for _, v := range s.UserList.UserList {
-			if s.CheckUserAcl(v.UserId, toUser) {
-				touser += "|" + v.UserId
+			if v.Name == toUser {
+				arr[k] = v.UserId
 			}
 		}
 	}
-	return strings.Trim(touser, "|")
+	return strings.Join(arr, "|")
 }
 
-// CheckUserAcl 测试权限，对比user的账号，姓名，手机，职位是否包含于acl
+// CheckUserAcl 测试权限，对比user的账号，姓名是否包含于acl
 func (s *Server) CheckUserAcl(userid, acl string) bool {
 	acl = strings.TrimSpace(acl)
 	if acl == "" {

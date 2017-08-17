@@ -53,6 +53,7 @@ func (s *Server) FetchUserList() {
 				}
 				i = 0
 			}
+			s.SyncTagList()
 			time.Sleep(FetchDelay)
 		}
 	}()

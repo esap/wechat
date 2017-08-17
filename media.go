@@ -7,6 +7,11 @@ import (
 	"github.com/esap/wechat/util"
 )
 
+const (
+	WXAPI_UPLOAD   = "media/upload?access_token=%s&type=%s"
+	WXAPI_GETMEDIA = "media/get?access_token=%s&media_id=%s"
+)
+
 // Media 上传回复体
 type Media struct {
 	WxErr
@@ -23,7 +28,7 @@ type Media struct {
 //	TypeFile   = "file" // 仅企业号可用
 //	TypeThumb  = "thumb"
 func (s *Server) MediaUpload(mediaType string, filename string) (media Media, err error) {
-	uri := fmt.Sprintf(s.UploadUrl, s.GetAccessToken(), mediaType)
+	uri := fmt.Sprintf(s.RootUrl+WXAPI_UPLOAD, s.GetAccessToken(), mediaType)
 	var b []byte
 	b, err = util.PostFile("media", filename, uri)
 	if err != nil {
@@ -43,7 +48,7 @@ func MediaUpload(mediaType string, filename string) (media Media, err error) {
 
 // GetMedia 下载媒体
 func (s *Server) GetMedia(filename, mediaId string) error {
-	url := fmt.Sprintf(s.GetMediaUrl, s.GetAccessToken(), mediaId)
+	url := fmt.Sprintf(s.RootUrl+WXAPI_GETMEDIA, s.GetAccessToken(), mediaId)
 	return util.GetFile(filename, url)
 }
 
@@ -54,7 +59,7 @@ func GetMedia(filename, mediaId string) error {
 
 // GetMediaBytes 下载媒体
 func (s *Server) GetMediaBytes(mediaId string) ([]byte, error) {
-	url := fmt.Sprintf(s.GetMediaUrl, s.GetAccessToken(), mediaId)
+	url := fmt.Sprintf(s.RootUrl+WXAPI_GETMEDIA, s.GetAccessToken(), mediaId)
 	return util.GetBody(url)
 }
 

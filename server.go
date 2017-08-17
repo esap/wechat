@@ -22,11 +22,9 @@ import (
 
 // WXAPI 订阅号，服务号接口
 const (
-	WXAPI          = "https://api.weixin.qq.com/cgi-bin/"
-	WXAPI_TOKEN    = WXAPI + "token?grant_type=client_credential&appid=%s&secret=%s"
-	WXAPI_MSG      = WXAPI + "message/custom/send?access_token="
-	WXAPI_UPLOAD   = WXAPI + "media/upload?access_token=%s&type=%s"
-	WXAPI_GETMEDIA = WXAPI + "media/get?access_token=%s&&media_id=%s"
+	WXAPI       = "https://api.weixin.qq.com/cgi-bin/"
+	WXAPI_TOKEN = WXAPI + "token?grant_type=client_credential&appid=%s&secret=%s"
+	WXAPI_MSG   = WXAPI + "message/custom/send?access_token="
 )
 
 var (
@@ -45,10 +43,9 @@ type Server struct {
 	AesKey         []byte // 解密的AesKey
 	SafeMode       bool
 	EntMode        bool
+	RootUrl        string
 	MsgUrl         string
 	TokenUrl       string
-	UploadUrl      string
-	GetMediaUrl    string
 	Safe           int
 	accessToken    *AccessToken
 	UserList       userList
@@ -71,10 +68,9 @@ func New(token, appid, secret, key string, agentId ...int) (s *Server) {
 // NewServer 空容器
 func NewServer() *Server {
 	s := &Server{
-		MsgUrl:      WXAPI_MSG,
-		TokenUrl:    WXAPI_TOKEN,
-		UploadUrl:   WXAPI_UPLOAD,
-		GetMediaUrl: WXAPI_GETMEDIA,
+		RootUrl:  WXAPI,
+		MsgUrl:   WXAPI_MSG,
+		TokenUrl: WXAPI_TOKEN,
 	}
 	s.init()
 	return s

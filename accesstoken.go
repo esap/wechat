@@ -11,7 +11,7 @@ import (
 
 // AgentsMap 应用代理，主要用于企业号
 var (
-	FetchDelay time.Duration = 1200 * time.Second // 默认20分钟同步一次
+	FetchDelay time.Duration = 5 * time.Minute // 默认5分钟同步一次
 )
 
 // AccessToken 回复体

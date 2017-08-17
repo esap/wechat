@@ -8,9 +8,9 @@ import (
 
 // WXAPI_ENT 企业号菜单接口
 const (
-	WXAPI_GetCorpMenu = WXAPI_ENT + `menu/get?access_token=%s&agentid=%d`
-	WXAPI_AddCorpMenu = WXAPI_ENT + `menu/create?access_token=%s&agentid=%d`
-	WXAPI_DelCorpMenu = WXAPI_ENT + `menu/delete?access_token=%s&agentid=%d`
+	WXAPI_GetMenu = `menu/get?access_token=%s&agentid=%d`
+	WXAPI_AddMenu = `menu/create?access_token=%s&agentid=%d`
+	WXAPI_DelMenu = `menu/delete?access_token=%s&agentid=%d`
 )
 
 type (
@@ -32,9 +32,10 @@ type (
 	}
 )
 
-// GetCorpMenu 获取企业应用菜单
-func (s *Server) GetCorpMenu() (m *Menu, err error) {
-	url := fmt.Sprintf(WXAPI_GetCorpMenu, s.GetAccessToken(), s.AgentId)
+// GetMenu 获取应用菜单
+func (s *Server) GetMenu() (m *Menu, err error) {
+	m = new(Menu)
+	url := fmt.Sprintf(s.RootUrl+WXAPI_GetMenu, s.GetAccessToken(), s.AgentId)
 	if err = util.GetJson(url, m); err != nil {
 		return
 	}
@@ -42,20 +43,20 @@ func (s *Server) GetCorpMenu() (m *Menu, err error) {
 	return
 }
 
-// AddCorpMenu 创建企业应用菜单
-func (s *Server) AddCorpMenu(m *Menu) (err error) {
+// AddMenu 创建应用菜单
+func (s *Server) AddMenu(m *Menu) (err error) {
 	e := new(WxErr)
-	url := fmt.Sprintf(WXAPI_AddCorpMenu, s.GetAccessToken(), s.AgentId)
+	url := fmt.Sprintf(s.RootUrl+WXAPI_AddMenu, s.GetAccessToken(), s.AgentId)
 	if err = util.PostJsonPtr(url, m, e); err != nil {
 		return
 	}
 	return e.Error()
 }
 
-// DelCorpMenu 删除企业应用菜单
-func (s *Server) DelCorpMenu() (err error) {
+// DelMenu 删除应用菜单
+func (s *Server) DelMenu() (err error) {
 	e := new(WxErr)
-	url := fmt.Sprintf(WXAPI_DelCorpMenu, s.GetAccessToken(), s.AgentId)
+	url := fmt.Sprintf(s.RootUrl+WXAPI_DelMenu, s.GetAccessToken(), s.AgentId)
 	if err = util.GetJson(url, e); err != nil {
 		return
 	}

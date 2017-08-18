@@ -46,7 +46,7 @@ func (c *Context) Reply() (err error) {
 
 // ReplySuccess 如果不能在5秒内处理完，应该先回复success，然后通过客服消息通知用户
 func (c *Context) ReplySuccess() (err error) {
-	if c.Request.Method != "POST" || c.repCount > 0 {
+	if c.Request.Method != http.MethodPost || c.repCount > 0 {
 		return errors.New("Reply err: no reply")
 	}
 	_, err = c.Writer.Write([]byte("success"))

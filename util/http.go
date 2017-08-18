@@ -39,7 +39,7 @@ func GetBody(uri string) ([]byte, error) {
 
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("http get error : uri=%v , statusCode=%v", uri, resp.StatusCode)
+		return nil, fmt.Errorf("http get err: uri=%v , statusCode=%v", uri, resp.StatusCode)
 	}
 	return ioutil.ReadAll(resp.Body)
 }

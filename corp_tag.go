@@ -19,9 +19,6 @@ const (
 	WXAPI_TagDel      = WXAPI_ENT + `tag/delete?access_token=%s&id=%d`
 )
 
-// DeptList 标签列表
-//var Tags TagList
-
 type (
 	// TagList 标签列表
 	TagList struct {
@@ -34,6 +31,7 @@ type (
 		TagId   int    `json:"tagid"`
 		TagName string `json:"tagname"`
 	}
+
 	// TagUsers 标签成员
 	TagUsers struct {
 		WxErr
@@ -42,12 +40,14 @@ type (
 		UserList  []UserInfo
 		PartyList []int
 	}
+
 	// TagUserBody 标签成员（请求body格式）
 	TagUserBody struct {
 		TagId     int      `json:"tagid"`
 		UserList  []string `json:"userlist"`
 		PartyList []int    `json:"partylist"`
 	}
+
 	// TagErr
 	TagErr struct {
 		WxErr
@@ -71,9 +71,7 @@ func (s *Server) GetTagList() (l TagList, err error) {
 	if err = util.GetJson(url, &l); err != nil {
 		return
 	}
-	if l.ErrCode != 0 {
-		err = fmt.Errorf("GetTagList error : errcode=%v , errmsg=%v", l.ErrCode, l.ErrMsg)
-	}
+	err = l.Error()
 	return
 }
 
@@ -106,8 +104,8 @@ func (s *Server) TagDelete(TagId int) (err error) {
 }
 
 // GetTagUsers 获取标签下的成员
-func (s *Server) GetTagUsers(id string) (tm *TagUsers, err error) {
-	err = util.GetJson(WXAPI_TagUsers+s.GetAccessToken()+"&tagid="+id, tm)
+func (s *Server) GetTagUsers(id int) (tu *TagUsers, err error) {
+	err = util.GetJson(WXAPI_TagUsers+s.GetAccessToken()+"&tagid="+fmt.Sprint(id), tu)
 	return
 }
 
@@ -144,6 +142,16 @@ func (s *Server) GetTagName(id int) string {
 	return ""
 }
 
+// GetTagId 通过标签名称获取标签名称
+func (s *Server) GetTagId(name string) int {
+	for _, v := range s.TagList.Taglist {
+		if fmt.Sprint(v.TagId) == name || v.TagName == name {
+			return v.TagId
+		}
+	}
+	return 0
+}
+
 // GetToTag 获取acl所包含的所有标签ID，结果形式：tagId1|tagId2|tagId3...
 func (s *Server) GetToTag(acl interface{}) string {
 	s1 := strings.TrimSpace(acl.(string))
@@ -156,4 +164,25 @@ func (s *Server) GetToTag(acl interface{}) string {
 		}
 	}
 	return strings.Join(arr, "|")
+}
+
+// CheckTagrAcl 测试权限，对比user是否包含于acl
+func (s *Server) CheckTagAcl(userid, acl string) bool {
+	acl = strings.TrimSpace(acl)
+	if acl == "" {
+		return false
+	}
+	arr := strings.Split(toUserReplacer.Replace(acl), "|")
+	for _, idOrName := range arr {
+		tu, err := s.GetTagUsers(s.GetTagId(idOrName))
+		if err != nil {
+			continue
+		}
+		for _, u := range tu.UserList {
+			if u.UserId == userid {
+				return true
+			}
+		}
+	}
+	return false
 }

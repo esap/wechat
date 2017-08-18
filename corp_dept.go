@@ -16,9 +16,6 @@ const (
 	WXAPI_DeptDel    = WXAPI_ENT + `department/delete?access_token=%s&id=%d`
 )
 
-// DeptList 部门列表
-//var Depts DeptList
-
 type (
 	// DeptList 部门列表
 	DeptList struct {
@@ -50,9 +47,7 @@ func (s *Server) GetDeptList() (dl DeptList, err error) {
 	if err = util.GetJson(url, &dl); err != nil {
 		return
 	}
-	if dl.ErrCode != 0 {
-		err = fmt.Errorf("GetDeptList error : errcode=%v , errmsg=%v", dl.ErrCode, dl.ErrMsg)
-	}
+	err = dl.Error()
 	return
 }
 
@@ -106,4 +101,27 @@ func (s *Server) GetToParty(acl interface{}) string {
 		}
 	}
 	return strings.Join(arr, "|")
+}
+
+// CheckDeptAcl 测试权限，对比user是否包含于acl
+func (s *Server) CheckDeptAcl(userid, acl string) bool {
+	acl = strings.TrimSpace(acl)
+	if acl == "" {
+		return false
+	}
+	acl = "|" + toUserReplacer.Replace(acl) + "|"
+	u := s.GetUser(userid)
+	if u == nil {
+		return false
+	}
+	for _, dv := range u.Department {
+		if strings.Contains(acl, "|"+s.GetDeptName(dv)+"|") {
+			return true
+		}
+		if strings.Contains(acl, "|"+fmt.Sprint(dv)+"|") {
+			return true
+		}
+	}
+
+	return false
 }

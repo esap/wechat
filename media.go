@@ -21,7 +21,7 @@ type Media struct {
 	CreatedAt    interface{} `json:"created_at"` // 企业号是string,服务号是int,采用interface{}统一接收
 }
 
-// MediaUpload 临时素材上传，mediaType可选项：
+// MediaUpload 临时素材上传，mediaType选项如下：
 //	TypeImage  = "image"
 //	TypeVoice  = "voice"
 //	TypeVideo  = "video"
@@ -37,11 +37,11 @@ func (s *Server) MediaUpload(mediaType string, filename string) (media Media, er
 	if err = json.Unmarshal(b, &media); err != nil {
 		return
 	}
-	if media.ErrCode != 0 {
-		err = fmt.Errorf("MediaUpload error : errcode=%v , errmsg=%v", media.ErrCode, media.ErrMsg)
-	}
+	err = media.Error()
 	return
 }
+
+// MediaUpload 临时素材上传
 func MediaUpload(mediaType string, filename string) (media Media, err error) {
 	return std.MediaUpload(mediaType, filename)
 }

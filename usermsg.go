@@ -11,9 +11,9 @@ type (
 		ToUserName   string
 		FromUserName string
 		CreateTime   int64
-		MsgType      string
-		Content      string // text
 		MsgId        int64
+		MsgType      string
+		Content      string  // text
 		AgentID      int     // corp
 		PicUrl       string  // image
 		MediaId      string  // image/voice/video/shortvideo

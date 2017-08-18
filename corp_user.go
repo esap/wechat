@@ -32,9 +32,7 @@ func (s *Server) GetUserOauth(code string) (o UserOauth, err error) {
 	if err = util.GetJson(url, &o); err != nil {
 		return
 	}
-	if o.ErrCode != 0 {
-		err = fmt.Errorf("GetUserId error : errcode=%v , errmsg=%v", o.ErrCode, o.ErrMsg)
-	}
+	err = o.Error()
 	return
 }
 
@@ -91,9 +89,7 @@ func (s *Server) GetUserInfo(userId string) (user UserInfo, err error) {
 	if err = util.GetJson(url, &user); err != nil {
 		return
 	}
-	if user.ErrCode != 0 {
-		err = fmt.Errorf("GetUserInfo error : errcode=%v , errmsg=%v", user.ErrCode, user.ErrMsg)
-	}
+	err = user.Error()
 	return
 }
 
@@ -117,9 +113,6 @@ func (s *Server) GetUserName(userid string) string {
 	return ""
 }
 
-// Users 用户列表
-//var Users userList
-
 // UserList 用户列表
 type userList struct {
 	WxErr
@@ -141,9 +134,7 @@ func (s *Server) GetUserList() (u userList, err error) {
 	if err = util.GetJson(url, &u); err != nil {
 		return
 	}
-	if u.ErrCode != 0 {
-		err = fmt.Errorf("GetUserList error : errcode=%v , errmsg=%v", u.ErrCode, u.ErrMsg)
-	}
+	err = u.Error()
 	return
 }
 
@@ -158,11 +149,11 @@ func (s *Server) GetUserIdList() (userlist []string) {
 
 func (s *Server) doUpdate(uri string, i interface{}) (err error) {
 	url := uri + s.GetAccessToken()
-	wxerr := new(WxErr)
-	if err = util.PostJsonPtr(url, i, wxerr); err != nil {
+	e := new(WxErr)
+	if err = util.PostJsonPtr(url, i, e); err != nil {
 		return
 	}
-	return wxerr.Error()
+	return e.Error()
 }
 
 // GetGender 获取性别
@@ -204,26 +195,11 @@ func (s *Server) CheckUserAcl(userid, acl string) bool {
 	if strings.ToLower(acl) == "@all" {
 		return true
 	}
-	acl = "," + strings.Replace(acl, "，", ",", -1) + ","
+	acl = "|" + toUserReplacer.Replace(acl) + "|"
 	u := s.GetUser(userid)
 	if u == nil {
 		return false
 	}
-	for _, dv := range u.Department {
-		if strings.Contains(acl, ","+s.GetDeptName(dv)+",") {
-			return true
-		}
-		if strings.Contains(acl, ","+s.GetDeptName(dv)+"/"+u.Position+",") {
-			return true
-		}
-	}
-	for _, pv := range u.ExtAttr.Attrs {
-		if strings.Contains(acl, ","+pv.Value+",") {
-			return true
-		}
-	}
-	return strings.Contains(acl, ","+u.Name+",") ||
-		strings.Contains(acl, ","+u.UserId+",") ||
-		strings.Contains(acl, ","+u.Mobile+",") ||
-		strings.Contains(acl, ","+u.Position+",")
+
+	return strings.Contains(acl, "|"+u.Name+"|") || strings.Contains(acl, "|"+u.UserId+"|")
 }

@@ -10,12 +10,13 @@ import (
 
 // WXAPI 企业号用户列表接口
 const (
-	WXAPI_GetUser     = WXAPI_ENT + "user/getuserinfo?access_token=%s&code=%s"
-	WXAPI_GetUserInfo = WXAPI_ENT + "user/get?access_token=%s&userid=%s"
-	WXAPI_UserList    = WXAPI_ENT + `user/list?access_token=%s&department_id=1&fetch_child=1&status=0`
-	WXAPI_UserAdd     = WXAPI_ENT + `user/create?access_token=`
-	WXAPI_UserUpdate  = WXAPI_ENT + `user/update?access_token=`
-	WXAPI_UserDel     = WXAPI_ENT + `user/delete?access_token=`
+	WXAPI_GetUser        = WXAPI_ENT + "user/getuserinfo?access_token=%s&code=%s"
+	WXAPI_GetUserInfo    = WXAPI_ENT + "user/get?access_token=%s&userid=%s"
+	WXAPI_UserList       = WXAPI_ENT + `user/list?access_token=%s&department_id=1&fetch_child=1`
+	WXAPI_UserSimpleList = WXAPI_ENT + `user/simplelist?access_token=%s&department_id=1&fetch_child=1`
+	WXAPI_UserAdd        = WXAPI_ENT + `user/create?access_token=`
+	WXAPI_UserUpdate     = WXAPI_ENT + `user/update?access_token=`
+	WXAPI_UserDel        = WXAPI_ENT + `user/delete?access_token=`
 )
 
 // UserOauth 用户鉴权信息
@@ -113,7 +114,7 @@ func (s *Server) GetUserName(userid string) string {
 	return ""
 }
 
-// UserList 用户列表
+// userList 用户列表
 type userList struct {
 	WxErr
 	UserList []UserInfo
@@ -128,7 +129,7 @@ func (s *Server) SyncUserList() (err error) {
 	return
 }
 
-// GetUserList 获取用户列表
+// GetUserList 获取用户详情列表
 func (s *Server) GetUserList() (u userList, err error) {
 	url := fmt.Sprintf(WXAPI_UserList, s.GetAccessToken())
 	if err = util.GetJson(url, &u); err != nil {
@@ -138,10 +139,24 @@ func (s *Server) GetUserList() (u userList, err error) {
 	return
 }
 
-// GetUserNameList 获取用户列表
+// GetUserSimpleList 获取用户列表
+func (s *Server) GetUserSimpleList() (u userList, err error) {
+	url := fmt.Sprintf(WXAPI_UserSimpleList, s.GetAccessToken())
+	if err = util.GetJson(url, &u); err != nil {
+		return
+	}
+	err = u.Error()
+	return
+}
+
+// GetUserIdList 获取用户列表
 func (s *Server) GetUserIdList() (userlist []string) {
 	userlist = make([]string, 0)
-	for _, v := range s.UserList.UserList {
+	ul, err := s.GetUserSimpleList()
+	if err != nil {
+		return
+	}
+	for _, v := range ul.UserList {
 		userlist = append(userlist, v.UserId)
 	}
 	return

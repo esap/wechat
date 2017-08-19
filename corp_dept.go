@@ -13,7 +13,7 @@ const (
 	WXAPI_DeptList   = WXAPI_ENT + `department/list?access_token=%s&id=1`
 	WXAPI_DeptAdd    = WXAPI_ENT + `department/create?access_token=`
 	WXAPI_DeptUpdate = WXAPI_ENT + `department/update?access_token=`
-	WXAPI_DeptDel    = WXAPI_ENT + `department/delete?access_token=%s&id=%d`
+	WXAPI_DeptDel    = WXAPI_ENT + `department/delete?access_token=`
 )
 
 type (

@@ -16,7 +16,7 @@ const (
 	WXAPI_DelTagUsers = WXAPI_ENT + `tag/deltagusers?access_token=`
 	WXAPI_TagAdd      = WXAPI_ENT + `tag/create?access_token=`
 	WXAPI_TagUpdate   = WXAPI_ENT + `tag/update?access_token=`
-	WXAPI_TagDel      = WXAPI_ENT + `tag/delete?access_token=%s&id=%d`
+	WXAPI_TagDel      = WXAPI_ENT + `tag/delete?access_token=`
 )
 
 type (

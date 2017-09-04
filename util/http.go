@@ -18,6 +18,7 @@ func GetJson(uri string, v interface{}) error {
 	if err != nil {
 		return err
 	}
+	defer r.Body.Close()
 	return json.NewDecoder(r.Body).Decode(v)
 }
 
@@ -27,6 +28,7 @@ func GetXml(uri string, v interface{}) error {
 	if err != nil {
 		return err
 	}
+	defer r.Body.Close()
 	return xml.NewDecoder(r.Body).Decode(v)
 }
 

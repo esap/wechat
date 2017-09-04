@@ -105,6 +105,7 @@ func (s *Server) TagDelete(TagId int) (err error) {
 
 // GetTagUsers 获取标签下的成员
 func (s *Server) GetTagUsers(id int) (tu *TagUsers, err error) {
+	tu = new(TagUsers)
 	err = util.GetJson(WXAPI_TagUsers+s.GetAccessToken()+"&tagid="+fmt.Sprint(id), tu)
 	return
 }

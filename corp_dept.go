@@ -109,16 +109,16 @@ func (s *Server) CheckDeptAcl(userid, acl string) bool {
 	if acl == "" {
 		return false
 	}
-	acl = "|" + toUserReplacer.Replace(acl) + "|"
 	u := s.GetUser(userid)
 	if u == nil {
 		return false
 	}
-	for _, dv := range u.Department {
-		if strings.Contains(acl, "|"+s.GetDeptName(dv)+"|") {
+	acl = "|" + toUserReplacer.Replace(acl) + "|"
+	for _, id := range u.Department {
+		if strings.Contains(acl, "|"+s.GetDeptName(id)+"|") {
 			return true
 		}
-		if strings.Contains(acl, "|"+fmt.Sprint(dv)+"|") {
+		if strings.Contains(acl, "|"+fmt.Sprint(id)+"|") {
 			return true
 		}
 	}

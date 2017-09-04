@@ -81,6 +81,16 @@ func SetLog(l io.Writer) {
 	log.SetOutput(l)
 }
 
+//SafeOpen 设置密保模式
+func (s *Server) SafeOpen() {
+	s.Safe = 1
+}
+
+//SafeOpen 设置密保模式
+func (s *Server) SafeClose() {
+	s.Safe = 0
+}
+
 // Set 设置token,appId,secret
 func (s *Server) Set(tk, id, sec string, key ...string) (err error) {
 	s.Token, s.AppId, s.Secret = tk, id, sec

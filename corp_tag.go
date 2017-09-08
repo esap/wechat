@@ -67,6 +67,7 @@ func (s *Server) SyncTagList() (err error) {
 
 // GetTagList 获取标签列表
 func (s *Server) GetTagList() (l TagList, err error) {
+	l = TagList{}
 	url := WXAPI_TagList + s.GetAccessToken()
 	if err = util.GetJson(url, &l); err != nil {
 		return

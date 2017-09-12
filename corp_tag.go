@@ -60,7 +60,7 @@ type (
 func (s *Server) SyncTagList() (err error) {
 	s.TagList, err = s.GetTagList()
 	if err != nil {
-		log.Println("获取标签列表失败:", err)
+		log.Printf("[%v::%v]获取标签列表失败:%v", s.AppId, s.AgentId, err)
 	}
 	return
 }

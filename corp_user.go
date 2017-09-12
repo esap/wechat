@@ -124,7 +124,7 @@ type userList struct {
 func (s *Server) SyncUserList() (err error) {
 	s.UserList, err = s.GetUserList()
 	if err != nil {
-		log.Println("同步通讯录失败:", err)
+		log.Printf("[%v::%v]获取用户列表失败:%v", s.AppId, s.AgentId, err)
 	}
 	return
 }

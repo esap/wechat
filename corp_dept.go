@@ -36,7 +36,7 @@ type (
 func (s *Server) SyncDeptList() (err error) {
 	s.DeptList, err = s.GetDeptList()
 	if err != nil {
-		log.Println("获取部门列表失败:", err)
+		log.Printf("[%v::%v]获取部门列表失败:%v", s.AppId, s.AgentId, err)
 	}
 	return
 }

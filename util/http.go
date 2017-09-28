@@ -46,6 +46,19 @@ func GetBody(uri string) ([]byte, error) {
 	return ioutil.ReadAll(resp.Body)
 }
 
+// GetRawBody 发送GET请求，返回body字节
+func GetRawBody(uri string) (io.ReadCloser, error) {
+	resp, err := http.Get(uri)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("http get err: uri=%v , statusCode=%v", uri, resp.StatusCode)
+	}
+	return resp.Body, nil
+}
+
 //PostJson 发送Json格式的POST请求
 func PostJson(uri string, obj interface{}) ([]byte, error) {
 	buf := new(bytes.Buffer)

@@ -3,6 +3,7 @@ package wechat
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 
 	"github.com/esap/wechat/util"
 )
@@ -61,6 +62,12 @@ func GetMedia(filename, mediaId string) error {
 func (s *Server) GetMediaBytes(mediaId string) ([]byte, error) {
 	url := fmt.Sprintf(s.RootUrl+WXAPI_GETMEDIA, s.GetAccessToken(), mediaId)
 	return util.GetBody(url)
+}
+
+// GetMediaBytes 下载媒体
+func (s *Server) GetBody(mediaId string) (io.ReadCloser, error) {
+	url := fmt.Sprintf(s.RootUrl+WXAPI_GETMEDIA, s.GetAccessToken(), mediaId)
+	return util.GetRawBody(url)
 }
 
 // GetMediaBytes 下载媒体

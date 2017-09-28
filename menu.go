@@ -29,6 +29,21 @@ type (
 				Url  string `json:"url"`
 			} `json:"sub_button"`
 		} `json:"button"`
+
+		Menu struct {
+			Button []struct {
+				Name      string `json:"name"`
+				Type      string `json:"type"`
+				Key       string `json:"key"`
+				Url       string `json:"url"`
+				SubButton []struct {
+					Name string `json:"name"`
+					Type string `json:"type"`
+					Key  string `json:"key"`
+					Url  string `json:"url"`
+				} `json:"sub_button"`
+			} `json:"button"`
+		} `json:"menu,omitempty"`
 	}
 )
 

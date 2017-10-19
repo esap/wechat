@@ -55,7 +55,7 @@ type UserInfo struct {
 	Email      string `json:"email,omitempty"`
 	Telephone  string `json:"telephone,omitempty"`
 	WeixinId   string `json:"-"`
-	Avatar     string `json:"avatar_mediaid,omitempty"`
+	Avatar     string `json:"avatar,omitempty"`
 	Status     int    `json:"-"`
 	ExtAttr    struct {
 		Attrs []struct {

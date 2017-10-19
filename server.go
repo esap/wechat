@@ -102,8 +102,11 @@ func (s *Server) Set(tk, id, sec string, key ...string) (err error) {
 		}
 		Println("启用加密模式")
 	}
-	if err := s.getAccessToken(); err != nil {
+	if err = s.getAccessToken(); err != nil {
 		Println("公众号获取AccessToken出错:", err)
+	} else {
+		b, err := s.BatchGetAll()
+		Println("公众号用户:", b, err)
 	}
 	return nil
 }

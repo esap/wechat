@@ -2,6 +2,8 @@ package wechat
 
 import (
 	"encoding/json"
+	"fmt"
+	"unicode/utf8"
 
 	"github.com/esap/wechat/util"
 )
@@ -40,9 +42,39 @@ func (s *Server) SendMsg(v interface{}) *WxErr {
 	return rst
 }
 
-// SendText 发送客服text消息
-func (s *Server) SendText(to string, id int, msg ...string) *WxErr {
-	return s.SendMsg(NewText(to, id, msg...))
+// SendText 发送客服text消息,过长时自动拆分
+func (s *Server) SendText(to string, agentId int, msg string, safe ...int) (e *WxErr) {
+	if len(safe) > 0 && safe[0] == 1 {
+		s.SafeOpen()
+		defer s.SafeClose()
+	}
+	//	m := strings.Join(msg, "")
+	leng := utf8.RuneCountInString(msg)
+	n := leng/500 + 1
+
+	if n == 1 {
+		return s.SendMsg(NewText(to, agentId, msg))
+	} else {
+		for i := 0; i < n; i++ {
+			e = s.SendMsg(NewText(to, agentId, fmt.Sprintf("%s\n(%v/%v)", Substr(msg, i*500, (i+1)*500), i+1, n)))
+		}
+	}
+	return
+}
+
+// Substr 截取字符串 start 起点下标 end 终点下标(不包括)
+func Substr(str string, start int, end int) string {
+	rs := []rune(str)
+	length := len(rs)
+
+	if start < 0 || start > length || end < 0 {
+		return ""
+	}
+
+	if end > length {
+		return string(rs[start:])
+	}
+	return string(rs[start:end])
 }
 
 // SendImage 发送客服Image消息
@@ -96,8 +128,8 @@ func SendMsg(v interface{}) *WxErr {
 }
 
 // SendText 发送客服text消息
-func SendText(to string, id int, msg ...string) *WxErr {
-	return std.SendText(to, id, msg...)
+func SendText(to string, id int, msg string, safe ...int) *WxErr {
+	return std.SendText(to, id, msg, safe...)
 }
 
 // SendImage 发送客服Image消息

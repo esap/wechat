@@ -10,6 +10,7 @@ const (
 	WXAPI_ENT       = "https://qyapi.weixin.qq.com/cgi-bin/"
 	WXAPI_TOKEN_ENT = WXAPI_ENT + "gettoken?corpid=%s&corpsecret=%s"
 	WXAPI_MSG_ENT   = WXAPI_ENT + "message/send?access_token="
+	WXAPI_JSAPI_ENT = WXAPI_ENT + "get_jsapi_ticket?access_token="
 )
 
 // SetEnt 初始化企业号，设置token,corpid,secrat,aesKey
@@ -21,6 +22,7 @@ func (s *Server) SetEnt(token, appId, secret, aeskey string, agentId ...int) (er
 	s.RootUrl = WXAPI_ENT
 	s.MsgUrl = WXAPI_MSG_ENT
 	s.TokenUrl = WXAPI_TOKEN_ENT
+	s.JsApi = WXAPI_JSAPI_ENT
 	if aeskey != "" {
 		s.AesKey, err = base64.StdEncoding.DecodeString(aeskey + "=")
 		if err != nil {

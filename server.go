@@ -25,6 +25,7 @@ const (
 	WXAPI       = "https://api.weixin.qq.com/cgi-bin/"
 	WXAPI_TOKEN = WXAPI + "token?grant_type=client_credential&appid=%s&secret=%s"
 	WXAPI_MSG   = WXAPI + "message/custom/send?access_token="
+	WXAPI_JSAPI = WXAPI + "get_jsapi_ticket?access_token="
 )
 
 var (
@@ -46,8 +47,10 @@ type Server struct {
 	RootUrl        string
 	MsgUrl         string
 	TokenUrl       string
+	JsApi          string
 	Safe           int
 	accessToken    *AccessToken
+	ticket         *Ticket
 	UserList       userList
 	DeptList       DeptList
 	TagList        TagList
@@ -71,6 +74,7 @@ func NewServer() *Server {
 		RootUrl:  WXAPI,
 		MsgUrl:   WXAPI_MSG,
 		TokenUrl: WXAPI_TOKEN,
+		JsApi:    WXAPI_JSAPI,
 	}
 	s.init()
 	return s

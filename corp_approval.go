@@ -35,6 +35,9 @@ type (
 			NotifyName   []string `json:"notify_name"`   // 抄送人姓名
 			SpStatus     int64    `json:"sp_status"`     // 审批状态：1审批中；2 已通过；3已驳回；4已取消
 			SpNum        int64    `json:"sp_num"`        // 审批单号
+			Mediaids     []string `json:"mediaids"`      // 审批媒体
+			ApplyTime    int64    `json:"apply_time"`    // 申请时间
+			ApplyUserId  string   `json:"apply_user_id"` // 申请人
 
 			Leave struct {
 				Timeunit  int64  `json:"timeunit"`   // 请假时间单位：0半天；1小时

@@ -30,8 +30,9 @@ const (
 
 var (
 	// Debug is a flag to Println()
-	Debug bool = false
-	std        = NewServer()
+	Debug         bool = false
+	std                = NewServer()
+	UserServerMap      = make(map[string]*Server)
 )
 
 // Server 微信服务容器
@@ -62,6 +63,9 @@ func New(token, appid, secret, key string, agentId ...int) (s *Server) {
 	s = NewServer()
 	if len(agentId) > 0 {
 		s.SetEnt(token, appid, secret, key, agentId[0])
+		if agentId[0] == 9999999 {
+			UserServerMap[appid] = s
+		}
 	} else {
 		s.Set(token, appid, secret, key)
 	}

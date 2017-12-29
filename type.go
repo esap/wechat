@@ -59,6 +59,7 @@ type wxResp struct {
 	Safe         int      `xml:"-" json:"safe"`
 }
 
+// to字段格式："userid1|userid2 deptid1|deptid2 tagid1|tagid2"
 func (s *Server) newWxResp(msgType, to string, agentId int) (r wxResp) {
 	toArr := strings.Split(to, " ")
 	r = wxResp{
@@ -66,10 +67,10 @@ func (s *Server) newWxResp(msgType, to string, agentId int) (r wxResp) {
 		MsgType:    CDATA(msgType),
 		AgentId:    agentId,
 		Safe:       s.Safe}
-	if len(toArr) > 2 {
+	if len(toArr) > 1 {
 		r.ToParty = CDATA(toArr[1])
 	}
-	if len(toArr) > 3 {
+	if len(toArr) > 2 {
 		r.ToTag = CDATA(toArr[2])
 	}
 	return

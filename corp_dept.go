@@ -10,7 +10,7 @@ import (
 
 // WXAPI 企业号部门列表接口
 const (
-	WXAPI_DeptList   = WXAPI_ENT + `department/list?access_token=%s&id=1`
+	WXAPI_DeptList   = WXAPI_ENT + `department/list?access_token=%s`
 	WXAPI_DeptAdd    = WXAPI_ENT + `department/create?access_token=`
 	WXAPI_DeptUpdate = WXAPI_ENT + `department/update?access_token=`
 	WXAPI_DeptDel    = WXAPI_ENT + `department/delete?access_token=`
@@ -43,7 +43,7 @@ func (s *Server) SyncDeptList() (err error) {
 
 // GetDeptList 获取部门列表
 func (s *Server) GetDeptList() (dl DeptList, err error) {
-	url := fmt.Sprintf(WXAPI_DeptList, s.GetAccessToken())
+	url := fmt.Sprintf(WXAPI_DeptList, s.GetUserAccessToken())
 	if err = util.GetJson(url, &dl); err != nil {
 		return
 	}
@@ -54,6 +54,7 @@ func (s *Server) GetDeptList() (dl DeptList, err error) {
 // GetDeptIdList 获取部门id列表
 func (s *Server) GetDeptIdList() (deptIdlist []int) {
 	deptIdlist = make([]int, 0)
+	s.SyncDeptList()
 	for _, v := range s.DeptList.Department {
 		deptIdlist = append(deptIdlist, v.Id)
 	}
@@ -73,7 +74,7 @@ func (s *Server) DeptUpdate(dept *Department) (err error) {
 // DeptDelete 删除部门
 func (s *Server) DeptDelete(Id int) (err error) {
 	e := new(WxErr)
-	if err = util.GetJson(WXAPI_DeptDel+s.GetAccessToken()+"&id="+fmt.Sprint(Id), e); err != nil {
+	if err = util.GetJson(WXAPI_DeptDel+s.GetUserAccessToken()+"&id="+fmt.Sprint(Id), e); err != nil {
 		return
 	}
 	return e.Error()

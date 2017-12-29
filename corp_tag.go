@@ -68,7 +68,7 @@ func (s *Server) SyncTagList() (err error) {
 // GetTagList 获取标签列表
 func (s *Server) GetTagList() (l TagList, err error) {
 	l = TagList{}
-	url := WXAPI_TagList + s.GetAccessToken()
+	url := WXAPI_TagList + s.GetUserAccessToken()
 	if err = util.GetJson(url, &l); err != nil {
 		return
 	}
@@ -98,7 +98,7 @@ func (s *Server) TagUpdate(Tag *Tag) (err error) {
 // TagDelete 删除用户
 func (s *Server) TagDelete(TagId int) (err error) {
 	e := new(WxErr)
-	if err = util.GetJson(WXAPI_TagDel+s.GetAccessToken()+"&tagid="+fmt.Sprint(TagId), e); err != nil {
+	if err = util.GetJson(WXAPI_TagDel+s.GetUserAccessToken()+"&tagid="+fmt.Sprint(TagId), e); err != nil {
 		return
 	}
 	return e.Error()
@@ -107,7 +107,7 @@ func (s *Server) TagDelete(TagId int) (err error) {
 // GetTagUsers 获取标签下的成员
 func (s *Server) GetTagUsers(id int) (tu *TagUsers, err error) {
 	tu = new(TagUsers)
-	err = util.GetJson(WXAPI_TagUsers+s.GetAccessToken()+"&tagid="+fmt.Sprint(id), tu)
+	err = util.GetJson(WXAPI_TagUsers+s.GetUserAccessToken()+"&tagid="+fmt.Sprint(id), tu)
 	return
 }
 
@@ -121,7 +121,7 @@ func (s *Server) AddTagUsers(id int, userlist []string, partylist []int) error {
 			end = leng
 		}
 		b := TagUserBody{TagId: id, UserList: userlist[i*1000 : end], PartyList: partylist}
-		url := WXAPI_AddTagUsers + s.GetAccessToken()
+		url := WXAPI_AddTagUsers + s.GetUserAccessToken()
 		if err := util.PostJsonPtr(url, b, e); err != nil {
 			return err
 		}

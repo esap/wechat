@@ -34,6 +34,14 @@ func (s *Server) GetAccessToken() string {
 	return s.accessToken.AccessToken
 }
 
+// GetUserAccessToken 获取通讯录AccessToken
+func (s *Server) GetUserAccessToken() string {
+	if us, ok := UserServerMap[s.AppId]; ok {
+		return us.GetAccessToken()
+	}
+	return s.GetAccessToken()
+}
+
 func (s *Server) getAccessToken() (err error) {
 	url := fmt.Sprintf(s.TokenUrl, s.AppId, s.Secret)
 	at := new(AccessToken)

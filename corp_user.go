@@ -78,7 +78,7 @@ func (s *Server) UserUpdate(user *UserInfo) (err error) {
 // UserDelete 删除用户
 func (s *Server) UserDelete(user string) (err error) {
 	e := new(WxErr)
-	if err = util.GetJson(WXAPI_UserDel+s.GetAccessToken()+"&userid="+user, e); err != nil {
+	if err = util.GetJson(WXAPI_UserDel+s.GetUserAccessToken()+"&userid="+user, e); err != nil {
 		return
 	}
 	return e.Error()
@@ -86,7 +86,7 @@ func (s *Server) UserDelete(user string) (err error) {
 
 // GetUserInfo 通过userId获取用户信息
 func (s *Server) GetUserInfo(userId string) (user UserInfo, err error) {
-	url := fmt.Sprintf(WXAPI_GetUserInfo, s.GetAccessToken(), userId)
+	url := fmt.Sprintf(WXAPI_GetUserInfo, s.GetUserAccessToken(), userId)
 	if err = util.GetJson(url, &user); err != nil {
 		return
 	}
@@ -131,7 +131,7 @@ func (s *Server) SyncUserList() (err error) {
 
 // GetUserList 获取用户详情列表
 func (s *Server) GetUserList() (u userList, err error) {
-	url := fmt.Sprintf(WXAPI_UserList, s.GetAccessToken())
+	url := fmt.Sprintf(WXAPI_UserList, s.GetUserAccessToken())
 	if err = util.GetJson(url, &u); err != nil {
 		return
 	}
@@ -141,7 +141,7 @@ func (s *Server) GetUserList() (u userList, err error) {
 
 // GetUserSimpleList 获取用户列表
 func (s *Server) GetUserSimpleList() (u userList, err error) {
-	url := fmt.Sprintf(WXAPI_UserSimpleList, s.GetAccessToken())
+	url := fmt.Sprintf(WXAPI_UserSimpleList, s.GetUserAccessToken())
 	if err = util.GetJson(url, &u); err != nil {
 		return
 	}
@@ -163,7 +163,7 @@ func (s *Server) GetUserIdList() (userlist []string) {
 }
 
 func (s *Server) doUpdate(uri string, i interface{}) (err error) {
-	url := uri + s.GetAccessToken()
+	url := uri + s.GetUserAccessToken()
 	e := new(WxErr)
 	if err = util.PostJsonPtr(url, i, e); err != nil {
 		return

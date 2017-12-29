@@ -43,7 +43,7 @@ func (s *Server) SyncDeptList() (err error) {
 
 // GetDeptList 获取部门列表
 func (s *Server) GetDeptList() (dl DeptList, err error) {
-	url := fmt.Sprintf(WXAPI_DeptList, s.GetAccessToken())
+	url := fmt.Sprintf(WXAPI_DeptList, s.GetUserAccessToken())
 	if err = util.GetJson(url, &dl); err != nil {
 		return
 	}
@@ -73,7 +73,7 @@ func (s *Server) DeptUpdate(dept *Department) (err error) {
 // DeptDelete 删除部门
 func (s *Server) DeptDelete(Id int) (err error) {
 	e := new(WxErr)
-	if err = util.GetJson(WXAPI_DeptDel+s.GetAccessToken()+"&id="+fmt.Sprint(Id), e); err != nil {
+	if err = util.GetJson(WXAPI_DeptDel+s.GetUserAccessToken()+"&id="+fmt.Sprint(Id), e); err != nil {
 		return
 	}
 	return e.Error()

@@ -44,7 +44,7 @@ func (s *Server) FetchUserList() {
 	go func() {
 		for {
 			if s.SyncDeptList() == nil {
-				if s.SyncUserList() != nil && i < 3 {
+				if s.SyncUserList() != nil && i < 2 {
 					i++
 					Println("尝试再次获取用户列表(", i, ")")
 					continue

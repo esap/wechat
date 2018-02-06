@@ -44,25 +44,30 @@ func GetUserOauth(code string) (userOauth UserOauth, err error) {
 
 // UserInfo 用户信息
 type UserInfo struct {
-	WxErr      `json:"-"`
-	UserId     string `json:"userid"`
-	Name       string `json:"name"`
-	Department []int  `json:"department"`
-	Dept       int    `json:"dept"`
-	Position   string `json:"position,omitempty"`
-	Mobile     string `json:"mobile"`
-	Gender     string `json:"gender,omitempty"`
-	Email      string `json:"email,omitempty"`
-	Telephone  string `json:"telephone,omitempty"`
-	WeixinId   string `json:"-"`
-	Avatar     string `json:"avatar,omitempty"`
-	Status     int    `json:"-"`
-	ExtAttr    struct {
-		Attrs []struct {
-			Name  string
-			Value string
-		}
+	WxErr       `json:"-"`
+	UserId      string `json:"userid"`
+	Name        string `json:"name"`
+	Department  []int  `json:"department"`
+	Dept        int    `json:"dept"`
+	DeptName    string `json:"deptname"`
+	Position    string `json:"position,omitempty"`
+	Mobile      string `json:"mobile"`
+	Gender      string `json:"gender,omitempty"`
+	Email       string `json:"email,omitempty"`
+	IsLeader    int    `json:"isleader,omitempty"`
+	Telephone   string `json:"telephone,omitempty"`
+	EnglishName string `json:"english_name,omitempty"`
+	WeixinId    string `json:"-"`
+	Avatar      string `json:"avatar,omitempty"`
+	Status      int    `json:"-"`
+	ExtAttr     struct {
+		Attrs []Extattr
 	} `json:"-"`
+}
+
+type Extattr struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
 }
 
 // UserAdd 添加用户
@@ -84,7 +89,7 @@ func (s *Server) UserDelete(user string) (err error) {
 	return e.Error()
 }
 
-// GetUserInfo 通过userId获取用户信息
+// GetUserInfo 从企业号通过userId获取用户信息
 func (s *Server) GetUserInfo(userId string) (user UserInfo, err error) {
 	url := fmt.Sprintf(WXAPI_GetUserInfo, s.GetUserAccessToken(), userId)
 	if err = util.GetJson(url, &user); err != nil {
@@ -94,10 +99,11 @@ func (s *Server) GetUserInfo(userId string) (user UserInfo, err error) {
 	return
 }
 
-// GetUser 通过账号获取用户信息
+// GetUser 从缓存获取用户信息
 func (s *Server) GetUser(userid string) *UserInfo {
 	for _, v := range s.UserList.UserList {
 		if v.UserId == userid {
+			v.DeptName = s.GetDeptName(v.Department[0])
 			return &v
 		}
 	}

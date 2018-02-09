@@ -14,35 +14,26 @@ const (
 )
 
 type (
+	// 按钮
+	Button struct {
+		Name      string `json:"name"`
+		Type      string `json:"type"`
+		Key       string `json:"key"`
+		Url       string `json:"url"`
+		SubButton []struct {
+			Name string `json:"name"`
+			Type string `json:"type"`
+			Key  string `json:"key"`
+			Url  string `json:"url"`
+		} `json:"sub_button"`
+	}
 	// Menu 菜单
 	Menu struct {
 		WxErr
-		Button []struct {
-			Name      string `json:"name"`
-			Type      string `json:"type"`
-			Key       string `json:"key"`
-			Url       string `json:"url"`
-			SubButton []struct {
-				Name string `json:"name"`
-				Type string `json:"type"`
-				Key  string `json:"key"`
-				Url  string `json:"url"`
-			} `json:"sub_button"`
-		} `json:"button"`
+		Button []Button `json:"button"`
 
 		Menu struct {
-			Button []struct {
-				Name      string `json:"name"`
-				Type      string `json:"type"`
-				Key       string `json:"key"`
-				Url       string `json:"url"`
-				SubButton []struct {
-					Name string `json:"name"`
-					Type string `json:"type"`
-					Key  string `json:"key"`
-					Url  string `json:"url"`
-				} `json:"sub_button"`
-			} `json:"button"`
+			Button []Button `json:"button"`
 		} `json:"menu,omitempty"`
 	}
 )
@@ -53,6 +44,9 @@ func (s *Server) GetMenu() (m *Menu, err error) {
 	url := fmt.Sprintf(s.RootUrl+WXAPI_GetMenu, s.GetAccessToken(), s.AgentId)
 	if err = util.GetJson(url, m); err != nil {
 		return
+	}
+	if len(m.Menu.Button) == 0 && len(m.Button) > 0 {
+		m.Menu.Button = m.Button
 	}
 	err = m.Error()
 	return

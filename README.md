@@ -30,21 +30,33 @@ func WxHandler(w http.ResponseWriter, r *http.Request) {
 
 ```
 ## 配置方式
-
+* 使用默认实例
 ```go
 	// 不带aesKey则为明文模式
-	wechat.Set("token", "appId", "secrect")
+	wechat.Set("token", "appId", "secret")
 
 	// 带aesKey则为密文模式
-	wechat.Set("token", "appId", "secrect", "aesKey")
+	wechat.Set("token", "appId", "secret", "aesKey")
 
 	// 企业号自动配置为密文模式
-	wechat.SetEnt("token", "appId", "secrect", "aesKey")
+	wechat.SetEnt("token", "appId", "secret", "aesKey", "agentId")
+```
+
+* 创建其他实例，密文模式
+```go
+	// 创建公众号实例(服务号/订阅号/小程序)
+	app := wechat.New("token", "appId", "secret", "aesKey")
+
+	// 创建企业号实例
+	app := wechat.New("token", "appId", "secret", "aesKey", "agentId")
+
+	// 实例化后其他操作
+	app.VerifyURL(w, r).NewText("这是客服消息").Send().NewText("这是被动回复").Reply()
 ```
 
 ## 消息管理
 
-通常将`wechat.VerifyURL(http.ResponseWriter, *http.Request)`嵌入http handler
+* 通常将`wechat.VerifyURL(http.ResponseWriter, *http.Request)`嵌入http handler
 
 该函数返回`*wechat.Context`基本对象，其中的Msg为用户消息：
 

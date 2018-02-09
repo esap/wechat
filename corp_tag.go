@@ -48,7 +48,7 @@ type (
 		PartyList []int    `json:"partylist"`
 	}
 
-	// TagErr
+	// TagErr 标签获取错误
 	TagErr struct {
 		WxErr
 		InvalidList  string
@@ -168,7 +168,7 @@ func (s *Server) GetToTag(acl interface{}) string {
 	return strings.Join(arr, "|")
 }
 
-// CheckTagrAcl 测试权限，对比user是否包含于acl
+// CheckTagAcl 测试权限，对比user是否包含于acl
 func (s *Server) CheckTagAcl(userid, acl string) bool {
 	acl = strings.TrimSpace(acl)
 	if acl == "" {

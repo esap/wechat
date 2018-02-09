@@ -294,7 +294,7 @@ type (
 		} `json:"mpnews"`
 	}
 
-	// MpNews2 加密新闻消息(通过mediaId直接发)
+	// MpNewsId 加密新闻消息(通过mediaId直接发)
 	MpNewsId struct {
 		wxResp
 		MpNews struct {
@@ -310,7 +310,7 @@ func (s *Server) NewMpNews(to string, id int, arts ...MpArticle) (news MpNews) {
 	return
 }
 
-// NewMpNews 加密新闻mpnews消息(仅企业号可用)
+// NewMpNewsId 加密新闻mpnews消息(仅企业号可用)
 func (s *Server) NewMpNewsId(to string, id int, mediaId string) (news MpNewsId) {
 	news.wxResp = s.newWxResp(TypeMpNews, to, id)
 	news.MpNews.MediaId = CDATA(mediaId)
@@ -322,7 +322,7 @@ func NewMpNews(to string, id int, arts ...MpArticle) (news MpNews) {
 	return std.NewMpNews(to, id, arts...)
 }
 
-// NewMpNews 加密新闻mpnews消息(仅企业号可用)
+// NewMpNewsId 加密新闻mpnews消息(仅企业号可用)
 func NewMpNewsId(to string, id int, mediaId string) (news MpNewsId) {
 	return std.NewMpNewsId(to, id, mediaId)
 }

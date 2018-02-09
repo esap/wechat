@@ -62,7 +62,7 @@ type (
 			Comm struct {
 				Data string `json:"apply_data"` // 自定义审批申请的单据数据
 			} `json:"comm"` // 自定义类型
-		} `json:"data""`
+		} `json:"data"`
 	}
 
 	// ApplyField 自定义字段

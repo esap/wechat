@@ -54,11 +54,11 @@ func (s *Server) SendText(to string, agentId int, msg string, safe ...int) (e *W
 
 	if n == 1 {
 		return s.SendMsg(s.NewText(to, agentId, msg))
-	} else {
-		for i := 0; i < n; i++ {
-			e = s.SendMsg(s.NewText(to, agentId, fmt.Sprintf("%s\n(%v/%v)", Substr(msg, i*500, (i+1)*500), i+1, n)))
-		}
 	}
+	for i := 0; i < n; i++ {
+		e = s.SendMsg(s.NewText(to, agentId, fmt.Sprintf("%s\n(%v/%v)", Substr(msg, i*500, (i+1)*500), i+1, n)))
+	}
+
 	return
 }
 
@@ -172,7 +172,7 @@ func SendMpNews(to string, id int, arts ...MpArticle) *WxErr {
 	return std.SendMpNews(to, id, arts...)
 }
 
-// SendMpNews2 发送加密新闻mpnews消息(直接使用mediaId)
+// SendMpNewsId 发送加密新闻mpnews消息(直接使用mediaId)
 func SendMpNewsId(to string, id int, mediaId string) *WxErr {
 	return std.SendMpNewsId(to, id, mediaId)
 }

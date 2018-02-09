@@ -13,12 +13,13 @@ const (
 )
 
 type (
+	// MpUserInfoList 公众号用户信息列表
 	MpUserInfoList struct {
 		WxErr
 		MpUserInfoList []MpUserInfo `json:"user_info_list"`
 	}
 
-	//MpUserInfo
+	// MpUserInfo 公众号用户信息
 	MpUserInfo struct {
 		Subscribe     int
 		OpenId        string
@@ -36,7 +37,7 @@ type (
 		TagIdList     []int `json:"tagid_list"`
 	}
 
-	// MpUser
+	// MpUser 公众号用户
 	MpUser struct {
 		WxErr
 		Total int
@@ -47,11 +48,13 @@ type (
 		NextOpenId string
 	}
 
+	// MpUserListReq 公众号用户请求
 	MpUserListReq struct {
 		UserList interface{} `json:"user_list"`
 	}
 )
 
+// BatchGetAll 获取所有公众号用户
 func (s *Server) BatchGetAll() (ui []MpUserInfo, err error) {
 	var ul []string
 	ul, err = s.GetAllMpUserList()
@@ -78,6 +81,7 @@ func (s *Server) BatchGetAll() (ui []MpUserInfo, err error) {
 	return
 }
 
+// BatchGet 批量获取公众号用户信息
 func (s *Server) BatchGet(ul []string) (ui []MpUserInfo, err error) {
 	m := make([]map[string]interface{}, len(ul))
 
@@ -90,7 +94,7 @@ func (s *Server) BatchGet(ul []string) (ui []MpUserInfo, err error) {
 	return ml.MpUserInfoList, ml.Error()
 }
 
-// GetAllMpUserList
+// GetAllMpUserList 获取所有用户ID
 func (s *Server) GetAllMpUserList() (ul []string, err error) {
 	ul = make([]string, 0)
 	mul, err := s.GetMpUserList()
@@ -112,7 +116,7 @@ func (s *Server) GetAllMpUserList() (ul []string, err error) {
 	return
 }
 
-// GetMpUserList
+// GetMpUserList 获取用户信息，根据openid
 func (s *Server) GetMpUserList(openid ...string) (ul *MpUser, err error) {
 	if len(openid) == 0 {
 		openid = append(openid, "")

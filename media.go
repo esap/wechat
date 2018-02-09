@@ -9,8 +9,12 @@ import (
 )
 
 const (
-	WXAPI_UPLOAD   = "media/upload?access_token=%s&type=%s"
+	// WXAPI_UPLOAD 临时素材上传
+	WXAPI_UPLOAD = "media/upload?access_token=%s&type=%s"
+	// WXAPI_GETMEDIA 临时素材下载
 	WXAPI_GETMEDIA = "media/get?access_token=%s&media_id=%s"
+	// WXAPI_GetJssdkMedia 高清语言素材下载
+	WXAPI_GetJssdkMedia = "media/get/jssdk?access_token=%s&media_id=%s"
 )
 
 // Media 上传回复体
@@ -47,30 +51,58 @@ func MediaUpload(mediaType string, filename string) (media Media, err error) {
 	return std.MediaUpload(mediaType, filename)
 }
 
-// GetMedia 下载媒体
+// GetMedia 下载临时素材
 func (s *Server) GetMedia(filename, mediaId string) error {
 	url := fmt.Sprintf(s.RootUrl+WXAPI_GETMEDIA, s.GetAccessToken(), mediaId)
 	return util.GetFile(filename, url)
 }
 
-// GetMedia 下载媒体
+// GetMedia 下载临时素材
 func GetMedia(filename, mediaId string) error {
 	return std.GetMedia(filename, mediaId)
 }
 
-// GetMediaBytes 下载媒体
+// GetMediaBytes 下载临时素材,返回body字节
 func (s *Server) GetMediaBytes(mediaId string) ([]byte, error) {
 	url := fmt.Sprintf(s.RootUrl+WXAPI_GETMEDIA, s.GetAccessToken(), mediaId)
 	return util.GetBody(url)
 }
 
-// GetMediaBytes 下载媒体
+// GetBody 下载媒体,返回io.Reader
 func (s *Server) GetBody(mediaId string) (io.ReadCloser, error) {
 	url := fmt.Sprintf(s.RootUrl+WXAPI_GETMEDIA, s.GetAccessToken(), mediaId)
 	return util.GetRawBody(url)
 }
 
-// GetMediaBytes 下载媒体
+// GetMediaBytes 下载媒体,返回body字节
 func GetMediaBytes(mediaId string) ([]byte, error) {
+	return std.GetMediaBytes(mediaId)
+}
+
+// GetJsMedia 下载高清语言素材(通过JSSDK上传)
+func (s *Server) GetJsMedia(filename, mediaId string) error {
+	url := fmt.Sprintf(s.RootUrl+WXAPI_GetJssdkMedia, s.GetAccessToken(), mediaId)
+	return util.GetFile(filename, url)
+}
+
+// GetJsMedia 下载高清语言素材(通过JSSDK上传)
+func GetJsMedia(filename, mediaId string) error {
+	return std.GetJsMedia(filename, mediaId)
+}
+
+// GetJsMediaBytes 下载高清语言素材,返回body字节
+func (s *Server) GetJsMediaBytes(mediaId string) ([]byte, error) {
+	url := fmt.Sprintf(s.RootUrl+WXAPI_GetJssdkMedia, s.GetAccessToken(), mediaId)
+	return util.GetBody(url)
+}
+
+// GetJsMediaBody 下载高清语言素材,返回io.Reader
+func (s *Server) GetJsMediaBody(mediaId string) (io.ReadCloser, error) {
+	url := fmt.Sprintf(s.RootUrl+WXAPI_GetJssdkMedia, s.GetAccessToken(), mediaId)
+	return util.GetRawBody(url)
+}
+
+// GetJsMediaBytes 下载高清语言素材,返回body字节
+func GetJsMediaBytes(mediaId string) ([]byte, error) {
 	return std.GetMediaBytes(mediaId)
 }

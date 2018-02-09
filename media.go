@@ -9,8 +9,11 @@ import (
 )
 
 const (
-	WXAPI_UPLOAD        = "media/upload?access_token=%s&type=%s"
-	WXAPI_GETMEDIA      = "media/get?access_token=%s&media_id=%s"
+	// 临时素材上传
+	WXAPI_UPLOAD = "media/upload?access_token=%s&type=%s"
+	// 临时素材下载
+	WXAPI_GETMEDIA = "media/get?access_token=%s&media_id=%s"
+	// 高清语言素材下载
 	WXAPI_GetJssdkMedia = "media/get/jssdk?access_token=%s&media_id=%s"
 )
 

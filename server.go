@@ -84,17 +84,17 @@ func NewServer() *Server {
 	return s
 }
 
-//SetLog 设置log
+// SetLog 设置log
 func SetLog(l io.Writer) {
 	log.SetOutput(l)
 }
 
-//SafeOpen 设置密保模式
+// SafeOpen 设置密保模式
 func (s *Server) SafeOpen() {
 	s.Safe = 1
 }
 
-//SafeOpen 设置密保模式
+// SafeClose 设置密保模式
 func (s *Server) SafeClose() {
 	s.Safe = 0
 }

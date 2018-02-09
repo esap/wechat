@@ -23,7 +23,7 @@ type (
 	// DkDataRet 审批返回数据
 	DkDataRet struct {
 		WxErr  `json:"-"`
-		Result []DkData `json:"checkindata""`
+		Result []DkData `json:"checkindata"`
 	}
 
 	// DkData 审批数据

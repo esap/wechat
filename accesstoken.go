@@ -105,6 +105,7 @@ func (s *Server) getTicket() (err error) {
 	return
 }
 
+// JsConfig Jssdk配置
 type JsConfig struct {
 	Beta      bool     `json:"beta"`
 	Debug     bool     `json:"debug"`
@@ -117,6 +118,7 @@ type JsConfig struct {
 	App       int      `json:"jsapp"`
 }
 
+// GetJsConfig 获取Jssdk配置
 func (s *Server) GetJsConfig(Url string) *JsConfig {
 	jc := &JsConfig{Beta: true, Debug: Debug, AppId: s.AppId}
 	jc.Timestamp = time.Now().Unix()

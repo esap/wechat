@@ -36,7 +36,7 @@ func (s *Server) GetAccessToken() string {
 
 // GetAccessToken 读取默认实例AccessToken
 func GetAccessToken() string {
-	return std.getAccessToken()
+	return std.GetAccessToken()
 }
 
 // GetUserAccessToken 获取通讯录AccessToken

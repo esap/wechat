@@ -9,11 +9,11 @@ import (
 )
 
 const (
-	// 临时素材上传
+	// WXAPI_UPLOAD 临时素材上传
 	WXAPI_UPLOAD = "media/upload?access_token=%s&type=%s"
-	// 临时素材下载
+	// WXAPI_GETMEDIA 临时素材下载
 	WXAPI_GETMEDIA = "media/get?access_token=%s&media_id=%s"
-	// 高清语言素材下载
+	// WXAPI_GetJssdkMedia 高清语言素材下载
 	WXAPI_GetJssdkMedia = "media/get/jssdk?access_token=%s&media_id=%s"
 )
 
@@ -68,7 +68,7 @@ func (s *Server) GetMediaBytes(mediaId string) ([]byte, error) {
 	return util.GetBody(url)
 }
 
-// GetMediaBytes 下载媒体,返回io.Reader
+// GetBody 下载媒体,返回io.Reader
 func (s *Server) GetBody(mediaId string) (io.ReadCloser, error) {
 	url := fmt.Sprintf(s.RootUrl+WXAPI_GETMEDIA, s.GetAccessToken(), mediaId)
 	return util.GetRawBody(url)

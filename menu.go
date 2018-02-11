@@ -14,7 +14,7 @@ const (
 )
 
 type (
-	// 按钮
+	// Button 按钮
 	Button struct {
 		Name      string `json:"name"`
 		Type      string `json:"type"`

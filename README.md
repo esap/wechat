@@ -51,7 +51,8 @@ func WxHandler(w http.ResponseWriter, r *http.Request) {
 	app := wechat.New("token", "appId", "secret", "aesKey", "agentId")
 
 	// 实例化后其他操作
-	app.VerifyURL(w, r).NewText("这是客服消息").Send().NewText("这是被动回复").Reply()
+	ctx := app.VerifyURL(w, r)
+	ctx.NewText("这是客服消息").Send().NewText("这是被动回复").Reply()
 ```
 
 ## 消息管理

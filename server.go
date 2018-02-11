@@ -30,9 +30,10 @@ const (
 
 var (
 	// Debug is a flag to Println()
-	Debug         bool = false
-	std                = NewServer()
-	UserServerMap      = make(map[string]*Server)
+	Debug bool = false
+	std        = NewServer()
+	// UserServerMap 其他实例集
+	UserServerMap = make(map[string]*Server)
 )
 
 // Server 微信服务容器

@@ -65,6 +65,7 @@ type UserInfo struct {
 	} `json:"-"`
 }
 
+// Extattr 额外属性
 type Extattr struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`

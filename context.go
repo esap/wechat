@@ -152,3 +152,8 @@ func (c *Context) NewMusic(mediaId, title, desc, musicUrl, hqMusicUrl string) *C
 		Music:  music{CDATA(mediaId), CDATA(title), CDATA(desc), CDATA(musicUrl), CDATA(hqMusicUrl)}}
 	return c
 }
+
+// Id 返回消息的来源与去向，可作为多应用管理时的用户组Id
+func (c *Context) Id() string {
+	return c.Msg.FromUserName + "|" + c.Msg.ToUserName
+}

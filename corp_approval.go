@@ -1,6 +1,7 @@
 package wechat
 
 import (
+	"encoding/json"
 	"log"
 
 	"github.com/esap/wechat/util"
@@ -62,14 +63,17 @@ type (
 			Comm struct {
 				Data string `json:"apply_data"` // 自定义审批申请的单据数据
 			} `json:"comm"` // 自定义类型
+
+			MyData map[string]interface{}
 		} `json:"data"`
 	}
 
-	// ApplyField 自定义字段
-	ApplyField struct {
-		Title string      `json:"title"` // 类目名
-		Type  string      `json:"type"`  // 类目类型【 text: "文本", textarea: "多行文本", number: "数字", date: "日期", datehour: "日期+时间",  select: "选择框" 】
-		Value interface{} `json:"value"` // 填写的内容，只有Type是图片时，value是一个数组
+	// MyField 自定义字段
+	MyField struct {
+		Title         string      `json:"title"`         // 类目名
+		Type          string      `json:"type"`          // 类目类型【 text: "文本", textarea: "多行文本", number: "数字", date: "日期", datehour: "日期+时间",  select: "选择框" 】
+		Value         interface{} `json:"value"`         // 填写的内容，Type是图片或list时，value是一个数组
+		DateHourValue int64       `json:"dateHourValue"` // 日期时间值
 	}
 )
 
@@ -81,6 +85,17 @@ func (s *Server) GetApproval(start, end, nextNum int64) (sdr *SpDataRet, err err
 		log.Println("PostJsonPtr err:", err)
 		return
 	}
-	err = sdr.Error()
+	if sdr.ErrCode == 0 {
+		for k, v := range sdr.Data {
+			mp := make(map[string]interface{})
+			if e := json.Unmarshal([]byte(v.Comm.Data), &mp); e != nil {
+				err = e
+				return
+			}
+			sdr.Data[k].MyData = mp
+		}
+	} else {
+		err = sdr.Error()
+	}
 	return
 }

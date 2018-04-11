@@ -335,12 +335,11 @@ type MpArticle struct {
 	Url          string `json:"content_source_url"`
 	Content      string `json:"content"`
 	Digest       string `json:"digest"`
-	ShowCoverPic int    `json:"show_cover_pic"`
 }
 
 // NewMpArticle 先创建加密文章，再传给NewMpNews()
-func NewMpArticle(title, mediaId, author, url, content, digest string, showCoverPic int) MpArticle {
-	return MpArticle{title, mediaId, author, url, content, digest, showCoverPic}
+func NewMpArticle(title, mediaId, author, url, content, digest string) MpArticle {
+	return MpArticle{title, mediaId, author, url, content, digest}
 }
 
 // WxCard 卡券

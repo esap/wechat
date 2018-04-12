@@ -1,7 +1,6 @@
 package wechat
 
 import (
-	"encoding/json"
 	"log"
 
 	"github.com/esap/wechat/util"
@@ -86,14 +85,14 @@ func (s *Server) GetApproval(start, end, nextNum int64) (sdr *SpDataRet, err err
 		return
 	}
 	if sdr.ErrCode == 0 {
-		for k, v := range sdr.Data {
-			mp := make(map[string]interface{})
-			if e := json.Unmarshal([]byte(v.Comm.Data), &mp); e != nil {
-				err = e
-				return
-			}
-			sdr.Data[k].MyData = mp
-		}
+		//		for k, v := range sdr.Data {
+		//			mp := make(map[string]interface{})
+		//			if e := json.Unmarshal([]byte(v.Comm.Data), &mp); e != nil {
+		//				err = e
+		//				return
+		//			}
+		//			sdr.Data[k].MyData = mp
+		//		}
 	} else {
 		err = sdr.Error()
 	}

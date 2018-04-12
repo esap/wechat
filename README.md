@@ -96,6 +96,17 @@ type WxMsg struct {
 
 ```
 
+* 如果使用其他web框架，例如echo/gin/beego等，则把VerifyURL()放入controller或handler
+
+```go
+// echo示例 企业号回调接口
+func wxApiPost(c echo.Context) error {
+	ctx := wechat.VerifyURL(c.Response().Writer, c.Request())
+	// TODO: 这里是相关操作
+	return nil
+}
+```
+
 ### 回复消息
 
 回复消息有两种方式：

@@ -10,6 +10,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
+	"path/filepath"
 )
 
 // GetJson 发送GET请求解析json
@@ -151,7 +152,7 @@ func PostMultipartForm(fields []MultipartFormField, uri string) (respBody []byte
 
 	for _, field := range fields {
 		if field.IsFile {
-			fileWriter, e := bodyWriter.CreateFormFile(field.Fieldname, field.Filename)
+			fileWriter, e := bodyWriter.CreateFormFile(field.Fieldname, filepath.Base(field.Filename))
 			if e != nil {
 				err = fmt.Errorf("error writing to buffer , err=%v", e)
 				return

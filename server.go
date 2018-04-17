@@ -16,6 +16,7 @@ import (
 	"net/http"
 	"sort"
 	"strings"
+	"sync"
 
 	"github.com/esap/wechat/util"
 )
@@ -57,6 +58,7 @@ type Server struct {
 	DeptList       DeptList
 	TagList        TagList
 	MsgQueue       chan interface{}
+	sync.Mutex     // accessToken读取锁
 }
 
 // New 微信服务容器，根据agentId判断是企业号或服务号

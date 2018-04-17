@@ -20,15 +20,16 @@ type AccessToken struct {
 
 // GetAccessToken 读取AccessToken
 func (s *Server) GetAccessToken() string {
+	s.Lock()
+	defer s.Unlock()
 	if s.accessToken == nil || s.accessToken.ExpiresIn < time.Now().Unix() {
 		for i := 0; i < 3; i++ {
 			err := s.getAccessToken()
-			if err != nil {
-				log.Printf("GetAccessToken[%v] err:%v", s.AgentId, err)
-				time.Sleep(time.Second)
-				continue
+			if err == nil {
+				break
 			}
-			break
+			log.Printf("GetAccessToken[%v] err: %v", s.AgentId, err)
+			time.Sleep(time.Second)
 		}
 	}
 	return s.accessToken.AccessToken

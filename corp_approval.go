@@ -62,8 +62,6 @@ type (
 			Comm struct {
 				Data string `json:"apply_data"` // 自定义审批申请的单据数据
 			} `json:"comm"` // 自定义类型
-
-			MyData map[string]interface{}
 		} `json:"data"`
 	}
 
@@ -81,19 +79,10 @@ func (s *Server) GetApproval(start, end, nextNum int64) (sdr *SpDataRet, err err
 	url := WXAPIGetApproval + s.GetAccessToken()
 	sdr = new(SpDataRet)
 	if err = util.PostJsonPtr(url, spDataReq{start, end, nextNum}, sdr); err != nil {
-		log.Println("PostJsonPtr err:", err)
+		log.Println("GetApproval:PostJsonPtr err:", err)
 		return
 	}
-	if sdr.ErrCode == 0 {
-		//		for k, v := range sdr.Data {
-		//			mp := make(map[string]interface{})
-		//			if e := json.Unmarshal([]byte(v.Comm.Data), &mp); e != nil {
-		//				err = e
-		//				return
-		//			}
-		//			sdr.Data[k].MyData = mp
-		//		}
-	} else {
+	if sdr.ErrCode != 0 {
 		err = sdr.Error()
 	}
 	return

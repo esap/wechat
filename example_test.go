@@ -14,7 +14,7 @@ func Example() {
 	http.ListenAndServe(":9090", nil)
 }
 
-func Example_Echo() {
+func Example_echo() {
 	e := echo.New()
 	e.Any("/", EchoHandler)
 	e.Start(":9090")

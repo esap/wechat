@@ -20,11 +20,15 @@ type (
 		Type      string `json:"type"`
 		Key       string `json:"key"`
 		Url       string `json:"url"`
+		AppId     string `json:"appid"`
+		PagePath  string `json:"pagepath"`
 		SubButton []struct {
 			Name string `json:"name"`
 			Type string `json:"type"`
 			Key  string `json:"key"`
 			Url  string `json:"url"`
+			AppId     string `json:"appid"`
+			PagePath  string `json:"pagepath"`
 		} `json:"sub_button"`
 	}
 	// Menu 菜单

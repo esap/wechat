@@ -57,6 +57,7 @@ func (s *Server) getAccessToken() (err error) {
 	if s.ExternalTokenHandler != nil {
 		Printf("使用外部函数获取token")
 		s.accessToken = s.ExternalTokenHandler(s.AppId)
+		return
 	} else {
 		Printf("使用本地机制获取token")
 		url := fmt.Sprintf(s.TokenUrl, s.AppId, s.Secret)

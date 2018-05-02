@@ -59,6 +59,7 @@ type Server struct {
 	TagList        TagList
 	MsgQueue       chan interface{}
 	sync.Mutex     // accessToken读取锁
+	ExternalTokenHandler func(appId string) *AccessToken // 通过外部方法统一获取access token ,避免集群情况下token失效
 }
 
 // New 微信服务容器，根据agentId判断是企业号或服务号

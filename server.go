@@ -77,13 +77,14 @@ func New(token, appid, secret, key string, agentId ...int) (s *Server) {
 }
 
 // NewServer 空容器
-func NewServer() *Server {
+func NewServer(f func(appId string) *AccessToken) *Server {
 	s := &Server{
 		RootUrl:  WXAPI,
 		MsgUrl:   WXAPI_MSG,
 		TokenUrl: WXAPI_TOKEN,
 		JsApi:    WXAPI_JSAPI,
 	}
+	s.ExternalTokenHandler = f
 	s.init()
 	return s
 }

@@ -32,7 +32,7 @@ const (
 var (
 	// Debug is a flag to Println()
 	Debug bool = false
-	std        = NewServer()
+	std        *Server
 	// UserServerMap 其他实例集
 	UserServerMap = make(map[string]*Server)
 )
@@ -63,18 +63,18 @@ type Server struct {
 }
 
 // New 微信服务容器，根据agentId判断是企业号或服务号
-func New(token, appid, secret, key string, agentId ...int) (s *Server) {
-	s = NewServer()
-	if len(agentId) > 0 {
-		s.SetEnt(token, appid, secret, key, agentId[0])
-		if agentId[0] == 9999999 {
-			UserServerMap[appid] = s
-		}
-	} else {
-		s.Set(token, appid, secret, key)
-	}
-	return s
-}
+//func New(token, appid, secret, key string, agentId ...int) (s *Server) {
+//	s = NewServer(nil)
+//	if len(agentId) > 0 {
+//		s.SetEnt(token, appid, secret, key, agentId[0])
+//		if agentId[0] == 9999999 {
+//			UserServerMap[appid] = s
+//		}
+//	} else {
+//		s.Set(token, appid, secret, key)
+//	}
+//	return s
+//}
 
 // NewServer 空容器
 func NewServer(f func(appId string) *AccessToken) *Server {
@@ -85,6 +85,7 @@ func NewServer(f func(appId string) *AccessToken) *Server {
 		JsApi:    WXAPI_JSAPI,
 	}
 	s.ExternalTokenHandler = f
+	std = s;
 	s.init()
 	return s
 }

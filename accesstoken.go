@@ -54,18 +54,26 @@ func GetUserAccessToken() string {
 }
 
 func (s *Server) getAccessToken() (err error) {
-	url := fmt.Sprintf(s.TokenUrl, s.AppId, s.Secret)
-	at := new(AccessToken)
-	if err = util.GetJson(url, at); err != nil {
+	if s.ExternalTokenHandler != nil {
+		Printf("使用外部函数获取token")
+		s.accessToken = s.ExternalTokenHandler(s.AppId)
+		return
+	} else {
+		Printf("使用本地机制获取token")
+		url := fmt.Sprintf(s.TokenUrl, s.AppId, s.Secret)
+		at := new(AccessToken)
+		if err = util.GetJson(url, at); err != nil {
+			return
+		}
+		if at.ErrCode > 0 {
+			return at.Error()
+		}
+		Printf("[%v::%v]:%+v", s.AppId, s.AgentId, *at)
+		at.ExpiresIn = time.Now().Unix() + 500
+		s.accessToken = at
 		return
 	}
-	if at.ErrCode > 0 {
-		return at.Error()
-	}
-	Printf("[%v::%v]:%+v", s.AppId, s.AgentId, *at)
-	at.ExpiresIn = time.Now().Unix() + 500
-	s.accessToken = at
-	return
+
 }
 
 // Ticket JS-SDK

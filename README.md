@@ -50,7 +50,7 @@ func WxHandler(w http.ResponseWriter, r *http.Request) {
 	// 创建企业号实例
 	app := wechat.New("token", "appId", "secret", "aesKey", "agentId")
 
-	// 实例化后其他操作
+	// 实例化后其他业务操作
 	ctx := app.VerifyURL(w, r)
 	ctx.NewText("这是客服消息").Send().NewText("这是被动回复").Reply()
 ```
@@ -102,11 +102,10 @@ type WxMsg struct {
 // echo示例 企业号回调接口
 func wxApiPost(c echo.Context) error {
 	ctx := wechat.VerifyURL(c.Response().Writer, c.Request())
-	// TODO: 这里是相关操作
+	// TODO: 这里是其他业务操作
 	return nil
 }
 ```
-
 ### 回复消息
 
 回复消息有两种方式：

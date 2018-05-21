@@ -8,7 +8,7 @@ import (
 	"github.com/esap/wechat/util"
 )
 
-// MsgQueueAdd 添加队列消息消息
+// MsgQueueAdd 添加队列消息
 func (s *Server) MsgQueueAdd(v interface{}) {
 	s.MsgQueue <- v
 }

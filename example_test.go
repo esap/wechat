@@ -39,6 +39,7 @@ func HttpHandler(w http.ResponseWriter, r *http.Request) {
 		ctx.NewText("其他消息类型" + ctx.Msg.MsgType).Reply() // 回复模板消息
 	}
 }
+
 func EchoHandler(c echo.Context) error {
 	ctx := wechat.VerifyURL(c.Response().Writer, c.Request())
 

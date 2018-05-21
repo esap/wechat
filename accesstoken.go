@@ -73,7 +73,6 @@ func (s *Server) getAccessToken() (err error) {
 		s.accessToken = at
 		return
 	}
-
 }
 
 // Ticket JS-SDK
@@ -108,7 +107,7 @@ func (s *Server) getTicket() (err error) {
 	if at.ErrCode > 0 {
 		return at.Error()
 	}
-	log.Printf("[%v::%v-JsApi] >>> %+v", s.AppId, s.AgentId, *at)
+	Printf("[%v::%v-JsApi] >>> %+v", s.AppId, s.AgentId, *at)
 	at.ExpiresIn = time.Now().Unix() + 500
 	s.ticket = at
 	return

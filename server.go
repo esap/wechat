@@ -32,7 +32,7 @@ const (
 var (
 	// Debug is a flag to Println()
 	Debug bool = false
-	std   *Server
+	std        = new(Server)
 	// UserServerMap 其他实例集
 	UserServerMap = make(map[string]*Server)
 )
@@ -100,7 +100,7 @@ func (s *Server) SafeOpen() {
 	s.Safe = 1
 }
 
-// SafeClose 设置密保模式
+// SafeClose 关闭密保模式
 func (s *Server) SafeClose() {
 	s.Safe = 0
 }

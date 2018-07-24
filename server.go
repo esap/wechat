@@ -32,7 +32,7 @@ const (
 var (
 	// Debug is a flag to Println()
 	Debug bool = false
-	std        = new(Server)
+	std   *Server
 	// UserServerMap 其他实例集
 	UserServerMap = make(map[string]*Server)
 )
@@ -127,6 +127,7 @@ func (s *Server) Set(tk, id, sec string, key ...string) (err error) {
 
 // Set 设置token,appId,secret
 func Set(tk, id, sec string, key ...string) (err error) {
+	std = NewServer(nil)
 	return std.Set(tk, id, sec, key...)
 }
 

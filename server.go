@@ -100,7 +100,7 @@ func (s *Server) SafeOpen() {
 	s.Safe = 1
 }
 
-// SafeClose 设置密保模式
+// SafeClose 关闭密保模式
 func (s *Server) SafeClose() {
 	s.Safe = 0
 }
@@ -127,6 +127,7 @@ func (s *Server) Set(tk, id, sec string, key ...string) (err error) {
 
 // Set 设置token,appId,secret
 func Set(tk, id, sec string, key ...string) (err error) {
+	std = NewServer(nil)
 	return std.Set(tk, id, sec, key...)
 }
 

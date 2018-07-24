@@ -30,6 +30,7 @@ type (
 		Url          string  // link
 		Event        string  // event
 		EventKey     string  // event
+		SessionFrom  string  // event|user_enter_tempsession
 		Ticket       string
 
 		ScanCodeInfo struct {

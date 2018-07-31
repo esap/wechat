@@ -40,6 +40,7 @@ var (
 // Server 微信服务容器
 type Server struct {
 	AppId                string
+	MchId                string // 商户id，用于微信支付
 	AgentId              int
 	Secret               string
 	Token                string
@@ -249,7 +250,7 @@ func (s *Server) EncryptMsg(msg []byte, timeStamp, nonce string) (re *wxRespEnc,
 	}
 	l := buf.Bytes()
 
-	rd := []byte("welcometoesapsys")
+	rd := []byte(GetRandomString(16))
 
 	plain := bytes.Join([][]byte{rd, l, msg, []byte(s.AppId)}, nil)
 	ae, _ := util.AesEncrypt(plain, s.AesKey)

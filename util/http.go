@@ -85,7 +85,7 @@ func PostJson(uri string, obj interface{}) ([]byte, error) {
 func PostJsonPtr(uri string, obj interface{}, result interface{}) (err error) {
 	buf := new(bytes.Buffer)
 	enc := json.NewEncoder(buf)
-	enc.SetEscapeHTML(false)
+	//	enc.SetEscapeHTML(false)
 	err = enc.Encode(obj)
 	if err != nil {
 		return
@@ -107,6 +107,34 @@ func PostJsonPtr(uri string, obj interface{}, result interface{}) (err error) {
 		return fmt.Errorf("http post error : uri=%v , statusCode=%v", uri, resp.StatusCode)
 	}
 	return json.NewDecoder(resp.Body).Decode(result)
+}
+
+//PostXmlPtr 发送Xml格式的POST请求并解析结果到result指针
+func PostXmlPtr(uri string, obj interface{}, result interface{}) (err error) {
+	buf := new(bytes.Buffer)
+	enc := xml.NewEncoder(buf)
+	//	enc.SetEscapeHTML(false)
+	err = enc.Encode(obj)
+	if err != nil {
+		return
+	}
+
+	// debug
+	//	println("post body:", buf.String())
+
+	resp, err := http.Post(uri, "application/xml;charset=utf-8", buf)
+	if err != nil {
+		return err
+	}
+
+	// debug
+	//	bd, _ := ioutil.ReadAll(resp.Body)
+	//	println("resp body:", string(bd))
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("http post error : uri=%v , statusCode=%v", uri, resp.StatusCode)
+	}
+	return xml.NewDecoder(resp.Body).Decode(result)
 }
 
 // PostFile 上传文件

@@ -11,11 +11,25 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 )
+
+// TimeOut 请求超时设置,默认5秒钟
+var TimeOut time.Duration = 5 * time.Second
+
+func SetTimeOut(d time.Duration) {
+	TimeOut = d
+}
+
+// httpClient() 带超时的http.Client
+func httpClient() *http.Client {
+	return &http.Client{Timeout: TimeOut}
+}
 
 // GetJson 发送GET请求解析json
 func GetJson(uri string, v interface{}) error {
-	r, err := http.Get(uri)
+
+	r, err := httpClient().Get(uri)
 	if err != nil {
 		return err
 	}
@@ -25,7 +39,7 @@ func GetJson(uri string, v interface{}) error {
 
 // GetXml 发送GET请求并解析xml
 func GetXml(uri string, v interface{}) error {
-	r, err := http.Get(uri)
+	r, err := httpClient().Get(uri)
 	if err != nil {
 		return err
 	}
@@ -35,7 +49,7 @@ func GetXml(uri string, v interface{}) error {
 
 // GetBody 发送GET请求，返回body字节
 func GetBody(uri string) ([]byte, error) {
-	resp, err := http.Get(uri)
+	resp, err := httpClient().Get(uri)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +63,7 @@ func GetBody(uri string) ([]byte, error) {
 
 // GetRawBody 发送GET请求，返回body字节
 func GetRawBody(uri string) (io.ReadCloser, error) {
-	resp, err := http.Get(uri)
+	resp, err := httpClient().Get(uri)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +83,7 @@ func PostJson(uri string, obj interface{}) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	resp, err := http.Post(uri, "application/json;charset=utf-8", buf)
+	resp, err := httpClient().Post(uri, "application/json;charset=utf-8", buf)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +108,7 @@ func PostJsonPtr(uri string, obj interface{}, result interface{}) (err error) {
 	// debug
 	//	println("post body:", buf.String())
 
-	resp, err := http.Post(uri, "application/json;charset=utf-8", buf)
+	resp, err := httpClient().Post(uri, "application/json;charset=utf-8", buf)
 	if err != nil {
 		return err
 	}
@@ -122,7 +136,7 @@ func PostXmlPtr(uri string, obj interface{}, result interface{}) (err error) {
 	// debug
 	//	println("post body:", buf.String())
 
-	resp, err := http.Post(uri, "application/xml;charset=utf-8", buf)
+	resp, err := httpClient().Post(uri, "application/xml;charset=utf-8", buf)
 	if err != nil {
 		return err
 	}
@@ -151,7 +165,7 @@ func PostFile(fieldname, filename, uri string) ([]byte, error) {
 
 // GetFile 下载文件
 func GetFile(filename, uri string) error {
-	resp, err := http.Get(uri)
+	resp, err := httpClient().Get(uri)
 	if err != nil {
 		return err
 	}
@@ -212,7 +226,7 @@ func PostMultipartForm(fields []MultipartFormField, uri string) (respBody []byte
 	contentType := bodyWriter.FormDataContentType()
 	bodyWriter.Close()
 
-	resp, e := http.Post(uri, contentType, bodyBuf)
+	resp, e := httpClient().Post(uri, contentType, bodyBuf)
 	if e != nil {
 		err = e
 		return

@@ -110,7 +110,7 @@ func (s *Server) SafeClose() {
 func (s *Server) Set(tk, id, sec string, key ...string) (err error) {
 	s.Token, s.AppId, s.Secret = tk, id, sec
 	// 存在EncodingAESKey则开启加密安全模式
-	if len(key) > 0 {
+	if len(key) > 0 && key[0] != "" {
 		s.SafeMode = true
 		if s.AesKey, err = base64.StdEncoding.DecodeString(key[0] + "="); err != nil {
 			return err

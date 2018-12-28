@@ -44,31 +44,36 @@ func GetUserOauth(code string) (userOauth UserOauth, err error) {
 
 // UserInfo 用户信息
 type UserInfo struct {
-	WxErr       `json:"-"`
-	UserId      string `json:"userid"`
-	Name        string `json:"name"`
-	Department  []int  `json:"department"`
-	Dept        int    `json:"dept"`
-	DeptName    string `json:"deptname"`
-	Position    string `json:"position,omitempty"`
-	Mobile      string `json:"mobile"`
-	Gender      string `json:"gender,omitempty"`
-	Email       string `json:"email,omitempty"`
-	IsLeader    int    `json:"isleader,omitempty"`
-	Telephone   string `json:"telephone,omitempty"`
-	EnglishName string `json:"english_name,omitempty"`
-	WeixinId    string `json:"-"`
-	Avatar      string `json:"avatar,omitempty"`
-	Status      int    `json:"-"`
-	ExtAttr     struct {
-		Attrs []Extattr
-	} `json:"-"`
+	WxErr          `json:"-"`
+	UserId         string `json:"userid"`
+	Name           string `json:"name"`
+	Alias          string `json:"alias"`
+	Department     []int  `json:"department"`
+	IsLeaderInDept []int  `json:"is_leader_in_dept,omitempty"`
+	Order          []int  `json:"order"`
+	Dept           int    `json:"dept"`
+	DeptName       string `json:"deptname"`
+	Position       string `json:"position,omitempty"`
+	Mobile         string `json:"mobile"`
+	Gender         string `json:"gender,omitempty"`
+	Email          string `json:"email,omitempty"`
+	IsLeader       int    `json:"isleader,omitempty"` // old attr
+	AavatarMediaid string `json:"avatar_mediaid,omitempty"`
+	Enable         int    `json:"enable,omitempty"`
+	Telephone      string `json:"telephone,omitempty"`
+	WeixinId       string `json:"-"`
+	Avatar         string `json:"avatar,omitempty"`
+	Status         int    `json:"-"`
+	ToInvite       bool   `json:"to_invite"`
+	ExtAttr        struct {
+		Attrs []Extattr `json:"attrs"`
+	} `json:"extattr"`
 }
 
 // Extattr 额外属性
 type Extattr struct {
-	Name  string `json:"name"`
-	Value string `json:"value"`
+	Name  string      `json:"name"`
+	Value interface{} `json:"value"`
 }
 
 // UserAdd 添加用户
@@ -118,7 +123,7 @@ func (s *Server) GetUserName(userid string) string {
 			return v.Name
 		}
 	}
-	return ""
+	return "  "
 }
 
 // userList 用户列表

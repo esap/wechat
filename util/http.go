@@ -11,11 +11,12 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
-// TimeOut 请求超时设置,默认5秒钟
-var TimeOut time.Duration = 5 * time.Second
+// TimeOut 请求超时设置,默认1分钟
+var TimeOut time.Duration = 60 * time.Second
 
 func SetTimeOut(d time.Duration) {
 	TimeOut = d
@@ -90,13 +91,13 @@ func PostJson(uri string, obj interface{}) ([]byte, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("http get error : uri=%v , statusCode=%v", uri, resp.StatusCode)
+		return nil, fmt.Errorf("http post error : uri=%v , statusCode=%v", uri, resp.StatusCode)
 	}
 	return ioutil.ReadAll(resp.Body)
 }
 
 //PostJsonPtr 发送Json格式的POST请求并解析结果到result指针
-func PostJsonPtr(uri string, obj interface{}, result interface{}) (err error) {
+func PostJsonPtr(uri string, obj interface{}, result interface{}, contentType ...string) (err error) {
 	buf := new(bytes.Buffer)
 	enc := json.NewEncoder(buf)
 	//	enc.SetEscapeHTML(false)
@@ -104,18 +105,14 @@ func PostJsonPtr(uri string, obj interface{}, result interface{}) (err error) {
 	if err != nil {
 		return
 	}
-
-	// debug
-	//	println("post body:", buf.String())
-
-	resp, err := httpClient().Post(uri, "application/json;charset=utf-8", buf)
+	ct := "application/json;charset=utf-8"
+	if len(contentType) > 0 {
+		ct = strings.Join(contentType, ";")
+	}
+	resp, err := httpClient().Post(uri, ct, buf)
 	if err != nil {
 		return err
 	}
-
-	// debug
-	//	bd, _ := ioutil.ReadAll(resp.Body)
-	//	println("resp body:", string(bd))
 
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("http post error : uri=%v , statusCode=%v", uri, resp.StatusCode)
@@ -133,17 +130,10 @@ func PostXmlPtr(uri string, obj interface{}, result interface{}) (err error) {
 		return
 	}
 
-	// debug
-	//	println("post body:", buf.String())
-
 	resp, err := httpClient().Post(uri, "application/xml;charset=utf-8", buf)
 	if err != nil {
 		return err
 	}
-
-	// debug
-	//	bd, _ := ioutil.ReadAll(resp.Body)
-	//	println("resp body:", string(bd))
 
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("http post error : uri=%v , statusCode=%v", uri, resp.StatusCode)

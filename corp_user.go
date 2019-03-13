@@ -123,7 +123,7 @@ func (s *Server) GetUserName(userid string) string {
 			return v.Name
 		}
 	}
-	return ""
+	return "  "
 }
 
 // userList 用户列表

@@ -14,8 +14,8 @@ import (
 	"time"
 )
 
-// TimeOut 请求超时设置,默认5秒钟
-var TimeOut time.Duration = 5 * time.Second
+// TimeOut 请求超时设置,默认1分钟
+var TimeOut time.Duration = 60 * time.Second
 
 func SetTimeOut(d time.Duration) {
 	TimeOut = d

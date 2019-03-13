@@ -130,8 +130,9 @@ func (s *Server) AddTagUsers(id int, userlist []string, partylist []int) error {
 }
 
 // DelTagUsers 删除标签成员
-func (s *Server) DelTagUsers(id string, body TagUserBody) error {
-	return s.doUpdate(WXAPI_DelTagUsers, body)
+func (s *Server) DelTagUsers(id int, userlist []string) error {
+	b := TagUserBody{TagId: id, UserList: userlist}
+	return s.doUpdate(WXAPI_DelTagUsers, b)
 }
 
 // GetTagName 通过标签id获取标签名称

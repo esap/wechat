@@ -3,7 +3,8 @@ package wechat
 import (
 	"encoding/json"
 	"fmt"
-	"io"
+
+	// "io"
 
 	"github.com/esap/wechat/util"
 )
@@ -69,10 +70,10 @@ func (s *Server) GetMediaBytes(mediaId string) ([]byte, error) {
 }
 
 // GetBody 下载媒体,返回io.Reader
-func (s *Server) GetBody(mediaId string) (io.ReadCloser, error) {
-	url := fmt.Sprintf(s.RootUrl+WXAPI_GETMEDIA, s.GetAccessToken(), mediaId)
-	return util.GetRawBody(url)
-}
+// func (s *Server) GetBody(mediaId string) (io.ReadCloser, error) {
+// 	url := fmt.Sprintf(s.RootUrl+WXAPI_GETMEDIA, s.GetAccessToken(), mediaId)
+// 	return util.GetRawBody(url)
+// }
 
 // GetMediaBytes 下载媒体,返回body字节
 func GetMediaBytes(mediaId string) ([]byte, error) {
@@ -97,10 +98,10 @@ func (s *Server) GetJsMediaBytes(mediaId string) ([]byte, error) {
 }
 
 // GetJsMediaBody 下载高清语言素材,返回io.Reader
-func (s *Server) GetJsMediaBody(mediaId string) (io.ReadCloser, error) {
-	url := fmt.Sprintf(s.RootUrl+WXAPI_GetJssdkMedia, s.GetAccessToken(), mediaId)
-	return util.GetRawBody(url)
-}
+// func (s *Server) GetJsMediaBody(mediaId string) (io.ReadCloser, error) {
+// 	url := fmt.Sprintf(s.RootUrl+WXAPI_GetJssdkMedia, s.GetAccessToken(), mediaId)
+// 	return util.GetRawBody(url)
+// }
 
 // GetJsMediaBytes 下载高清语言素材,返回body字节
 func GetJsMediaBytes(mediaId string) ([]byte, error) {

@@ -32,6 +32,9 @@ type (
 		EventKey     string  // event
 		SessionFrom  string  // event|user_enter_tempsession
 		Ticket       string
+		FileKey      string
+		FileMd5      string
+		FileTotalLen string
 
 		ScanCodeInfo struct {
 			ScanType   string

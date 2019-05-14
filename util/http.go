@@ -63,17 +63,17 @@ func GetBody(uri string) ([]byte, error) {
 }
 
 // GetRawBody 发送GET请求，返回body字节
-func GetRawBody(uri string) (io.ReadCloser, error) {
-	resp, err := httpClient().Get(uri)
-	if err != nil {
-		return nil, err
-	}
+// func GetRawBody(uri string) (io.ReadCloser, error) {
+// 	resp, err := httpClient().Get(uri)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("http get err: uri=%v , statusCode=%v", uri, resp.StatusCode)
-	}
-	return resp.Body, nil
-}
+// 	if resp.StatusCode != http.StatusOK {
+// 		return nil, fmt.Errorf("http get err: uri=%v , statusCode=%v", uri, resp.StatusCode)
+// 	}
+// 	return resp.Body, nil
+// }
 
 //PostJson 发送Json格式的POST请求
 func PostJson(uri string, obj interface{}) ([]byte, error) {
@@ -113,6 +113,7 @@ func PostJsonPtr(uri string, obj interface{}, result interface{}, contentType ..
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("http post error : uri=%v , statusCode=%v", uri, resp.StatusCode)
@@ -134,6 +135,7 @@ func PostXmlPtr(uri string, obj interface{}, result interface{}) (err error) {
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("http post error : uri=%v , statusCode=%v", uri, resp.StatusCode)
@@ -222,6 +224,7 @@ func PostMultipartForm(fields []MultipartFormField, uri string) (respBody []byte
 		return
 	}
 	defer resp.Body.Close()
+
 	if resp.StatusCode != http.StatusOK {
 		return nil, err
 	}

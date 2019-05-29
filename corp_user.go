@@ -8,7 +8,7 @@ import (
 	"github.com/esap/wechat/util"
 )
 
-// WXAPI 企业号用户列表接口
+// WXAPI 企业微信用户列表接口
 const (
 	WXAPI_GetUser        = WXAPI_ENT + "user/getuserinfo?access_token=%s&code=%s"
 	WXAPI_GetUserInfo    = WXAPI_ENT + "user/get?access_token=%s&userid=%s"

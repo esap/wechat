@@ -10,6 +10,7 @@ import (
 const (
 	MP_GetUserList = WXAPI + "user/get?access_token=%s&next_openid=%s"
 	MP_BatchGet    = WXAPI + "user/info/batchget?access_token="
+	MP_GetUserInfo = WXAPI + "user/info?access_token=%s&openid=%v&lang=%v"
 )
 
 type (
@@ -127,4 +128,16 @@ func (s *Server) GetMpUserList(openid ...string) (ul *MpUser, err error) {
 		return
 	}
 	return mpuser, mpuser.Error()
+}
+
+func (s *Server) GetMpUserInfo(openid string, lang ...string) (user *MpUserInfo, err error) {
+	if len(lang) == 0 {
+		lang = append(lang, "zh_CN")
+	}
+	user = new(MpUserInfo)
+	url := fmt.Sprintf(MP_GetUserInfo, s.GetAccessToken(), openid, lang[0])
+	if err = util.GetJson(url, &user); err != nil {
+		return
+	}
+	return
 }

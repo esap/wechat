@@ -29,7 +29,7 @@ func (s *Server) GetAccessToken() string {
 			if err == nil {
 				break
 			}
-			log.Printf("GetAccessToken[%v] err: %v", s.AgentId, err)
+			log.Printf("GetAccessToken[%v] %v", s.AgentId, err)
 			time.Sleep(time.Second)
 		}
 		if err != nil {

@@ -22,14 +22,18 @@ type AccessToken struct {
 func (s *Server) GetAccessToken() string {
 	s.Lock()
 	defer s.Unlock()
+	var err error
 	if s.accessToken == nil || s.accessToken.ExpiresIn < time.Now().Unix() {
 		for i := 0; i < 3; i++ {
-			err := s.getAccessToken()
+			err = s.getAccessToken()
 			if err == nil {
 				break
 			}
-			log.Printf("GetAccessToken[%v] err: %v", s.AgentId, err)
+			log.Printf("GetAccessToken[%v] %v", s.AgentId, err)
 			time.Sleep(time.Second)
+		}
+		if err != nil {
+			return ""
 		}
 	}
 	return s.accessToken.AccessToken

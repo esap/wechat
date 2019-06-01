@@ -219,6 +219,31 @@ func wxApiPost(c echo.Context) error {
 	ctx.NewNews(art1, art2, art3)
 ```
 
+####  模板消息
+
+[相关issue](https://github.com/esap/wechat/issues/20#issue-451068915)
+
+```go
+	tlpdata := map[string]struct {
+		Value string `json:"value"`
+		Color string `json:"color"`
+	}{
+		"first": {Value: "我是渣渣涛", Color: "#173177"},
+		"keyword1": {Value: "这是一个你从没有玩过的全新游戏", Color: "#173177"},
+		"keyword2": {Value: "只要你跟着我一起试玩一下", Color: "#173177"},
+		"keyword3": {Value: "你就会爱上这款游戏", Color: "#4B1515"},
+		"remark":   {Value: "是兄弟就来砍我", Color: "#071D42"},
+	}
+	msgid,_ := ctx.SendTemplate(
+		ctx.Msg.FromUserName,
+		"tempid", // 模板ID
+		c.Request.Host, // 跳转url
+		ctx.AppId, // 跳转小程序，比url优先
+		"", // 小程序页面
+		tlpdata,
+	)
+```
+
 ## License
 
 MIT

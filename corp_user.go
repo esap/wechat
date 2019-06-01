@@ -113,7 +113,7 @@ func (s *Server) GetUser(userid string) *UserInfo {
 			return &v
 		}
 	}
-	return nil
+	return &UserInfo{}
 }
 
 // GetUserName 通过账号获取用户信息

@@ -109,6 +109,7 @@ func PostJsonPtr(uri string, obj interface{}, result interface{}, contentType ..
 	if len(contentType) > 0 {
 		ct = strings.Join(contentType, ";")
 	}
+	// fmt.Println("post buf:", buf.String()) // Debug
 	resp, err := httpClient().Post(uri, ct, buf)
 	if err != nil {
 		return err

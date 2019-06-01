@@ -2,6 +2,7 @@ package wechat
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/esap/wechat/util"
 )
@@ -34,8 +35,8 @@ func (s *Server) AddTemplate(IdShort string) (id string, err error) {
 		return
 	}
 
-	if ret["errcode"].(int64) != 0 {
-		return "", errors.New(ret["errcode"].(string))
+	if fmt.Sprint(ret["errcode"]) != "0" {
+		return "", errors.New(fmt.Sprint(ret["errcode"]))
 	}
 
 	return ret["template_id"].(string), nil
@@ -51,8 +52,8 @@ func (s *Server) DelTemplate(id string) (err error) {
 		return
 	}
 
-	if ret["errcode"].(int64) != 0 {
-		return errors.New(ret["errcode"].(string))
+	if fmt.Sprint(ret["errcode"]) != "0" {
+		return errors.New(fmt.Sprint(ret["errcode"]))
 	}
 
 	return
@@ -66,15 +67,16 @@ func (s *Server) GetAllTemplate() (templist []MpTemplate, err error) {
 		return
 	}
 
-	if ret["errcode"].(int64) != 0 {
-		return nil, errors.New(ret["errcode"].(string))
+	if fmt.Sprint(ret["errcode"]) != "0" {
+		return nil, errors.New(fmt.Sprint(ret["errcode"]))
 	}
 
 	return ret["template_id"].([]MpTemplate), nil
 }
 
 // SendTemplate 发送模板消息，data通常是map[string]struct{value string,color string}
-func (s *Server) SendTemplate(to, id, url, appid, pagepath string, data interface{}) (msgid int64, err error) {
+func (s *Server) SendTemplate(to, id, url, appid, pagepath string, data interface{}) (msgid float64, err error) {
+
 	form := map[string]interface{}{
 		"touser":      to,
 		"template_id": id,
@@ -88,16 +90,15 @@ func (s *Server) SendTemplate(to, id, url, appid, pagepath string, data interfac
 	} else if url != "" {
 		form["url"] = url
 	}
-
 	ret := make(map[string]interface{})
-	err = util.PostJsonPtr(MP_SendTemplateMsg+s.GetAccessToken(), form, ret)
+	err = util.PostJsonPtr(MP_SendTemplateMsg+s.GetAccessToken(), form, &ret)
 	if err != nil {
 		return
 	}
 
-	if ret["errcode"].(int64) != 0 {
-		return 0, errors.New(ret["errcode"].(string))
+	if fmt.Sprint(ret["errcode"]) != "0" {
+		return 0, (errors.New(fmt.Sprint(ret["errcode"])))
 	}
 
-	return ret["msgid"].(int64), nil
+	return ret["msgid"].(float64), nil
 }

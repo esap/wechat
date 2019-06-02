@@ -73,7 +73,7 @@ func (s *Server) getAccessToken() (err error) {
 			return at.Error()
 		}
 		Printf("[%v::%v]:%+v", s.AppId, s.AgentId, *at)
-		at.ExpiresIn = time.Now().Unix() + 500
+		at.ExpiresIn = time.Now().Unix() +  at.ExpiresIn-5
 		s.accessToken = at
 		return
 	}

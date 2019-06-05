@@ -130,6 +130,7 @@ func (s *Server) GetMpUserList(openid ...string) (ul *MpUser, err error) {
 	return mpuser, mpuser.Error()
 }
 
+// GetMpUserInfo 获取用户详情
 func (s *Server) GetMpUserInfo(openid string, lang ...string) (user *MpUserInfo, err error) {
 	if len(lang) == 0 {
 		lang = append(lang, "zh_CN")

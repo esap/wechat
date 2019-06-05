@@ -21,7 +21,7 @@ type MpTemplate struct {
 	Title           string `json:"title"`
 	PrimaryIndustry string `json:"primary_industry"`
 	DeputyIndustry  string `json:"deputy_industry"`
-	Content         string `json:"template_id"`
+	Content         string `json:"content"`
 	Example         string `json:"example"`
 }
 

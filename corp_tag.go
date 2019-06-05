@@ -9,11 +9,12 @@ import (
 )
 
 const (
-	// CorpAPITagUsers 企业微信标签接口
+	// CorpAPITagList 企业微信标签接口
 	CorpAPITagList   = CorpAPI + `tag/list?access_token=`
 	CorpAPITagAdd    = CorpAPI + `tag/create?access_token=`
 	CorpAPITagUpdate = CorpAPI + `tag/update?access_token=`
 	CorpAPITagDel    = CorpAPI + `tag/delete?access_token=`
+
 	// CorpAPITagUsers 企业微信标签用户接口
 	CorpAPITagUsers    = CorpAPI + `tag/get?access_token=`
 	CorpAPIAddTagUsers = CorpAPI + `tag/addtagusers?access_token=`

@@ -62,22 +62,22 @@ func (s *Server) getAccessToken() (err error) {
 		Printf("使用外部函数获取token")
 		s.accessToken = s.ExternalTokenHandler(s.AppId)
 		return
-	} else {
-		Printf("使用本地机制获取token")
-		url := fmt.Sprintf(s.TokenUrl, s.AppId, s.Secret)
-		Printf(url)
-		at := new(AccessToken)
-		if err = util.GetJson(url, at); err != nil {
-			return
-		}
-		if at.ErrCode > 0 {
-			return at.Error()
-		}
-		Printf("[%v::%v]:%+v", s.AppId, s.AgentId, *at)
-		at.ExpiresIn = time.Now().Unix() + at.ExpiresIn - 5
-		s.accessToken = at
+	}
+	Printf("使用本地机制获取token")
+	url := fmt.Sprintf(s.TokenUrl, s.AppId, s.Secret)
+	Printf(url)
+	at := new(AccessToken)
+	if err = util.GetJson(url, at); err != nil {
 		return
 	}
+	if at.ErrCode > 0 {
+		return at.Error()
+	}
+	Printf("[%v::%v]:%+v", s.AppId, s.AgentId, *at)
+	at.ExpiresIn = time.Now().Unix() + at.ExpiresIn - 5
+	s.accessToken = at
+	return
+
 }
 
 // Ticket JS-SDK

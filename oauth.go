@@ -14,6 +14,7 @@ const (
 	CorpAPIJscode2session = "https://qyapi.weixin.qq.com/cgi-bin/miniprogram/jscode2session?access_token=%v&js_code=%v&grant_type=authorization_code"
 )
 
+// WxSession 兼容企业微信和服务号
 type WxSession struct {
 	WxErr
 	SessionKey string `json:"session_key"`

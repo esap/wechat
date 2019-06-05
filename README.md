@@ -44,11 +44,14 @@ func WxHandler(w http.ResponseWriter, r *http.Request) {
 
 * 创建其他实例，密文模式
 ```go
+	// 创建公众号实例(服务号/订阅号/小程序) 不带aesKey则为明文模式
+	app := wechat.New("token", "appId", "secret")
+
 	// 创建公众号实例(服务号/订阅号/小程序)
 	app := wechat.New("token", "appId", "secret", "aesKey")
 
 	// 创建企业号实例
-	app := wechat.New("token", "appId", "secret", "aesKey", "agentId")
+	app := wechat.NewEnt("token", "appId", "secret", "aesKey", "agentId")
 
 	// 实例化后其他业务操作
 	ctx := app.VerifyURL(w, r)

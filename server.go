@@ -64,7 +64,7 @@ type Server struct {
 }
 
 // New 微信服务容器，根据agentId判断是企业号或服务号
-func New(token, appid, secret, key string, agentId ...int) (s *Server) {
+func NewEnt(token, appid, secret, key string, agentId ...int) (s *Server) {
 	s = NewServer(nil)
 	if len(agentId) > 0 {
 		s.SetEnt(token, appid, secret, key, agentId[0])
@@ -77,6 +77,12 @@ func New(token, appid, secret, key string, agentId ...int) (s *Server) {
 	return s
 }
 
+// New 微信服务容器
+func New(token, appid, secret string, key ...string) (s *Server) {
+	s = NewServer(nil)
+	s.Set(token, appid, secret, key...)
+	return s
+}
 // NewServer 空容器
 func NewServer(f func(appId string) *AccessToken) *Server {
 	s := &Server{

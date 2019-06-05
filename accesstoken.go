@@ -65,6 +65,7 @@ func (s *Server) getAccessToken() (err error) {
 	} else {
 		Printf("使用本地机制获取token")
 		url := fmt.Sprintf(s.TokenUrl, s.AppId, s.Secret)
+		Printf(url)
 		at := new(AccessToken)
 		if err = util.GetJson(url, at); err != nil {
 			return

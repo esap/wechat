@@ -14,18 +14,17 @@ package main
 
 import (
 	"net/http"
+
 	"github.com/esap/wechat" // 微信SDK包
 )
 
 func main() {
 	wechat.Debug = true
-	wechat.Set("yourToken", "yourAppID", "yourSecret", "yourAesKey")
-	http.HandleFunc("/", WxHandler)
+	app := wechat.New("yourToken", "yourAppID", "yourSecret", "yourEncodingAesKey")
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		app.VerifyURL(w, r).NewText("客服消息1").Send().NewText("客服消息2").Send().NewText("查询OK").Reply()
+	})
 	http.ListenAndServe(":9090", nil)
-}
-
-func WxHandler(w http.ResponseWriter, r *http.Request) {
-	wechat.VerifyURL(w, r).NewText("这是客服消息").Send().NewText("这是被动回复").Reply()
 }
 
 ```

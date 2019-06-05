@@ -41,11 +41,6 @@ func (s *Server) GetUserOauth(code string) (o UserOauth, err error) {
 	return
 }
 
-// GetUserOauth 通过code鉴权
-func GetUserOauth(code string) (userOauth UserOauth, err error) {
-	return std.GetUserOauth(code)
-}
-
 // UserInfo 用户信息
 type UserInfo struct {
 	WxErr          `json:"-"`

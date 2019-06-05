@@ -3,23 +3,22 @@ Package wechat provide wechat-sdk for go
 
 5行代码，开启微信API示例:
 
-	package main
+package main
 
-	import (
-		"net/http"
-		"github.com/esap/wechat" // 微信SDK包
-	)
+import (
+	"net/http"
 
-	func main() {
-		wechat.Debug = true
-		wechat.Set("yourToken", "yourAppID", "yourSecret", "yourEncodingAesKey")
-		http.HandleFunc("/", WxHandler)
-		http.ListenAndServe(":9090", nil)
-	}
+	"github.com/esap/wechat" // 微信SDK包
+)
 
-	func WxHandler(w http.ResponseWriter, r *http.Request) {
-		wechat.VerifyURL(w, r).NewText("客服消息1").Send().NewText("客服消息2").Send().NewText("查询结果...").Reply()
-	}
+func main() {
+	wechat.Debug = true
+	app := wechat.New("yourToken", "yourAppID", "yourSecret", "yourEncodingAesKey")
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		app.VerifyURL(w, r).NewText("客服消息1").Send().NewText("客服消息2").Send().NewText("查询OK").Reply()
+	})
+	http.ListenAndServe(":9090", nil)
+}
 
 More info: https://github.com/esap/wechat
 

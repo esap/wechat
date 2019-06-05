@@ -33,11 +33,6 @@ func (s *Server) SetEnt(token, appId, secret, aeskey string, agentId ...int) (er
 	return nil
 }
 
-// SetEnt 初始化企业微信应用，设置token,corpid,secrat,aesKey
-func SetEnt(token, appId, secret, aeskey string, agentId ...int) (err error) {
-	return std.SetEnt(token, appId, secret, aeskey, agentId...)
-}
-
 // FetchUserList 定期获取AccessToken
 func (s *Server) FetchUserList() {
 	i := 0

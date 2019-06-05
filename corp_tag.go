@@ -8,8 +8,8 @@ import (
 	"github.com/esap/wechat/util"
 )
 
+// CorpAPITagList 企业微信标签接口
 const (
-	// CorpAPITagList 企业微信标签接口
 	CorpAPITagList   = CorpAPI + `tag/list?access_token=`
 	CorpAPITagAdd    = CorpAPI + `tag/create?access_token=`
 	CorpAPITagUpdate = CorpAPI + `tag/update?access_token=`

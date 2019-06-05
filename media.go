@@ -45,20 +45,10 @@ func (s *Server) MediaUpload(mediaType string, filename string) (media Media, er
 	return
 }
 
-// MediaUpload 临时素材上传
-func MediaUpload(mediaType string, filename string) (media Media, err error) {
-	return std.MediaUpload(mediaType, filename)
-}
-
 // GetMedia 下载临时素材
 func (s *Server) GetMedia(filename, mediaId string) error {
 	url := fmt.Sprintf(s.RootUrl+WXAPIMediaGet, s.GetAccessToken(), mediaId)
 	return util.GetFile(filename, url)
-}
-
-// GetMedia 下载临时素材
-func GetMedia(filename, mediaId string) error {
-	return std.GetMedia(filename, mediaId)
 }
 
 // GetMediaBytes 下载临时素材,返回body字节
@@ -67,29 +57,14 @@ func (s *Server) GetMediaBytes(mediaId string) ([]byte, error) {
 	return util.GetBody(url)
 }
 
-// GetMediaBytes 下载媒体,返回body字节
-func GetMediaBytes(mediaId string) ([]byte, error) {
-	return std.GetMediaBytes(mediaId)
-}
-
 // GetJsMedia 下载高清语言素材(通过JSSDK上传)
 func (s *Server) GetJsMedia(filename, mediaId string) error {
 	url := fmt.Sprintf(s.RootUrl+WXAPIMediaGetJssdk, s.GetAccessToken(), mediaId)
 	return util.GetFile(filename, url)
 }
 
-// GetJsMedia 下载高清语言素材(通过JSSDK上传)
-func GetJsMedia(filename, mediaId string) error {
-	return std.GetJsMedia(filename, mediaId)
-}
-
 // GetJsMediaBytes 下载高清语言素材,返回body字节
 func (s *Server) GetJsMediaBytes(mediaId string) ([]byte, error) {
 	url := fmt.Sprintf(s.RootUrl+WXAPIMediaGetJssdk, s.GetAccessToken(), mediaId)
 	return util.GetBody(url)
-}
-
-// GetJsMediaBytes 下载高清语言素材,返回body字节
-func GetJsMediaBytes(mediaId string) ([]byte, error) {
-	return std.GetMediaBytes(mediaId)
 }

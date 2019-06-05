@@ -32,9 +32,8 @@ const (
 var (
 	// Debug is a flag to Println()
 	Debug bool = false
-	std   *Server
 
-	// UserServerMap 其他实例集
+	// UserServerMap 通讯录实例集，用于企业微信
 	UserServerMap = make(map[string]*Server)
 )
 
@@ -70,7 +69,7 @@ func NewEnt(token, appid, secret, key string, agentId ...int) (s *Server) {
 	if len(agentId) > 0 {
 		s.SetEnt(token, appid, secret, key, agentId[0])
 		if agentId[0] == 9999999 {
-			UserServerMap[appid] = s
+			UserServerMap[appid] = s // 这里我们约定传入企业微信通讯录secret时，agentId=9999999
 		}
 	} else {
 		s.Set(token, appid, secret, key)
@@ -94,7 +93,7 @@ func NewServer(f func(appId string) *AccessToken) *Server {
 		JsApi:    WXAPIJsapi,
 	}
 	s.ExternalTokenHandler = f
-	std = s
+	// std = s
 	s.init()
 	return s
 }
@@ -129,12 +128,6 @@ func (s *Server) Set(tk, id, sec string, key ...string) (err error) {
 		Println("公众号获取AccessToken出错", err)
 	}
 	return nil
-}
-
-// Set 设置token,appId,secret
-func Set(tk, id, sec string, key ...string) (err error) {
-	std = NewServer(nil)
-	return std.Set(tk, id, sec, key...)
 }
 
 // VerifyURL 验证URL,验证成功则返回标准请求载体（Msg已解密）
@@ -198,11 +191,6 @@ func (s *Server) VerifyURL(w http.ResponseWriter, r *http.Request) (ctx *Context
 	// 	w.Write([]byte(ctx.Msg.PackageId))
 	// }
 	return
-}
-
-// VerifyURL 验证URL,验证成功则返回标准请求载体（Msg已解密）
-func VerifyURL(w http.ResponseWriter, r *http.Request) (ctx *Context) {
-	return std.VerifyURL(w, r)
 }
 
 // sortSha1 排序并sha1，主要用于计算signature

@@ -8,12 +8,12 @@ import (
 	"github.com/esap/wechat/util"
 )
 
-// WXAPI 企业号部门列表接口
+// CorpAPIDeptList 企业微信部门列表接口
 const (
-	WXAPI_DeptList   = WXAPI_ENT + `department/list?access_token=%s`
-	WXAPI_DeptAdd    = WXAPI_ENT + `department/create?access_token=`
-	WXAPI_DeptUpdate = WXAPI_ENT + `department/update?access_token=`
-	WXAPI_DeptDel    = WXAPI_ENT + `department/delete?access_token=`
+	CorpAPIDeptList   = CorpAPI + `department/list?access_token=%s`
+	CorpAPIDeptAdd    = CorpAPI + `department/create?access_token=`
+	CorpAPIDeptUpdate = CorpAPI + `department/update?access_token=`
+	CorpAPIDeptDel    = CorpAPI + `department/delete?access_token=`
 )
 
 type (
@@ -43,7 +43,7 @@ func (s *Server) SyncDeptList() (err error) {
 
 // GetDeptList 获取部门列表
 func (s *Server) GetDeptList() (dl DeptList, err error) {
-	url := fmt.Sprintf(WXAPI_DeptList, s.GetUserAccessToken())
+	url := fmt.Sprintf(CorpAPIDeptList, s.GetUserAccessToken())
 	if err = util.GetJson(url, &dl); err != nil {
 		return
 	}
@@ -63,18 +63,18 @@ func (s *Server) GetDeptIdList() (deptIdlist []int) {
 
 // DeptAdd 获取部门列表
 func (s *Server) DeptAdd(dept *Department) (err error) {
-	return s.doUpdate(WXAPI_DeptAdd, dept)
+	return s.doUpdate(CorpAPIDeptAdd, dept)
 }
 
 // DeptUpdate 获取部门列表
 func (s *Server) DeptUpdate(dept *Department) (err error) {
-	return s.doUpdate(WXAPI_DeptUpdate, dept)
+	return s.doUpdate(CorpAPIDeptUpdate, dept)
 }
 
 // DeptDelete 删除部门
 func (s *Server) DeptDelete(Id int) (err error) {
 	e := new(WxErr)
-	if err = util.GetJson(WXAPI_DeptDel+s.GetUserAccessToken()+"&id="+fmt.Sprint(Id), e); err != nil {
+	if err = util.GetJson(CorpAPIDeptDel+s.GetUserAccessToken()+"&id="+fmt.Sprint(Id), e); err != nil {
 		return
 	}
 	return e.Error()

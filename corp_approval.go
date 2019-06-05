@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	// WXAPIGetApproval  企业号审批数据获取接口
-	WXAPIGetApproval = WXAPI_ENT + "corp/getapprovaldata?access_token="
+	// CorpAPIGetApproval  企业微信审批数据获取接口
+	CorpAPIGetApproval = CorpAPI + "corp/getapprovaldata?access_token="
 	// CorpApprovalAgentID  审批AgentId
 	CorpApprovalAgentID = 3010040
 )
@@ -76,7 +76,7 @@ type (
 
 // GetApproval 获取审批数据
 func (s *Server) GetApproval(start, end, nextNum int64) (sdr *SpDataRet, err error) {
-	url := WXAPIGetApproval + s.GetAccessToken()
+	url := CorpAPIGetApproval + s.GetAccessToken()
 	sdr = new(SpDataRet)
 	if err = util.PostJsonPtr(url, spDataReq{start, end, nextNum}, sdr); err != nil {
 		log.Println("GetApproval:PostJsonPtr err:", err)

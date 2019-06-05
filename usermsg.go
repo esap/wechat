@@ -40,49 +40,6 @@ type (
 			ScanType   string
 			ScanResult string
 		}
-
-		AgentType string
-		ItemCount int
-		PackageId string
-
-		Item []struct {
-			FromUserName string
-			CreateTime   int64
-			MsgType      string
-			Event        string // event
-			Name         string
-			Owner        string
-			AddUserList  string
-			DelUserList  string
-			ChatId       string
-			MsgId        int64
-
-			ChatInfo struct {
-				ChatId   string
-				Name     string
-				Owner    string
-				UserList string
-			}
-
-			Content  string // text
-			Receiver struct {
-				Type string
-				Id   string
-			}
-
-			FileName string // file
-			PicUrl   string // image/link
-			MediaId  string // image/voice/video/shortvideo
-
-			Location_X float32 // location
-			Location_Y float32 // location
-			Scale      int     // location
-			Label      string  // location
-
-			Title       string // link
-			Description string // link
-			Url         string // link
-		}
 	}
 
 	// WxMsgEnc 加密的用户消息

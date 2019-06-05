@@ -5,24 +5,24 @@ import (
 	"time"
 )
 
-// WXAPI_ENT 企业号接口
+// CorpAPI 企业微信接口，相关接口常量统一以此开头
 const (
-	WXAPI_ENT       = "https://qyapi.weixin.qq.com/cgi-bin/"
-	WXAPI_TOKEN_ENT = WXAPI_ENT + "gettoken?corpid=%s&corpsecret=%s"
-	WXAPI_MSG_ENT   = WXAPI_ENT + "message/send?access_token="
-	WXAPI_JSAPI_ENT = WXAPI_ENT + "get_jsapi_ticket?access_token="
+	CorpAPI      = "https://qyapi.weixin.qq.com/cgi-bin/"
+	CorpAPIToken = CorpAPI + "gettoken?corpid=%s&corpsecret=%s"
+	CorpAPIMsg   = CorpAPI + "message/send?access_token="
+	CorpAPIJsapi = CorpAPI + "get_jsapi_ticket?access_token="
 )
 
-// SetEnt 初始化企业号，设置token,corpid,secrat,aesKey
+// SetEnt 初始化企业微信应用，设置token,corpid,secrat,aesKey
 func (s *Server) SetEnt(token, appId, secret, aeskey string, agentId ...int) (err error) {
 	s.Token, s.AppId, s.Secret, s.SafeMode, s.EntMode = token, appId, secret, true, true
 	if len(agentId) > 0 {
 		s.AgentId = agentId[0]
 	}
-	s.RootUrl = WXAPI_ENT
-	s.MsgUrl = WXAPI_MSG_ENT
-	s.TokenUrl = WXAPI_TOKEN_ENT
-	s.JsApi = WXAPI_JSAPI_ENT
+	s.RootUrl = CorpAPI
+	s.MsgUrl = CorpAPIMsg
+	s.TokenUrl = CorpAPIToken
+	s.JsApi = CorpAPIJsapi
 	if aeskey != "" {
 		s.AesKey, err = base64.StdEncoding.DecodeString(aeskey + "=")
 		if err != nil {
@@ -33,7 +33,7 @@ func (s *Server) SetEnt(token, appId, secret, aeskey string, agentId ...int) (er
 	return nil
 }
 
-// SetEnt 初始化企业号，设置token,corpid,secrat,aesKey
+// SetEnt 初始化企业微信应用，设置token,corpid,secrat,aesKey
 func SetEnt(token, appId, secret, aeskey string, agentId ...int) (err error) {
 	return std.SetEnt(token, appId, secret, aeskey, agentId...)
 }

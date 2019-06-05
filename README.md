@@ -3,7 +3,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/esap/wechat)](https://goreportcard.com/report/github.com/esap/wechat)
 [![GoDoc](http://godoc.org/github.com/esap/wechat?status.svg)](http://godoc.org/github.com/esap/wechat)
 
-**微信SDK的golang实现，短小精悍，同时兼容【企业号/服务号/订阅号/小程序】**
+**微信SDK的golang实现，短小精悍，同时兼容【企业微信/服务号/订阅号/小程序】**
 
 ## 快速开始
 
@@ -96,49 +96,6 @@ type WxMsg struct {
 	ScanCodeInfo struct {
 		ScanType   string
 		ScanResult string
-	}
-
-	AgentType string
-	ItemCount int
-	PackageId string
-
-	Item []struct {
-		FromUserName string
-		CreateTime   int64
-		MsgType      string
-		Event        string // event
-		Name         string
-		Owner        string
-		AddUserList  string
-		DelUserList  string
-		ChatId       string
-		MsgId        int64
-
-		ChatInfo struct {
-			ChatId   string
-			Name     string
-			Owner    string
-			UserList string
-		}
-
-		Content  string // text
-		Receiver struct {
-			Type string
-			Id   string
-		}
-
-		FileName string // file
-		PicUrl   string // image/link
-		MediaId  string // image/voice/video/shortvideo
-
-		Location_X float32 // location
-		Location_Y float32 // location
-		Scale      int     // location
-		Label      string  // location
-
-		Title       string // link
-		Description string // link
-		Url         string // link
 	}
 }
 

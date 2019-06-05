@@ -8,15 +8,19 @@ import (
 	"github.com/esap/wechat/util"
 )
 
-// WXAPI 企业微信用户列表接口
 const (
-	WXAPI_GetUser        = WXAPI_ENT + "user/getuserinfo?access_token=%s&code=%s"
-	WXAPI_GetUserInfo    = WXAPI_ENT + "user/get?access_token=%s&userid=%s"
-	WXAPI_UserList       = WXAPI_ENT + `user/list?access_token=%s&department_id=1&fetch_child=1`
-	WXAPI_UserSimpleList = WXAPI_ENT + `user/simplelist?access_token=%s&department_id=1&fetch_child=1`
-	WXAPI_UserAdd        = WXAPI_ENT + `user/create?access_token=`
-	WXAPI_UserUpdate     = WXAPI_ENT + `user/update?access_token=`
-	WXAPI_UserDel        = WXAPI_ENT + `user/delete?access_token=`
+	// CorpAPIGetUserOauth 企业微信用户oauth2认证接口
+	CorpAPIGetUserOauth = CorpAPI + "user/getuserinfo?access_token=%s&code=%s"
+
+	// CorpAPIUserList 企业微信用户列表
+	CorpAPIUserList       = CorpAPI + `user/list?access_token=%s&department_id=1&fetch_child=1`
+	CorpAPIUserSimpleList = CorpAPI + `user/simplelist?access_token=%s&department_id=1&fetch_child=1`
+
+	// CorpAPIUserGet 企业微信用户接口
+	CorpAPIUserGet    = CorpAPI + "user/get?access_token=%s&userid=%s"
+	CorpAPIUserAdd    = CorpAPI + `user/create?access_token=`
+	CorpAPIUserUpdate = CorpAPI + `user/update?access_token=`
+	CorpAPIUserDel    = CorpAPI + `user/delete?access_token=`
 )
 
 // UserOauth 用户鉴权信息
@@ -29,7 +33,7 @@ type UserOauth struct {
 
 // GetUserOauth 通过code鉴权
 func (s *Server) GetUserOauth(code string) (o UserOauth, err error) {
-	url := fmt.Sprintf(WXAPI_GetUser, s.GetAccessToken(), code)
+	url := fmt.Sprintf(CorpAPIGetUserOauth, s.GetAccessToken(), code)
 	if err = util.GetJson(url, &o); err != nil {
 		return
 	}
@@ -78,18 +82,18 @@ type Extattr struct {
 
 // UserAdd 添加用户
 func (s *Server) UserAdd(user *UserInfo) (err error) {
-	return s.doUpdate(WXAPI_UserAdd, user)
+	return s.doUpdate(CorpAPIUserAdd, user)
 }
 
 // UserUpdate 添加用户
 func (s *Server) UserUpdate(user *UserInfo) (err error) {
-	return s.doUpdate(WXAPI_UserUpdate, user)
+	return s.doUpdate(CorpAPIUserUpdate, user)
 }
 
 // UserDelete 删除用户
 func (s *Server) UserDelete(user string) (err error) {
 	e := new(WxErr)
-	if err = util.GetJson(WXAPI_UserDel+s.GetUserAccessToken()+"&userid="+user, e); err != nil {
+	if err = util.GetJson(CorpAPIUserDel+s.GetUserAccessToken()+"&userid="+user, e); err != nil {
 		return
 	}
 	return e.Error()
@@ -97,7 +101,7 @@ func (s *Server) UserDelete(user string) (err error) {
 
 // GetUserInfo 从企业号通过userId获取用户信息
 func (s *Server) GetUserInfo(userId string) (user UserInfo, err error) {
-	url := fmt.Sprintf(WXAPI_GetUserInfo, s.GetUserAccessToken(), userId)
+	url := fmt.Sprintf(CorpAPIUserGet, s.GetUserAccessToken(), userId)
 	if err = util.GetJson(url, &user); err != nil {
 		return
 	}
@@ -143,7 +147,7 @@ func (s *Server) SyncUserList() (err error) {
 
 // GetUserList 获取用户详情列表
 func (s *Server) GetUserList() (u userList, err error) {
-	url := fmt.Sprintf(WXAPI_UserList, s.GetUserAccessToken())
+	url := fmt.Sprintf(CorpAPIUserList, s.GetUserAccessToken())
 	if err = util.GetJson(url, &u); err != nil {
 		return
 	}
@@ -153,7 +157,7 @@ func (s *Server) GetUserList() (u userList, err error) {
 
 // GetUserSimpleList 获取用户列表
 func (s *Server) GetUserSimpleList() (u userList, err error) {
-	url := fmt.Sprintf(WXAPI_UserSimpleList, s.GetUserAccessToken())
+	url := fmt.Sprintf(CorpAPIUserSimpleList, s.GetUserAccessToken())
 	if err = util.GetJson(url, &u); err != nil {
 		return
 	}

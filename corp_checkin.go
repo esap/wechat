@@ -5,10 +5,10 @@ import (
 )
 
 const (
-	// WXAPICheckIn 企业号打开数据获取接口
-	WXAPICheckIn = WXAPI_ENT + "checkin/getcheckindata?access_token="
-	// CorpGetCheckInAgentID  打卡AgentId
-	CorpGetCheckInAgentID = 3010011
+	// CorpAPICheckInGet 企业微信打开数据获取接口
+	CorpAPICheckInGet = CorpAPI + "checkin/getcheckindata?access_token="
+	// CorpCheckInAgentID  打卡AgentId
+	CorpCheckInAgentID = 3010011
 )
 
 type (
@@ -43,7 +43,7 @@ type (
 
 // GetCheckIn 获取打卡数据,Namelist用户列表不超过100个。若用户超过100个，请分批获取
 func (s *Server) GetCheckIn(opType, start, end int64, Namelist []string) (dkdata []DkData, err error) {
-	url := WXAPICheckIn + s.GetAccessToken()
+	url := CorpAPICheckInGet + s.GetAccessToken()
 	data := new(DkDataRet)
 	if err = util.PostJsonPtr(url, dkDataReq{opType, start, end, Namelist}, data); err != nil {
 		return

@@ -6,11 +6,11 @@ import (
 	"github.com/esap/wechat/util"
 )
 
-// MP 公众号接口
+// MPUserGetList 公众号用户接口
 const (
-	MP_GetUserList = WXAPI + "user/get?access_token=%s&next_openid=%s"
-	MP_BatchGet    = WXAPI + "user/info/batchget?access_token="
-	MP_GetUserInfo = WXAPI + "user/info?access_token=%s&openid=%v&lang=%v"
+	MPUserGetList  = WXAPI + "user/get?access_token=%s&next_openid=%s"
+	MPUserBatchGet = WXAPI + "user/info/batchget?access_token="
+	MPUserInfo     = WXAPI + "user/info?access_token=%s&openid=%v&lang=%v"
 )
 
 type (
@@ -38,7 +38,7 @@ type (
 		TagIdList     []int `json:"tagid_list"`
 	}
 
-	// MpUser 公众号用户
+	// MpUser 服务号用户
 	MpUser struct {
 		WxErr
 		Total int
@@ -91,7 +91,7 @@ func (s *Server) BatchGet(ul []string) (ui []MpUserInfo, err error) {
 		m[k]["openid"] = v
 	}
 	ml := new(MpUserInfoList)
-	err = util.PostJsonPtr(MP_BatchGet+s.GetAccessToken(), MpUserListReq{m}, ml)
+	err = util.PostJsonPtr(MPUserBatchGet+s.GetAccessToken(), MpUserListReq{m}, ml)
 	return ml.MpUserInfoList, ml.Error()
 }
 
@@ -123,7 +123,7 @@ func (s *Server) GetMpUserList(openid ...string) (ul *MpUser, err error) {
 		openid = append(openid, "")
 	}
 	mpuser := new(MpUser)
-	url := fmt.Sprintf(MP_GetUserList, s.GetAccessToken(), openid[0])
+	url := fmt.Sprintf(MPUserGetList, s.GetAccessToken(), openid[0])
 	if err = util.GetJson(url, &mpuser); err != nil {
 		return
 	}
@@ -135,7 +135,7 @@ func (s *Server) GetMpUserInfo(openid string, lang ...string) (user *MpUserInfo,
 		lang = append(lang, "zh_CN")
 	}
 	user = new(MpUserInfo)
-	url := fmt.Sprintf(MP_GetUserInfo, s.GetAccessToken(), openid, lang[0])
+	url := fmt.Sprintf(MPUserInfo, s.GetAccessToken(), openid, lang[0])
 	if err = util.GetJson(url, &user); err != nil {
 		return
 	}

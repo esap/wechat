@@ -74,7 +74,7 @@ func (s *Server) getAccessToken() (err error) {
 			return at.Error()
 		}
 		Printf("[%v::%v]:%+v", s.AppId, s.AgentId, *at)
-		at.ExpiresIn = time.Now().Unix() +  at.ExpiresIn-5
+		at.ExpiresIn = time.Now().Unix() + at.ExpiresIn - 5
 		s.accessToken = at
 		return
 	}
@@ -140,6 +140,6 @@ func (s *Server) GetJsConfig(Url string) *JsConfig {
 	jc.JsApiList = []string{"scanQRCode"}
 	jc.Url = Url
 	jc.App = s.AgentId
-	Println("jsconfig:", jc) //debug
+	Println("jsconfig:", jc) // Debug
 	return jc
 }

@@ -8,15 +8,16 @@ import (
 	"github.com/esap/wechat/util"
 )
 
-// WXAPI 企业号标签接口
 const (
-	WXAPI_TagList     = WXAPI_ENT + `tag/list?access_token=`
-	WXAPI_TagUsers    = WXAPI_ENT + `tag/get?access_token=`
-	WXAPI_AddTagUsers = WXAPI_ENT + `tag/addtagusers?access_token=`
-	WXAPI_DelTagUsers = WXAPI_ENT + `tag/deltagusers?access_token=`
-	WXAPI_TagAdd      = WXAPI_ENT + `tag/create?access_token=`
-	WXAPI_TagUpdate   = WXAPI_ENT + `tag/update?access_token=`
-	WXAPI_TagDel      = WXAPI_ENT + `tag/delete?access_token=`
+	// CorpAPITagUsers 企业微信标签接口
+	CorpAPITagList   = CorpAPI + `tag/list?access_token=`
+	CorpAPITagAdd    = CorpAPI + `tag/create?access_token=`
+	CorpAPITagUpdate = CorpAPI + `tag/update?access_token=`
+	CorpAPITagDel    = CorpAPI + `tag/delete?access_token=`
+	// CorpAPITagUsers 企业微信标签用户接口
+	CorpAPITagUsers    = CorpAPI + `tag/get?access_token=`
+	CorpAPIAddTagUsers = CorpAPI + `tag/addtagusers?access_token=`
+	CorpAPIDelTagUsers = CorpAPI + `tag/deltagusers?access_token=`
 )
 
 type (
@@ -68,7 +69,7 @@ func (s *Server) SyncTagList() (err error) {
 // GetTagList 获取标签列表
 func (s *Server) GetTagList() (l TagList, err error) {
 	l = TagList{}
-	url := WXAPI_TagList + s.GetUserAccessToken()
+	url := CorpAPITagList + s.GetUserAccessToken()
 	if err = util.GetJson(url, &l); err != nil {
 		return
 	}
@@ -87,18 +88,18 @@ func (s *Server) GetTagIdList() (tagIdlist []int) {
 
 // TagAdd 获取标签列表
 func (s *Server) TagAdd(Tag *Tag) (err error) {
-	return s.doUpdate(WXAPI_TagAdd, Tag)
+	return s.doUpdate(CorpAPITagAdd, Tag)
 }
 
 // TagUpdate 获取标签列表
 func (s *Server) TagUpdate(Tag *Tag) (err error) {
-	return s.doUpdate(WXAPI_TagUpdate, Tag)
+	return s.doUpdate(CorpAPITagUpdate, Tag)
 }
 
 // TagDelete 删除用户
 func (s *Server) TagDelete(TagId int) (err error) {
 	e := new(WxErr)
-	if err = util.GetJson(WXAPI_TagDel+s.GetUserAccessToken()+"&tagid="+fmt.Sprint(TagId), e); err != nil {
+	if err = util.GetJson(CorpAPITagDel+s.GetUserAccessToken()+"&tagid="+fmt.Sprint(TagId), e); err != nil {
 		return
 	}
 	return e.Error()
@@ -107,7 +108,7 @@ func (s *Server) TagDelete(TagId int) (err error) {
 // GetTagUsers 获取标签下的成员
 func (s *Server) GetTagUsers(id int) (tu *TagUsers, err error) {
 	tu = new(TagUsers)
-	err = util.GetJson(WXAPI_TagUsers+s.GetUserAccessToken()+"&tagid="+fmt.Sprint(id), tu)
+	err = util.GetJson(CorpAPITagUsers+s.GetUserAccessToken()+"&tagid="+fmt.Sprint(id), tu)
 	return
 }
 
@@ -121,7 +122,7 @@ func (s *Server) AddTagUsers(id int, userlist []string, partylist []int) error {
 			end = leng
 		}
 		b := TagUserBody{TagId: id, UserList: userlist[i*1000 : end], PartyList: partylist}
-		url := WXAPI_AddTagUsers + s.GetUserAccessToken()
+		url := CorpAPIAddTagUsers + s.GetUserAccessToken()
 		if err := util.PostJsonPtr(url, b, e); err != nil {
 			return err
 		}
@@ -132,7 +133,7 @@ func (s *Server) AddTagUsers(id int, userlist []string, partylist []int) error {
 // DelTagUsers 删除标签成员
 func (s *Server) DelTagUsers(id int, userlist []string) error {
 	b := TagUserBody{TagId: id, UserList: userlist}
-	return s.doUpdate(WXAPI_DelTagUsers, b)
+	return s.doUpdate(CorpAPIDelTagUsers, b)
 }
 
 // GetTagName 通过标签id获取标签名称

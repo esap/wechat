@@ -13,11 +13,12 @@ const (
 	TypeVoice    = "voice"
 	TypeMusic    = "music"
 	TypeVideo    = "video"
-	TypeTextcard = "textcard" // 仅企业号可用
+	TypeTextcard = "textcard" // 仅企业微信可用
 	TypeWxCard   = "wxcard"   // 仅服务号可用
-	TypeFile     = "file"     // 仅企业号可用
+	TypeMarkDown = "markdown" // 仅企业微信可用
+	TypeFile     = "file"     // 仅企业微信可用
 	TypeNews     = "news"
-	TypeMpNews   = "mpnews" // 仅企业号可用
+	TypeMpNews   = "mpnews" // 仅企业微信可用
 	TypeThumb    = "thumb"
 )
 
@@ -221,7 +222,7 @@ func NewTextcard(to string, id int, title, description, url string) Textcard {
 	return std.NewTextcard(to, id, title, description, url)
 }
 
-// Music 音乐消息，企业号不支持
+// Music 音乐消息，企业微信不支持
 type (
 	Music struct {
 		wxResp
@@ -286,7 +287,7 @@ func NewArticle(title, desc, picUrl, url string) Article {
 }
 
 type (
-	// MpNews 加密新闻消息，仅企业号支持
+	// MpNews 加密新闻消息，仅企业微信支持
 	MpNews struct {
 		wxResp
 		MpNews struct {
@@ -303,26 +304,26 @@ type (
 	}
 )
 
-// NewMpNews 加密新闻mpnews消息(仅企业号可用)
+// NewMpNews 加密新闻mpnews消息(仅企业微信可用)
 func (s *Server) NewMpNews(to string, id int, arts ...MpArticle) (news MpNews) {
 	news.wxResp = s.newWxResp(TypeMpNews, to, id)
 	news.MpNews.Articles = arts
 	return
 }
 
-// NewMpNewsId 加密新闻mpnews消息(仅企业号可用)
+// NewMpNewsId 加密新闻mpnews消息(仅企业微信可用)
 func (s *Server) NewMpNewsId(to string, id int, mediaId string) (news MpNewsId) {
 	news.wxResp = s.newWxResp(TypeMpNews, to, id)
 	news.MpNews.MediaId = CDATA(mediaId)
 	return
 }
 
-// NewMpNews 加密新闻mpnews消息(仅企业号可用)
+// NewMpNews 加密新闻mpnews消息(仅企业微信可用)
 func NewMpNews(to string, id int, arts ...MpArticle) (news MpNews) {
 	return std.NewMpNews(to, id, arts...)
 }
 
-// NewMpNewsId 加密新闻mpnews消息(仅企业号可用)
+// NewMpNewsId 加密新闻mpnews消息(仅企业微信可用)
 func NewMpNewsId(to string, id int, mediaId string) (news MpNewsId) {
 	return std.NewMpNewsId(to, id, mediaId)
 }
@@ -358,6 +359,26 @@ func (s *Server) NewWxCard(to string, id int, cardId string) (c WxCard) {
 }
 
 // NewWxCard 卡券消息，服务号可用
-func NewWxCard(to string, id int, cardId string) (c WxCard) {
+func NewWxCard(to string, id int, cardId string) WxCard {
 	return std.NewWxCard(to, id, cardId)
+}
+
+// MarkDown markdown消息，仅企业微信支持，上限2048字节，utf-8编码
+type MarkDown struct {
+	wxResp
+	MarkDown struct {
+		Content string `json:"content"`
+	} `json:"markdown"`
+}
+
+// NewMarkDown markdown消息，企业微信可用
+func (s *Server) NewMarkDown(to string, id int, content string) (md MarkDown) {
+	md.wxResp = s.newWxResp(TypeMarkDown, to, id)
+	md.MarkDown.Content = content
+	return
+}
+
+// NewMarkDown markdown消息，企业微信可用
+func NewMarkDown(to string, id int, content string) MarkDown {
+	return std.NewMarkDown(to, id, content)
 }

@@ -19,7 +19,6 @@ const (
 	TypeFile     = "file"     // 仅企业微信可用
 	TypeNews     = "news"
 	TypeMpNews   = "mpnews" // 仅企业微信可用
-	TypeThumb    = "thumb"
 )
 
 //WxErr 通用错误

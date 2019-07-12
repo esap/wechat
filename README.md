@@ -20,88 +20,132 @@ import (
 
 func main() {
 	wechat.Debug = true
-	app := wechat.New("yourToken", "yourAppID", "yourSecret", "yourEncodingAesKey")
+	
+	cfg := &wechat.WxConfig{
+		Token:          "yourToken",
+		AppId:          "yourAppID",
+		Secret:         "yourSecret",
+		EncodingAESKey: "yourEncodingAesKey",
+	}
+
+	app := wechat.New(cfg)
+	
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		app.VerifyURL(w, r).NewText("客服消息1").Send().NewText("客服消息2").Send().NewText("查询OK").Reply()
 	})
+	
 	http.ListenAndServe(":9090", nil)
 }
 
 ```
 ## 配置方式
 
-* 创建实例，密文模式
 ```go
 	// 创建公众号实例(服务号/订阅号/小程序) 不带aesKey则为明文模式
-	app := wechat.New("token", "appId", "secret")
+	cfg := &wechat.WxConfig{
+		Token:          "yourToken",
+		AppId:          "yourAppID",
+		Secret:         "yourSecret",
+	}
 
 	// 创建公众号实例(服务号/订阅号/小程序)
-	app := wechat.New("token", "appId", "secret", "aesKey")
+	cfg := &wechat.WxConfig{
+		Token:          "yourToken",
+		AppId:          "yourAppID",
+		Secret:         "yourSecret",
+		EncodingAESKey: "yourEncodingAesKey",
+	}
 
 	// 创建企业微信实例
-	app := wechat.NewEnt("token", "appId", "secret", "aesKey", "agentId")
-
-	// 实例化后其他业务操作
-	ctx := app.VerifyURL(w, r)
-	ctx.NewText("这是客服消息").Send().NewText("这是被动回复").Reply()
+	cfg := &wechat.WxConfig{
+		Token:          "yourToken",
+		AppId:          "yourCorpID",
+		Secret:         "yourSecret",
+		EncodingAESKey: "yourEncodingAesKey",
+		AppType:        1,
+	}
 ```
 
-## 消息管理
+### 直接发提醒消息
+
+用户关注后，企业微信可以直接发，服务号需要用户48小时内进入过。
+
+```go
+	app.SendText(to, agentId, msg)
+	app.SendImage(to, id, mediaId)
+	app.SendVoice(to, id, mediaId)
+	app.SendFile(to, id, mediaId)
+	app.SendVideo(to, id, mediaId, title, desc)
+	app.SendTextcard(to, id, title, desc, url)
+	app.SendMusic(to, id, mediaId, title, desc, musicUrl, qhMusicUrl)
+	app.SendNews(to, id, arts...)
+	app.SendMpNews(to, id, arts...)
+	app.SendMpNewsId(to, id, mediaId)
+	app.SendMarkDown(to, id, content)
+```
+
+## 消息回调
 
 * 通常将`app.VerifyURL(http.ResponseWriter, *http.Request)`嵌入http handler
 
 该函数返回`*wechat.Context`基本对象，其中的Msg为用户消息：
 
 ```go
-// 混合用户消息，业务判断的主体
-type WxMsg struct {
-	XMLName      xml.Name `xml:"xml"`
-	ToUserName   string
-	FromUserName string
-	CreateTime   int64
-	MsgId        int64
-	MsgType      string
-	Content      string  // text
-	AgentID      int     // corp
-	PicUrl       string  // image
-	MediaId      string  // image/voice/video/shortvideo
-	Format       string  // voice
-	Recognition  string  // voice
-	ThumbMediaId string  // video
-	LocationX    float32 `xml:"Latitude"`  // location
-	LocationY    float32 `xml:"Longitude"` // location
-	Precision    float32 // LOCATION
-	Scale        int     // location
-	Label        string  // location
-	Title        string  // link
-	Description  string  // link
-	Url          string  // link
-	Event        string  // event
-	EventKey     string  // event
-	SessionFrom  string  // event|user_enter_tempsession
-	Ticket       string
+	// 混合用户消息，业务判断的主体
+	WxMsg struct {
+		XMLName      xml.Name `xml:"xml"`
+		ToUserName  
+		FromUserName
+		CreateTime  64
+		MsgId       64
+		MsgType     
+		Content       // text
+		AgentID          // corp
+		PicUrl        // image
+		MediaId       // image/voice/video/shortvideo
+		Format        // voice
+		Recognition   // voice
+		ThumbMediaId  // video
+		LocationX    float32 `xml:"Latitude"`  // location
+		LocationY    float32 `xml:"Longitude"` // location
+		Precision    float32 // LOCATION
+		Scale            // location
+		Label         // location
+		Title         // link
+		Description   // link
+		Url           // link
+		Event         // event
+		EventKey      // event
+		SessionFrom   // event|user_enter_tempsession
+		Ticket      
+		FileKey     
+		FileMd5     
+		FileTotalLen
 
-	ScanCodeInfo struct {
-		ScanType   string
-		ScanResult string
+		ScanCodeInfo struct {
+			ScanType  
+			ScanResult
+		}
 	}
-}
 
 ```
 
 * 如果使用其他web框架，例如echo/gin/beego等，则把VerifyURL()放入controller或handler
 
 ```go
-// echo示例 企业号回调接口
+// echo示例 公众号回调接口
 func wxApiPost(c echo.Context) error {
 	ctx := app.VerifyURL(c.Response().Writer, c.Request())
+	
 	// TODO: 这里是其他业务操作
+
 	return nil
 }
 ```
-### 回复消息
 
-回复消息有两种方式：
+### 回调回复消息
+
+回调回复消息有两种方式：
 
 * 被动回复，采用XML格式编码返回(Reply)；
 
@@ -173,8 +217,8 @@ func wxApiPost(c echo.Context) error {
 
 ```go
 	tlpdata := map[string]struct {
-		Value string `json:"value"`
-		Color string `json:"color"`
+		Value `json:"value"`
+		Color `json:"color"`
 	}{
 		"first": {Value: "我是渣渣涛", Color: "#173177"},
 		"keyword1": {Value: "这是一个你从没有玩过的全新游戏", Color: "#173177"},
@@ -182,7 +226,7 @@ func wxApiPost(c echo.Context) error {
 		"keyword3": {Value: "你就会爱上这款游戏", Color: "#4B1515"},
 		"remark":   {Value: "是兄弟就来砍我", Color: "#071D42"},
 	}
-	msgid,_ := ctx.SendTemplate(
+	ctx.SendTemplate(
 		ctx.Msg.FromUserName,
 		"tempid", // 模板ID
 		c.Request.Host, // 跳转url

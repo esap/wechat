@@ -61,7 +61,7 @@ func (c *Context) Send() *Context {
 
 // SendAdd 添加主动消息队列(客服)
 func (c *Context) SendAdd() *Context {
-	c.MsgQueueAdd(c.Resp)
+	c.AddMsg(c.Resp)
 	return c
 }
 

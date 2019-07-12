@@ -30,7 +30,6 @@ type Media struct {
 //	TypeVoice  = "voice"
 //	TypeVideo  = "video"
 //	TypeFile   = "file" // 仅企业微信可用
-//	TypeThumb  = "thumb"
 func (s *Server) MediaUpload(mediaType string, filename string) (media Media, err error) {
 	uri := fmt.Sprintf(s.RootUrl+WXAPIMediaUpload, s.GetAccessToken(), mediaType)
 	var b []byte

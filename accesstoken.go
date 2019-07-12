@@ -49,13 +49,12 @@ func (s *Server) GetUserAccessToken() string {
 
 func (s *Server) getAccessToken() (err error) {
 	if s.ExternalTokenHandler != nil {
-		Printf("使用外部函数获取token")
-		s.accessToken = s.ExternalTokenHandler(s.AppId)
+		Printf("远程获取token")
+		s.accessToken = s.ExternalTokenHandler(s.AppId, s.AppName)
 		return
 	}
-	Printf("使用本地机制获取token")
+	Printf("本地获取token")
 	url := fmt.Sprintf(s.TokenUrl, s.AppId, s.Secret)
-	Printf(url)
 	at := new(AccessToken)
 	if err = util.GetJson(url, at); err != nil {
 		return
@@ -63,7 +62,7 @@ func (s *Server) getAccessToken() (err error) {
 	if at.ErrCode > 0 {
 		return at.Error()
 	}
-	Printf("[%v::%v]:%+v", s.AppId, s.AgentId, *at)
+	Printf("%v[%v]:%+v", s.AppId, s.AgentId, *at)
 	at.ExpiresIn = time.Now().Unix() + at.ExpiresIn - 5
 	s.accessToken = at
 	return
@@ -126,7 +125,7 @@ func (s *Server) GetJsConfig(Url string) *JsConfig {
 	jc := &JsConfig{Beta: true, Debug: Debug, AppId: s.AppId}
 	jc.Timestamp = time.Now().Unix()
 	jc.Nonsestr = "esap"
-	jc.Signature = sortSha1(fmt.Sprintf("jsapi_ticket=%v&noncestr=%v&timestamp=%v&url=%v", s.GetTicket(), jc.Nonsestr, jc.Timestamp, Url))
+	jc.Signature = util.SortSha1(fmt.Sprintf("jsapi_ticket=%v&noncestr=%v&timestamp=%v&url=%v", s.GetTicket(), jc.Nonsestr, jc.Timestamp, Url))
 	// TODO：可加入其他apilist
 	jc.JsApiList = []string{"scanQRCode"}
 	jc.Url = Url

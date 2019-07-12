@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/esap/wechat/util"
 )
@@ -129,6 +130,25 @@ func (s *Server) GetUserName(userid string) string {
 type userList struct {
 	WxErr
 	UserList []UserInfo
+}
+
+// FetchUserList 定期获取AccessToken
+func (s *Server) FetchUserList() {
+	i := 0
+	go func() {
+		for {
+			if s.SyncDeptList() == nil {
+				if s.SyncUserList() != nil && i < 2 {
+					i++
+					Println("尝试再次获取用户列表(", i, ")")
+					continue
+				}
+				i = 0
+			}
+			s.SyncTagList()
+			time.Sleep(FetchDelay)
+		}
+	}()
 }
 
 // SyncUserList 获取用户列表

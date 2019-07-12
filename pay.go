@@ -2,11 +2,8 @@
 package wechat
 
 import (
-	"crypto/md5"
 	"fmt"
-	"math/rand"
-	"sort"
-	"strings"
+
 	"time"
 
 	"github.com/esap/wechat/util"
@@ -71,19 +68,14 @@ type UnifiedOrderRet struct {
 	SceneInfo  string `xml:"scene_info"`
 }
 
-// SetMchId 设置商户ID
-func (s *Server) SetMchId(mchid string) {
-	s.MchId = mchid
-}
-
 // GetUnifedOrderUrl 获取统一下单URL，用于生成付款二维码等
 func (s *Server) GetUnifedOrderUrl(desc, tradeNo, fee, ip, callback, tradetype, productid string) string {
-	noncestr := GetRandomString(16)
+	noncestr := util.GetRandomString(16)
 	r := &UnifiedOrderReq{
 		Appid:          s.AppId,
 		MchId:          s.MchId,
 		NonceStr:       noncestr,
-		Sign:           sortMd5(noncestr),
+		Sign:           util.SortMd5(noncestr),
 		Body:           desc,
 		OutTradeNo:     tradeNo,
 		TotalFee:       fee,
@@ -103,28 +95,8 @@ func (s *Server) GetUnifedOrderUrl(desc, tradeNo, fee, ip, callback, tradetype, 
 
 // PayOrderScan 扫码付
 func (s *Server) PayOrderScan(mchId, ProductId string) string {
-	nonceStr := GetRandomString(10)
+	nonceStr := util.GetRandomString(10)
 	timeStamp := time.Now().Unix()
 	strA := fmt.Sprintf("appid=%s&mch_id=%s&nonce_str=%s&product_id=%s&time_stamp=%v", s.AppId, mchId, nonceStr, ProductId, timeStamp)
-	return PayRoot + strA + "&sign=" + sortMd5(strA)
-}
-
-// sortMd5 排序并md5，主要用于计算sign
-func sortMd5(s ...string) string {
-	sort.Strings(s)
-	h := md5.New()
-	h.Write([]byte(strings.Join(s, "")))
-	return strings.ToUpper(fmt.Sprintf("%x", h.Sum(nil)))
-}
-
-// GetRandomString 获得随机字符串
-func GetRandomString(l int) string {
-	str := "0123456789abcdefghijklmnopqrstuvwxyz"
-	bytes := []byte(str)
-	result := []byte{}
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	for i := 0; i < l; i++ {
-		result = append(result, bytes[r.Intn(len(bytes))])
-	}
-	return string(result)
+	return PayRoot + strA + "&sign=" + util.SortMd5(strA)
 }

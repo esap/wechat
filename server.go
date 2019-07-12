@@ -5,28 +5,32 @@ package wechat
 
 import (
 	"bytes"
-	"crypto/sha1"
 	"encoding/base64"
 	"encoding/binary"
 	"encoding/xml"
 	"errors"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
-	"sort"
-	"strings"
 	"sync"
 
 	"github.com/esap/wechat/util"
 )
 
-// WXAPI 订阅号，服务号接口，相关接口常量统一以此开头
+// WXAPI 订阅号，服务号，小程序接口，相关接口常量统一以此开头
 const (
 	WXAPI      = "https://api.weixin.qq.com/cgi-bin/"
 	WXAPIToken = WXAPI + "token?grant_type=client_credential&appid=%s&secret=%s"
 	WXAPIMsg   = WXAPI + "message/custom/send?access_token="
 	WXAPIJsapi = WXAPI + "get_jsapi_ticket?access_token="
+)
+
+// CorpAPI 企业微信接口，相关接口常量统一以此开头
+const (
+	CorpAPI      = "https://qyapi.weixin.qq.com/cgi-bin/"
+	CorpAPIToken = CorpAPI + "gettoken?corpid=%s&corpsecret=%s"
+	CorpAPIMsg   = CorpAPI + "message/send?access_token="
+	CorpAPIJsapi = CorpAPI + "get_jsapi_ticket?access_token="
 )
 
 var (
@@ -37,64 +41,114 @@ var (
 	UserServerMap = make(map[string]*Server)
 )
 
-// Server 微信服务容器
-type Server struct {
+// WxConfig 配置，用于New()
+type WxConfig struct {
 	AppId                string
-	MchId                string // 商户id，用于微信支付
-	AgentId              int
-	Secret               string
 	Token                string
+	Secret               string
 	EncodingAESKey       string
-	AesKey               []byte // 解密的AesKey
-	SafeMode             bool
-	EntMode              bool
-	RootUrl              string
-	MsgUrl               string
-	TokenUrl             string
-	JsApi                string
-	Safe                 int
-	accessToken          *AccessToken
-	ticket               *Ticket
-	UserList             userList
-	DeptList             DeptList
-	TagList              TagList
-	MsgQueue             chan interface{}
-	sync.Mutex                                           // accessToken读取锁
-	ExternalTokenHandler func(appId string) *AccessToken // 通过外部方法统一获取access token ,避免集群情况下token失效
+	AgentId              int
+	MchId                string
+	AppName              string
+	AppType              int                                  // 0-公众号, 1-企业微信, 2-钉钉，3-小程序
+	ExternalTokenHandler func(string, ...string) *AccessToken // 外部token获取函数
 }
 
-// NewEnt 微信服务容器，根据agentId判断是企业号或服务号
-func NewEnt(token, appid, secret, key string, agentId ...int) (s *Server) {
-	s = NewServer(nil)
-	if len(agentId) > 0 {
-		s.SetEnt(token, appid, secret, key, agentId[0])
-		if agentId[0] == 9999999 {
-			UserServerMap[appid] = s // 这里我们约定传入企业微信通讯录secret时，agentId=9999999
-		}
-	} else {
-		s.Set(token, appid, secret, key)
-	}
-	return s
+// Server 微信服务容器
+type Server struct {
+	AppId   string
+	MchId   string // 商户id，用于微信支付
+	AgentId int
+	Secret  string
+
+	Token          string
+	EncodingAESKey string
+
+	AppName  string // 唯一标识，主要用于企业微信多应用区分
+	AppType  int    // 0-公众号,小程序; 1-企业微信
+	AesKey   []byte // 解密的AesKey
+	SafeMode bool
+	EntMode  bool
+
+	RootUrl  string
+	MsgUrl   string
+	TokenUrl string
+	JsApi    string
+
+	Safe        int
+	accessToken *AccessToken
+	ticket      *Ticket
+	UserList    userList
+	DeptList    DeptList
+	TagList     TagList
+	MsgQueue    chan interface{}
+	sync.Mutex  // accessToken读取锁
+
+	ExternalTokenHandler func(appId string, appName ...string) *AccessToken // 通过外部方法统一获取access token ,避免集群情况下token失效
 }
 
 // New 微信服务容器
-func New(token, appid, secret string, key ...string) (s *Server) {
-	s = NewServer(nil)
-	s.Set(token, appid, secret, key...)
-	return s
-}
-
-// NewServer 空容器
-func NewServer(f func(appId string) *AccessToken) *Server {
+func New(wc *WxConfig) *Server {
 	s := &Server{
-		RootUrl:  WXAPI,
-		MsgUrl:   WXAPIMsg,
-		TokenUrl: WXAPIToken,
-		JsApi:    WXAPIJsapi,
+		AppId:                wc.AppId,
+		Secret:               wc.Secret,
+		AgentId:              wc.AgentId,
+		MchId:                wc.MchId,
+		AppName:              wc.AppName,
+		AppType:              wc.AppType,
+		Token:                wc.Token,
+		EncodingAESKey:       wc.EncodingAESKey,
+		ExternalTokenHandler: wc.ExternalTokenHandler,
 	}
-	s.ExternalTokenHandler = f
-	// std = s
-	s.init()
+
+	switch wc.AppType {
+	case 1:
+		s.RootUrl = CorpAPI
+		s.MsgUrl = CorpAPIMsg
+		s.TokenUrl = CorpAPIToken
+		s.JsApi = CorpAPIJsapi
+		s.EntMode = true
+	case 2:
+
+	default:
+		s.RootUrl = WXAPI
+		s.MsgUrl = WXAPIMsg
+		s.TokenUrl = WXAPIToken
+		s.JsApi = WXAPIJsapi
+	}
+
+	err := s.getAccessToken()
+	if err != nil {
+		log.Println("getAccessToken err:", err)
+	}
+
+	// 存在EncodingAESKey则开启加密安全模式
+	if len(s.EncodingAESKey) > 0 && s.EncodingAESKey != "" {
+		s.SafeMode = true
+		if s.AesKey, err = base64.StdEncoding.DecodeString(s.EncodingAESKey + "="); err != nil {
+			log.Println("AesKey解析错误:", err)
+		}
+		Println("启用加密模式")
+	}
+	if s.AgentId == 9999999 {
+		UserServerMap[s.AppId] = s // 这里约定传入企业微信通讯录secret时，agentId=9999999
+	}
+
+	if s.AppType == 1 {
+		s.FetchUserList()
+	}
+
+	s.MsgQueue = make(chan interface{}, 1000)
+	go func() {
+		for {
+			msg := <-s.MsgQueue
+			e := s.SendMsg(msg)
+			if e.ErrCode != 0 {
+				log.Println("MsgQueueSend err:", e.ErrMsg)
+			}
+		}
+	}()
+
 	return s
 }
 
@@ -111,23 +165,6 @@ func (s *Server) SafeOpen() {
 // SafeClose 关闭密保模式
 func (s *Server) SafeClose() {
 	s.Safe = 0
-}
-
-// Set 设置token,appId,secret
-func (s *Server) Set(tk, id, sec string, key ...string) (err error) {
-	s.Token, s.AppId, s.Secret = tk, id, sec
-	// 存在EncodingAESKey则开启加密安全模式
-	if len(key) > 0 && key[0] != "" {
-		s.SafeMode = true
-		if s.AesKey, err = base64.StdEncoding.DecodeString(key[0] + "="); err != nil {
-			return err
-		}
-		Println("启用加密模式")
-	}
-	if err = s.getAccessToken(); err != nil {
-		Println("公众号获取AccessToken出错", err)
-	}
-	return nil
 }
 
 // VerifyURL 验证URL,验证成功则返回标准请求载体（Msg已解密）
@@ -159,10 +196,10 @@ func (s *Server) VerifyURL(w http.ResponseWriter, r *http.Request) (ctx *Context
 
 	// 验证signature
 	signature := r.FormValue("signature") + r.FormValue("msg_signature")
-	if s.EntMode && signature != sortSha1(s.Token, ctx.Timestamp, ctx.Nonce, echostr) {
+	if s.EntMode && signature != util.SortSha1(s.Token, ctx.Timestamp, ctx.Nonce, echostr) {
 		log.Println("Signature验证错误!(企业微信)", s.Token, ctx.Timestamp, ctx.Nonce, echostr)
 		return
-	} else if !s.EntMode && r.FormValue("signature") != sortSha1(s.Token, ctx.Timestamp, ctx.Nonce) {
+	} else if !s.EntMode && r.FormValue("signature") != util.SortSha1(s.Token, ctx.Timestamp, ctx.Nonce) {
 		log.Println("Signature验证错误!(公众号)", s.Token, ctx.Timestamp, ctx.Nonce)
 		return
 	}
@@ -191,14 +228,6 @@ func (s *Server) VerifyURL(w http.ResponseWriter, r *http.Request) (ctx *Context
 	// 	w.Write([]byte(ctx.Msg.PackageId))
 	// }
 	return
-}
-
-// sortSha1 排序并sha1，主要用于计算signature
-func sortSha1(s ...string) string {
-	sort.Strings(s)
-	h := sha1.New()
-	h.Write([]byte(strings.Join(s, "")))
-	return fmt.Sprintf("%x", h.Sum(nil))
 }
 
 // DecryptMsg 解密微信消息,密文string->base64Dec->aesDec->去除头部随机字串
@@ -244,14 +273,14 @@ func (s *Server) EncryptMsg(msg []byte, timeStamp, nonce string) (re *wxRespEnc,
 	}
 	l := buf.Bytes()
 
-	rd := []byte(GetRandomString(16))
+	rd := []byte(util.GetRandomString(16))
 
 	plain := bytes.Join([][]byte{rd, l, msg, []byte(s.AppId)}, nil)
 	ae, _ := util.AesEncrypt(plain, s.AesKey)
 	encMsg := base64.StdEncoding.EncodeToString(ae)
 	re = &wxRespEnc{
 		Encrypt:      CDATA(encMsg),
-		MsgSignature: CDATA(sortSha1(s.Token, timeStamp, nonce, encMsg)),
+		MsgSignature: CDATA(util.SortSha1(s.Token, timeStamp, nonce, encMsg)),
 		TimeStamp:    timeStamp,
 		Nonce:        CDATA(nonce),
 	}

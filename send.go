@@ -8,22 +8,9 @@ import (
 	"github.com/esap/wechat/util"
 )
 
-// MsgQueueAdd 添加队列消息
-func (s *Server) MsgQueueAdd(v interface{}) {
+// AddMsg 添加队列消息
+func (s *Server) AddMsg(v interface{}) {
 	s.MsgQueue <- v
-}
-
-func (s *Server) init() {
-	s.MsgQueue = make(chan interface{}, 10000)
-	go func() {
-		for {
-			msg := <-s.MsgQueue
-			e := s.SendMsg(msg)
-			if e.ErrCode != 0 {
-				Println("MsgQueueSend err:", e.ErrMsg)
-			}
-		}
-	}()
 }
 
 // SendMsg 发送消息
@@ -42,7 +29,7 @@ func (s *Server) SendMsg(v interface{}) *WxErr {
 	return rst
 }
 
-// SendText 发送客服text消息,过长时自动拆分
+// SendText 发送客服text消息,过长时按500长度自动拆分
 func (s *Server) SendText(to string, agentId int, msg string, safe ...int) (e *WxErr) {
 	if len(safe) > 0 && safe[0] == 1 {
 		s.SafeOpen()
@@ -56,25 +43,10 @@ func (s *Server) SendText(to string, agentId int, msg string, safe ...int) (e *W
 		return s.SendMsg(s.NewText(to, agentId, msg))
 	}
 	for i := 0; i < n; i++ {
-		e = s.SendMsg(s.NewText(to, agentId, fmt.Sprintf("%s\n(%v/%v)", Substr(msg, i*500, (i+1)*500), i+1, n)))
+		e = s.SendMsg(s.NewText(to, agentId, fmt.Sprintf("%s\n(%v/%v)", util.Substr(msg, i*500, (i+1)*500), i+1, n)))
 	}
 
 	return
-}
-
-// Substr 截取字符串 start 起点下标 end 终点下标(不包括)
-func Substr(str string, start int, end int) string {
-	rs := []rune(str)
-	length := len(rs)
-
-	if start < 0 || start > length || end < 0 {
-		return ""
-	}
-
-	if end > length {
-		return string(rs[start:])
-	}
-	return string(rs[start:end])
 }
 
 // SendImage 发送客服Image消息
@@ -120,4 +92,9 @@ func (s *Server) SendMpNews(to string, id int, arts ...MpArticle) *WxErr {
 // SendMpNewsId 发送加密新闻mpnews消息(直接使用mediaId)
 func (s *Server) SendMpNewsId(to string, id int, mediaId string) *WxErr {
 	return s.SendMsg(s.NewMpNewsId(to, id, mediaId))
+}
+
+// SendMarkdown 发送加密新闻mpnews消息(直接使用mediaId)
+func (s *Server) SendMarkDown(to string, id int, content string) *WxErr {
+	return s.SendMsg(s.NewMarkDown(to, id, content))
 }

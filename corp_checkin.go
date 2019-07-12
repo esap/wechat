@@ -60,7 +60,7 @@ func (s *Server) GetAllCheckIn(opType, start, end int64) (dkdata []DkData, err e
 	ul := s.GetUserIdList()
 	l := len(ul)
 	for i := 0; i < l; i += 100 {
-		dk, e := s.GetCheckIn(opType, start, end, ul[i:min(l, i+100)])
+		dk, e := s.GetCheckIn(opType, start, end, ul[i:util.Min(l, i+100)])
 		if e != nil {
 			err = e
 			return
@@ -68,14 +68,4 @@ func (s *Server) GetAllCheckIn(opType, start, end int64) (dkdata []DkData, err e
 		dkdata = append(dkdata, dk...)
 	}
 	return
-}
-
-// golang min int
-func min(first int, args ...int) int {
-	for _, v := range args {
-		if first > v {
-			first = v
-		}
-	}
-	return first
 }

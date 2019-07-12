@@ -9,7 +9,16 @@ import (
 
 func Example() {
 	wechat.Debug = true
-	app := wechat.New("yourToken", "yourAppID", "yourSecret", "yourEncodingAesKey")
+
+	cfg := &wechat.WxConfig{
+		Token:          "yourToken",
+		AppId:          "yourAppID",
+		Secret:         "yourSecret",
+		EncodingAESKey: "yourEncodingAesKey",
+	}
+
+	app := wechat.New(cfg)
+
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		ctx := app.VerifyURL(w, r)
 
@@ -29,6 +38,7 @@ func Example() {
 			ctx.NewText("其他消息类型" + ctx.Msg.MsgType).Reply() // 回复模板消息
 		}
 	})
+
 	http.ListenAndServe(":9090", nil)
 }
 

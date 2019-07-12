@@ -75,7 +75,7 @@ func (s *Server) GetAllTemplate() (templist []MpTemplate, err error) {
 }
 
 // SendTemplate 发送模板消息，data通常是map[string]struct{value string,color string}
-func (s *Server) SendTemplate(to, id, url, appid, pagepath string, data interface{}) (msgid float64, err error) {
+func (s *Server) SendTemplate(to, id, url, appid, pagepath string, data interface{}) *WxErr {
 
 	form := map[string]interface{}{
 		"touser":      to,
@@ -90,15 +90,11 @@ func (s *Server) SendTemplate(to, id, url, appid, pagepath string, data interfac
 	} else if url != "" {
 		form["url"] = url
 	}
-	ret := make(map[string]interface{})
-	err = util.PostJsonPtr(MPTemplateSendMsg+s.GetAccessToken(), form, &ret)
+	ret := new(WxErr)
+	err := util.PostJsonPtr(MPTemplateSendMsg+s.GetAccessToken(), form, &ret)
 	if err != nil {
-		return
+		return &WxErr{ErrCode: -1, ErrMsg: err.Error()}
 	}
 
-	if fmt.Sprint(ret["errcode"]) != "0" {
-		return 0, (errors.New(fmt.Sprint(ret["errcode"])))
-	}
-
-	return ret["msgid"].(float64), nil
+	return ret
 }

@@ -50,7 +50,7 @@ type WxConfig struct {
 	AgentId              int
 	MchId                string
 	AppName              string
-	AppType              int                                  // 0-公众号, 1-企业微信, 2-钉钉，3-小程序
+	AppType              int                                  // 0-公众号,小程序; 1-企业微信
 	ExternalTokenHandler func(string, ...string) *AccessToken // 外部token获取函数
 }
 
@@ -108,8 +108,6 @@ func New(wc *WxConfig) *Server {
 		s.TokenUrl = CorpAPIToken
 		s.JsApi = CorpAPIJsapi
 		s.EntMode = true
-	case 2:
-
 	default:
 		s.RootUrl = WXAPI
 		s.MsgUrl = WXAPIMsg
@@ -130,6 +128,7 @@ func New(wc *WxConfig) *Server {
 		}
 		Println("启用加密模式")
 	}
+
 	if s.AgentId == 9999999 {
 		UserServerMap[s.AppId] = s // 这里约定传入企业微信通讯录secret时，agentId=9999999
 	}
@@ -144,27 +143,12 @@ func New(wc *WxConfig) *Server {
 			msg := <-s.MsgQueue
 			e := s.SendMsg(msg)
 			if e.ErrCode != 0 {
-				log.Println("MsgQueueSend err:", e.ErrMsg)
+				log.Println("MsgSend err:", e.ErrMsg)
 			}
 		}
 	}()
 
 	return s
-}
-
-// SetLog 设置log
-func SetLog(l io.Writer) {
-	log.SetOutput(l)
-}
-
-// SafeOpen 设置密保模式
-func (s *Server) SafeOpen() {
-	s.Safe = 1
-}
-
-// SafeClose 关闭密保模式
-func (s *Server) SafeClose() {
-	s.Safe = 0
 }
 
 // VerifyURL 验证URL,验证成功则返回标准请求载体（Msg已解密）
@@ -174,35 +158,42 @@ func (s *Server) VerifyURL(w http.ResponseWriter, r *http.Request) (ctx *Context
 		Server:    s,
 		Writer:    w,
 		Request:   r,
-		repCount:  0,
 		Timestamp: r.FormValue("timestamp"),
 		Nonce:     r.FormValue("nonce"),
 		Msg:       new(WxMsg),
-		MsgEnc:    new(WxMsgEnc),
 	}
+
+	// 明文模式可直接解析body->消息
 	if !s.SafeMode && r.Method == "POST" {
 		if err := xml.NewDecoder(r.Body).Decode(ctx.Msg); err != nil {
 			Println("Decode WxMsg err:", err)
 		}
 	}
 
+	// 密文模式，消息在body.Encrypt
 	echostr := r.FormValue("echostr")
 	if s.SafeMode && r.Method == "POST" {
-		if err := xml.NewDecoder(r.Body).Decode(ctx.MsgEnc); err != nil {
+		msgEnc := new(WxMsgEnc)
+		if err := xml.NewDecoder(r.Body).Decode(msgEnc); err != nil {
 			Println("Decode MsgEnc err:", err)
 		}
-		echostr = ctx.MsgEnc.Encrypt // POST请求需解析消息体中的Encrypt
+		echostr = msgEnc.Encrypt
 	}
 
 	// 验证signature
-	signature := r.FormValue("signature") + r.FormValue("msg_signature")
+	signature := r.FormValue("signature")
+	if signature == "" {
+		signature = r.FormValue("msg_signature")
+	}
 	if s.EntMode && signature != util.SortSha1(s.Token, ctx.Timestamp, ctx.Nonce, echostr) {
 		log.Println("Signature验证错误!(企业微信)", s.Token, ctx.Timestamp, ctx.Nonce, echostr)
 		return
-	} else if !s.EntMode && r.FormValue("signature") != util.SortSha1(s.Token, ctx.Timestamp, ctx.Nonce) {
-		log.Println("Signature验证错误!(公众号)", s.Token, ctx.Timestamp, ctx.Nonce)
+	} else if !s.EntMode && signature != util.SortSha1(s.Token, ctx.Timestamp, ctx.Nonce) {
+		log.Println("Signature验证错误!(公众号)", util.SortSha1(s.Token, ctx.Timestamp, ctx.Nonce))
 		return
 	}
+
+	// 密文模式，解密echostr中的消息
 	if s.EntMode || (s.SafeMode && r.Method == "POST") {
 		var err error
 		echostr, err = s.DecryptMsg(echostr)
@@ -211,22 +202,20 @@ func (s *Server) VerifyURL(w http.ResponseWriter, r *http.Request) (ctx *Context
 			return
 		}
 	}
+
 	if r.Method == "GET" {
 		Println("api echostr:", echostr)
 		w.Write([]byte(echostr))
 		return
 	}
+
 	Println("Wechat ==>", echostr)
 	if s.SafeMode {
 		if err := xml.Unmarshal([]byte(echostr), ctx.Msg); err != nil {
 			log.Println("Msg parse err:", err)
 		}
 	}
-	// 旧的企业号会话接口，已失效
-	// if r.Method == "POST" && ctx.Msg != nil && ctx.Msg.AgentType == "chat" {
-	// 	Println("Chat echostr:", ctx.Msg.PackageId)
-	// 	w.Write([]byte(ctx.Msg.PackageId))
-	// }
+
 	return
 }
 
@@ -285,6 +274,21 @@ func (s *Server) EncryptMsg(msg []byte, timeStamp, nonce string) (re *wxRespEnc,
 		Nonce:        CDATA(nonce),
 	}
 	return
+}
+
+// SetLog 设置log
+func SetLog(l io.Writer) {
+	log.SetOutput(l)
+}
+
+// SafeOpen 设置密保模式
+func (s *Server) SafeOpen() {
+	s.Safe = 1
+}
+
+// SafeClose 关闭密保模式
+func (s *Server) SafeClose() {
+	s.Safe = 0
 }
 
 // Println Debug输出

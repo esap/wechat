@@ -49,11 +49,10 @@ func (s *Server) GetUserAccessToken() string {
 
 func (s *Server) getAccessToken() (err error) {
 	if s.ExternalTokenHandler != nil {
-		Printf("远程获取token")
 		s.accessToken = s.ExternalTokenHandler(s.AppId, s.AppName)
+		Printf("***%v[%v]远程获取token:%v", util.Substr(s.AppId, 14, 30), s.AgentId, s.accessToken)
 		return
 	}
-	Printf("本地获取token")
 	url := fmt.Sprintf(s.TokenUrl, s.AppId, s.Secret)
 	at := new(AccessToken)
 	if err = util.GetJson(url, at); err != nil {
@@ -62,9 +61,9 @@ func (s *Server) getAccessToken() (err error) {
 	if at.ErrCode > 0 {
 		return at.Error()
 	}
-	Printf("%v[%v]:%+v", s.AppId, s.AgentId, *at)
 	at.ExpiresIn = time.Now().Unix() + at.ExpiresIn - 5
 	s.accessToken = at
+	Printf("***%v[%v]本地获取token:%v", util.Substr(s.AppId, 14, 30), s.AgentId, s.accessToken)
 	return
 
 }

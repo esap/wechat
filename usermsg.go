@@ -35,6 +35,7 @@ type (
 		FileKey      string
 		FileMd5      string
 		FileTotalLen string
+		TaskId       string
 
 		ScanCodeInfo struct {
 			ScanType   string

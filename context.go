@@ -14,53 +14,41 @@ type Context struct {
 	Timestamp string
 	Nonce     string
 	Msg       *WxMsg
-	MsgEnc    *WxMsgEnc
 	Resp      interface{}
 	Writer    http.ResponseWriter
 	Request   *http.Request
-	repCount  int
+	hasReply  bool
 }
 
 // Reply 被动回复消息
 func (c *Context) Reply() (err error) {
-	if c.Request.Method != "POST" || c.repCount > 0 {
-		return errors.New("Reply err: no reply")
+	if c.hasReply {
+		return errors.New("重复调用错误")
 	}
+
+	c.hasReply = true
+
+	if c.Resp == nil {
+		return nil
+	}
+
 	Printf("Wechat <== %+v", c.Resp)
 	if c.SafeMode {
 		b, err := xml.MarshalIndent(c.Resp, "", "  ")
 		if err != nil {
-			c.Writer.Write([]byte{})
 			return err
 		}
 		c.Resp, err = c.EncryptMsg(b, c.Timestamp, c.Nonce)
 		if err != nil {
-			c.Writer.Write([]byte{})
 			return err
 		}
 	}
 	c.Writer.Header().Set("Content-Type", "application/xml;charset=UTF-8")
-	c.repCount++
 	return xml.NewEncoder(c.Writer).Encode(c.Resp)
-}
-
-// ReplySuccess 如果不能在5秒内处理完，应该先回复success，然后通过客服消息通知用户
-func (c *Context) ReplySuccess() (err error) {
-	if c.Request.Method != http.MethodPost || c.repCount > 0 {
-		return errors.New("Reply err: no reply")
-	}
-	_, err = c.Writer.Write([]byte("success"))
-	return
 }
 
 // Send 主动发送消息(客服)
 func (c *Context) Send() *Context {
-	go c.SendMsg(c.Resp)
-	return c
-}
-
-// SendAdd 添加主动消息队列(客服)
-func (c *Context) SendAdd() *Context {
 	c.AddMsg(c.Resp)
 	return c
 }

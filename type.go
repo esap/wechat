@@ -1,6 +1,7 @@
 package wechat
 
 import (
+	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"strings"
@@ -16,6 +17,7 @@ const (
 	TypeTextcard = "textcard" // 仅企业微信可用
 	TypeWxCard   = "wxcard"   // 仅服务号可用
 	TypeMarkDown = "markdown" // 仅企业微信可用
+	TypeTaskCard = "taskcard" // 仅企业微信可用
 	TypeFile     = "file"     // 仅企业微信可用
 	TypeNews     = "news"
 	TypeMpNews   = "mpnews" // 仅企业微信可用
@@ -60,12 +62,12 @@ type wxResp struct {
 }
 
 // to字段格式："userid1|userid2 deptid1|deptid2 tagid1|tagid2"
-func (s *Server) newWxResp(msgType, to string, agentId int) (r wxResp) {
+func (s *Server) newWxResp(msgType, to string) (r wxResp) {
 	toArr := strings.Split(to, " ")
 	r = wxResp{
 		ToUserName: CDATA(toArr[0]),
 		MsgType:    CDATA(msgType),
-		AgentId:    agentId,
+		AgentId:    s.AgentId,
 		Safe:       s.Safe}
 	if len(toArr) > 1 {
 		r.ToParty = CDATA(toArr[1])
@@ -89,9 +91,9 @@ type (
 )
 
 // NewText Text 文本消息
-func (s *Server) NewText(to string, id int, msg ...string) Text {
+func (s *Server) NewText(to string, msg ...string) Text {
 	return Text{
-		s.newWxResp(TypeText, to, id),
+		s.newWxResp(TypeText, to),
 		content{CDATA(strings.Join(msg, ""))},
 	}
 }
@@ -109,9 +111,9 @@ type (
 )
 
 // NewImage Image 消息
-func (s *Server) NewImage(to string, id int, mediaId string) Image {
+func (s *Server) NewImage(to, mediaId string) Image {
 	return Image{
-		s.newWxResp(TypeImage, to, id),
+		s.newWxResp(TypeImage, to),
 		media{CDATA(mediaId)},
 	}
 }
@@ -123,9 +125,9 @@ type Voice struct {
 }
 
 // NewVoice Voice消息
-func (s *Server) NewVoice(to string, id int, mediaId string) Voice {
+func (s *Server) NewVoice(to, mediaId string) Voice {
 	return Voice{
-		s.newWxResp(TypeVoice, to, id),
+		s.newWxResp(TypeVoice, to),
 		media{CDATA(mediaId)},
 	}
 }
@@ -137,9 +139,9 @@ type File struct {
 }
 
 // NewFile File消息
-func (s *Server) NewFile(to string, id int, mediaId string) File {
+func (s *Server) NewFile(to, mediaId string) File {
 	return File{
-		s.newWxResp(TypeFile, to, id),
+		s.newWxResp(TypeFile, to),
 		media{CDATA(mediaId)},
 	}
 }
@@ -159,9 +161,9 @@ type (
 )
 
 // NewVideo Video消息
-func (s *Server) NewVideo(to string, id int, mediaId, title, desc string) Video {
+func (s *Server) NewVideo(to, mediaId, title, desc string) Video {
 	return Video{
-		s.newWxResp(TypeVideo, to, id),
+		s.newWxResp(TypeVideo, to),
 		video{CDATA(mediaId), CDATA(title), CDATA(desc)},
 	}
 }
@@ -181,9 +183,9 @@ type (
 )
 
 // NewTextcard Textcard消息
-func (s *Server) NewTextcard(to string, id int, title, description, url string) Textcard {
+func (s *Server) NewTextcard(to, title, description, url string) Textcard {
 	return Textcard{
-		s.newWxResp(TypeTextcard, to, id),
+		s.newWxResp(TypeTextcard, to),
 		textcard{CDATA(title), CDATA(description), CDATA(url)},
 	}
 }
@@ -205,9 +207,9 @@ type (
 )
 
 // NewMusic Music消息
-func (s *Server) NewMusic(to string, id int, mediaId, title, desc, musicUrl, qhMusicUrl string) Music {
+func (s *Server) NewMusic(to, mediaId, title, desc, musicUrl, qhMusicUrl string) Music {
 	return Music{
-		s.newWxResp(TypeMusic, to, id),
+		s.newWxResp(TypeMusic, to),
 		music{CDATA(title), CDATA(desc), CDATA(musicUrl), CDATA(qhMusicUrl), CDATA(mediaId)},
 	}
 }
@@ -222,8 +224,8 @@ type News struct {
 }
 
 // NewNews news消息
-func (s *Server) NewNews(to string, id int, arts ...Article) (news News) {
-	news.wxResp = s.newWxResp(TypeNews, to, id)
+func (s *Server) NewNews(to string, arts ...Article) (news News) {
+	news.wxResp = s.newWxResp(TypeNews, to)
 	news.ArticleCount = len(arts)
 	news.Articles.Item = arts
 	return
@@ -261,15 +263,15 @@ type (
 )
 
 // NewMpNews 加密新闻mpnews消息(仅企业微信可用)
-func (s *Server) NewMpNews(to string, id int, arts ...MpArticle) (news MpNews) {
-	news.wxResp = s.newWxResp(TypeMpNews, to, id)
+func (s *Server) NewMpNews(to string, arts ...MpArticle) (news MpNews) {
+	news.wxResp = s.newWxResp(TypeMpNews, to)
 	news.MpNews.Articles = arts
 	return
 }
 
 // NewMpNewsId 加密新闻mpnews消息(仅企业微信可用)
-func (s *Server) NewMpNewsId(to string, id int, mediaId string) (news MpNewsId) {
-	news.wxResp = s.newWxResp(TypeMpNews, to, id)
+func (s *Server) NewMpNewsId(to string, mediaId string) (news MpNewsId) {
+	news.wxResp = s.newWxResp(TypeMpNews, to)
 	news.MpNews.MediaId = CDATA(mediaId)
 	return
 }
@@ -298,8 +300,8 @@ type WxCard struct {
 }
 
 // NewWxCard 卡券消息，服务号可用
-func (s *Server) NewWxCard(to string, id int, cardId string) (c WxCard) {
-	c.wxResp = s.newWxResp(TypeWxCard, to, id)
+func (s *Server) NewWxCard(to, cardId string) (c WxCard) {
+	c.wxResp = s.newWxResp(TypeWxCard, to)
 	c.WxCard.CardId = cardId
 	return
 }
@@ -313,8 +315,38 @@ type MarkDown struct {
 }
 
 // NewMarkDown markdown消息，企业微信可用
-func (s *Server) NewMarkDown(to string, id int, content string) (md MarkDown) {
-	md.wxResp = s.newWxResp(TypeMarkDown, to, id)
+func (s *Server) NewMarkDown(to, content string) (md MarkDown) {
+	md.wxResp = s.newWxResp(TypeMarkDown, to)
 	md.MarkDown.Content = content
+	return
+}
+
+// TaskCard 任务卡片消息，仅企业微信支持，支持一到两个按钮设置
+type TaskCard struct {
+	wxResp
+	TaskCard struct {
+		Title       string                   `json:"title"`
+		Description string                   `json:"description"`
+		Url         string                   `json:"url"`
+		TaskId      string                   `json:"task_id"`
+		Btn         []map[string]interface{} `json:"btn"`
+	} `json:"taskcard"`
+}
+
+// NewTaskCard 任务卡片消息，企业微信可用
+func (s *Server) NewTaskCard(to, Title, Desc, Url, TaskId, Btn string) (tc TaskCard) {
+	tc.wxResp = s.newWxResp(TypeTaskCard, to)
+	tc.TaskCard.Title = Title
+	tc.TaskCard.Description = Desc
+	tc.TaskCard.Url = Url
+	tc.TaskCard.TaskId = TaskId
+	mp := make([]map[string]interface{}, 0)
+	if Btn != "" {
+		if err := json.Unmarshal([]byte(Btn), &mp); err != nil {
+			fmt.Println("create taskcard btn err:", err)
+		} else {
+			tc.TaskCard.Btn = mp
+		}
+	}
 	return
 }

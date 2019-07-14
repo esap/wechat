@@ -29,6 +29,7 @@ func main() {
 	}
 
 	app := wechat.New(cfg)
+	app.SendText("@all", "Hello,World!")
 	
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		app.VerifyURL(w, r).NewText("客服消息1").Send().NewText("客服消息2").Send().NewText("查询OK").Reply()
@@ -60,28 +61,29 @@ func main() {
 	cfg := &wechat.WxConfig{
 		Token:          "yourToken",
 		AppId:          "yourCorpID",
+		AgentId:        "yourAgentId",
 		Secret:         "yourSecret",
 		EncodingAESKey: "yourEncodingAesKey",
 		AppType:        1,
 	}
 ```
 
-### 直接发提醒消息
+## 主动推送消息
 
-用户关注后，企业微信可以直接发，服务号需要用户48小时内进入过。
+用户关注后，企业微信可以主动推送消息，服务号需要用户48小时内进入过。
 
 ```go
-	app.SendText(to, agentId, msg)
-	app.SendImage(to, id, mediaId)
-	app.SendVoice(to, id, mediaId)
-	app.SendFile(to, id, mediaId)
-	app.SendVideo(to, id, mediaId, title, desc)
-	app.SendTextcard(to, id, title, desc, url)
-	app.SendMusic(to, id, mediaId, title, desc, musicUrl, qhMusicUrl)
-	app.SendNews(to, id, arts...)
-	app.SendMpNews(to, id, arts...)
-	app.SendMpNewsId(to, id, mediaId)
-	app.SendMarkDown(to, id, content)
+	app.SendText(to, msg)
+	app.SendImage(to, mediaId)
+	app.SendVoice(to, mediaId)
+	app.SendFile(to, mediaId)
+	app.SendVideo(to, mediaId, title, desc)
+	app.SendTextcard(to, title, desc, url)
+	app.SendMusic(to, mediaId, title, desc, musicUrl, qhMusicUrl)
+	app.SendNews(to, arts...)
+	app.SendMpNews(to, arts...)
+	app.SendMpNewsId(to, mediaId)
+	app.SendMarkDown(to, content)
 ```
 
 ## 消息回调
@@ -160,7 +162,7 @@ func wxApiPost(c echo.Context) error {
 	ctx.NewText("客服消息1").Send().NewText("客服消息2").Send()
 ```
 
-* 被动回复可直接调用ReplySuccess()，表示已收到，然后调用客服消息。
+* 被动回复可直接调用Reply()，表示已收到，然后调用客服消息。
 
 ####  文本消息
 

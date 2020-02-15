@@ -87,19 +87,22 @@ type Server struct {
 	ExternalTokenHandler func(appId string, appName ...string) *AccessToken // 通过外部方法统一获取access token ,避免集群情况下token失效
 }
 
+func Set(wc *WxConfig) *Server {
+        return &Server{
+                AppId:                wc.AppId,
+                Secret:               wc.Secret,
+                AgentId:              wc.AgentId,
+                MchId:                wc.MchId,
+                AppName:              wc.AppName,
+                AppType:              wc.AppType,
+                Token:                wc.Token,
+                EncodingAESKey:       wc.EncodingAESKey,
+                ExternalTokenHandler: wc.ExternalTokenHandler,
+        }
+}
 // New 微信服务容器
 func New(wc *WxConfig) *Server {
-	s := &Server{
-		AppId:                wc.AppId,
-		Secret:               wc.Secret,
-		AgentId:              wc.AgentId,
-		MchId:                wc.MchId,
-		AppName:              wc.AppName,
-		AppType:              wc.AppType,
-		Token:                wc.Token,
-		EncodingAESKey:       wc.EncodingAESKey,
-		ExternalTokenHandler: wc.ExternalTokenHandler,
-	}
+	s := Set(wc)
 
 	switch wc.AppType {
 	case 1:

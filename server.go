@@ -84,22 +84,27 @@ type Server struct {
 	MsgQueue    chan interface{}
 	sync.Mutex  // accessToken读取锁
 
+	stopCh   chan struct{}
+	stopOnce sync.Once
+
 	ExternalTokenHandler func(appId string, appName ...string) *AccessToken // 通过外部方法统一获取access token ,避免集群情况下token失效
 }
 
 func Set(wc *WxConfig) *Server {
-        return &Server{
-                AppId:                wc.AppId,
-                Secret:               wc.Secret,
-                AgentId:              wc.AgentId,
-                MchId:                wc.MchId,
-                AppName:              wc.AppName,
-                AppType:              wc.AppType,
-                Token:                wc.Token,
-                EncodingAESKey:       wc.EncodingAESKey,
-                ExternalTokenHandler: wc.ExternalTokenHandler,
-        }
+	return &Server{
+		AppId:                wc.AppId,
+		Secret:               wc.Secret,
+		AgentId:              wc.AgentId,
+		MchId:                wc.MchId,
+		AppName:              wc.AppName,
+		AppType:              wc.AppType,
+		Token:                wc.Token,
+		EncodingAESKey:       wc.EncodingAESKey,
+		ExternalTokenHandler: wc.ExternalTokenHandler,
+		stopCh:               make(chan struct{}),
+	}
 }
+
 // New 微信服务容器
 func New(wc *WxConfig) *Server {
 	s := Set(wc)
@@ -143,10 +148,14 @@ func New(wc *WxConfig) *Server {
 	s.MsgQueue = make(chan interface{}, 1000)
 	go func() {
 		for {
-			msg := <-s.MsgQueue
-			e := s.SendMsg(msg)
-			if e.ErrCode != 0 {
-				log.Println("MsgSend err:", e.ErrMsg)
+			select {
+			case <-s.stopCh:
+				return
+			case msg := <-s.MsgQueue:
+				e := s.SendMsg(msg)
+				if e.ErrCode != 0 {
+					log.Println("MsgSend err:", e.ErrMsg)
+				}
 			}
 		}
 	}()
@@ -277,6 +286,13 @@ func (s *Server) EncryptMsg(msg []byte, timeStamp, nonce string) (re *wxRespEnc,
 		Nonce:        CDATA(nonce),
 	}
 	return
+}
+
+// 关闭微信 client, 可多次调用
+func (s *Server) Stop() {
+	s.stopOnce.Do(func() {
+		close(s.stopCh)
+	})
 }
 
 // SetLog 设置log

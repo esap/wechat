@@ -258,6 +258,17 @@ func wxApiPost(c echo.Context) error {
 	)
 ```
 
+## 退出
+
+在多微信 app 的情况下, 修改了微信的配置之后, 需要动态地调整微信配置, 这时候需要结束老的实例, 可以调用实例的 Stop 方法.
+
+```go
+app.Stop() // Stop 可多次调用
+
+app.AddMsg(app.NewText("zhengzhou", "这条消息不会被发出, 因为在 Stop 方法后, 后台发送消息的 goroutine 已经退出"))  
+
+```
+
 
 ## License
 

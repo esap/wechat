@@ -10,6 +10,14 @@ import (
 
 // AddMsg 添加队列消息
 func (s *Server) AddMsg(v interface{}) {
+	select {
+	case <-s.stopCh:
+		// do not add message to queue if the server is down
+		Println("[*] 试图在微信服务关闭的情况下发消息")
+		return
+	default:
+	}
+
 	s.MsgQueue <- v
 }
 

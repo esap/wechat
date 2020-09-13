@@ -68,6 +68,26 @@ func main() {
 	}
 ```
 
+### 定制 HTTP client
+
+```go
+import "github.com/esap/wechat/util"
+
+func myCustomHTTPClient() *http.Client {
+	// 配置适合自己部署环境的 HTTP client, 例如超时, 代理(可能需要认证)等
+	tr := &http.Transport{
+		MaxIdleConns:       10,
+		IdleConnTimeout:    30 * time.Second,
+		DisableCompression: true,
+	}
+	return &http.Client{Transport: tr}
+}
+
+util.SetHTTPClientFactory(myCustomHTTPClient)
+
+```
+
+
 ## 主动推送消息
 
 用户关注后，企业微信可以主动推送消息，服务号需要用户48小时内进入过。
@@ -237,6 +257,7 @@ func wxApiPost(c echo.Context) error {
 		tlpdata,
 	)
 ```
+
 
 ## License
 

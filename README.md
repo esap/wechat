@@ -68,6 +68,26 @@ func main() {
 	}
 ```
 
+### 定制 HTTP client
+
+```go
+import "github.com/esap/wechat/util"
+
+func myCustomHTTPClient() *http.Client {
+	// 配置适合自己部署环境的 HTTP client, 例如超时, 代理(可能需要认证)等
+	tr := &http.Transport{
+		MaxIdleConns:       10,
+		IdleConnTimeout:    30 * time.Second,
+		DisableCompression: true,
+	}
+	return &http.Client{Transport: tr}
+}
+
+util.SetHTTPClientFactory(myCustomHTTPClient)
+
+```
+
+
 ## 主动推送消息
 
 用户关注后，企业微信可以主动推送消息，服务号需要用户48小时内进入过。
@@ -237,6 +257,18 @@ func wxApiPost(c echo.Context) error {
 		tlpdata,
 	)
 ```
+
+## 退出
+
+在多微信 app 的情况下, 修改了微信的配置之后, 需要动态地调整微信配置, 这时候需要结束老的实例, 可以调用实例的 Stop 方法.
+
+```go
+app.Stop() // Stop 可多次调用
+
+app.AddMsg(app.NewText("zhengzhou", "这条消息不会被发出, 因为在 Stop 方法后, 后台发送消息的 goroutine 已经退出"))  
+
+```
+
 
 ## License
 

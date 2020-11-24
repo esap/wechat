@@ -127,6 +127,11 @@ func (s *Server) GetMpUserList(openid ...string) (ul *MpUser, err error) {
 	if err = util.GetJson(url, &mpuser); err != nil {
 		return
 	}
+	
+	if mpuser.Count > 0 {
+		mpuser.NextOpenId = mpuser.Data.OpenId[mpuser.Count-1]
+	}
+	
 	return mpuser, mpuser.Error()
 }
 

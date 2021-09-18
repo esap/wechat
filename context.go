@@ -105,10 +105,10 @@ func (c *Context) NewVideo(mediaId, title, desc string) *Context {
 }
 
 // NewTextcard Textcard消息
-func (c *Context) NewTextcard(title, description, url string) *Context {
+func (c *Context) NewTextcard(title, description, url, btntxt string) *Context {
 	c.Resp = &Textcard{
 		wxResp:   c.newResp(TypeTextcard),
-		Textcard: textcard{CDATA(title), CDATA(description), CDATA(url)}}
+		Textcard: textcard{CDATA(title), CDATA(description), CDATA(url), CDATA(btntxt)}}
 	return c
 }
 

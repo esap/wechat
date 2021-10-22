@@ -8,9 +8,9 @@ import (
 
 // MPUserGetList 公众号用户接口
 const (
-	MPUserGetList  = WXAPI + "user/get?access_token=%s&next_openid=%s"
-	MPUserBatchGet = WXAPI + "user/info/batchget?access_token="
-	MPUserInfo     = WXAPI + "user/info?access_token=%s&openid=%v&lang=%v"
+	MPUserGetList  = "user/get?access_token=%s&next_openid=%s"
+	MPUserBatchGet = "user/info/batchget?access_token="
+	MPUserInfo     = "user/info?access_token=%s&openid=%v&lang=%v"
 )
 
 type (
@@ -91,7 +91,7 @@ func (s *Server) BatchGet(ul []string) (ui []MpUserInfo, err error) {
 		m[k]["openid"] = v
 	}
 	ml := new(MpUserInfoList)
-	err = util.PostJsonPtr(MPUserBatchGet+s.GetAccessToken(), MpUserListReq{m}, ml)
+	err = util.PostJsonPtr(s.RootUrl+MPUserBatchGet+s.GetAccessToken(), MpUserListReq{m}, ml)
 	return ml.MpUserInfoList, ml.Error()
 }
 
@@ -123,7 +123,7 @@ func (s *Server) GetMpUserList(openid ...string) (ul *MpUser, err error) {
 		openid = append(openid, "")
 	}
 	mpuser := new(MpUser)
-	url := fmt.Sprintf(MPUserGetList, s.GetAccessToken(), openid[0])
+	url := fmt.Sprintf(s.RootUrl+MPUserGetList, s.GetAccessToken(), openid[0])
 	if err = util.GetJson(url, &mpuser); err != nil {
 		return
 	}
@@ -141,7 +141,7 @@ func (s *Server) GetMpUserInfo(openid string, lang ...string) (user *MpUserInfo,
 		lang = append(lang, "zh_CN")
 	}
 	user = new(MpUserInfo)
-	url := fmt.Sprintf(MPUserInfo, s.GetAccessToken(), openid, lang[0])
+	url := fmt.Sprintf(s.RootUrl+MPUserInfo, s.GetAccessToken(), openid, lang[0])
 	if err = util.GetJson(url, &user); err != nil {
 		return
 	}

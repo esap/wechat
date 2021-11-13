@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/esap/wechat/util"
+	"github.com/rixingyike/wechat/util"
 )
 
 // FetchDelay 默认5分钟同步一次

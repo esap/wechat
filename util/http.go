@@ -18,24 +18,13 @@ import (
 // TimeOut 全局请求超时设置,默认1分钟
 var TimeOut time.Duration = 60 * time.Second
 
-// 全局获取 http client 的方法
-var httpClient func() *http.Client
-
-func init() {
-	httpClient = defaultHTTPClient
-}
-
 // SetTimeOut 设置全局请求超时
 func SetTimeOut(d time.Duration) {
 	TimeOut = d
 }
 
-func SetHTTPClientFactory(f func() *http.Client) {
-	httpClient = f
-}
-
 // httpClient() 带超时的http.Client
-func defaultHTTPClient() *http.Client {
+func httpClient() *http.Client {
 	return &http.Client{Timeout: TimeOut}
 }
 

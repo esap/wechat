@@ -7,8 +7,10 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/binary"
+	"encoding/json"
 	"encoding/xml"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -52,6 +54,7 @@ type WxConfig struct {
 	AppName              string
 	AppType              int                                  // 0-公众号,小程序; 1-企业微信
 	ExternalTokenHandler func(string, ...string) *AccessToken // 外部token获取函数
+	DateFormat           string                               // 数据格式：JSON、XML
 }
 
 // Server 微信服务容器
@@ -64,11 +67,12 @@ type Server struct {
 	Token          string
 	EncodingAESKey string
 
-	AppName  string // 唯一标识，主要用于企业微信多应用区分
-	AppType  int    // 0-公众号,小程序; 1-企业微信
-	AesKey   []byte // 解密的AesKey
-	SafeMode bool
-	EntMode  bool
+	AppName    string // 唯一标识，主要用于企业微信多应用区分
+	AppType    int    // 0-公众号,小程序; 1-企业微信
+	AesKey     []byte // 解密的AesKey
+	SafeMode   bool
+	EntMode    bool
+	DateFormat string // 通讯数据格式：JSON、XML
 
 	RootUrl  string
 	MsgUrl   string
@@ -84,9 +88,6 @@ type Server struct {
 	MsgQueue    chan interface{}
 	sync.Mutex  // accessToken读取锁
 
-	stopCh   chan struct{}
-	stopOnce sync.Once
-
 	ExternalTokenHandler func(appId string, appName ...string) *AccessToken // 通过外部方法统一获取access token ,避免集群情况下token失效
 }
 
@@ -101,7 +102,7 @@ func Set(wc *WxConfig) *Server {
 		Token:                wc.Token,
 		EncodingAESKey:       wc.EncodingAESKey,
 		ExternalTokenHandler: wc.ExternalTokenHandler,
-		stopCh:               make(chan struct{}),
+		DateFormat:           wc.DateFormat,
 	}
 }
 
@@ -148,19 +149,37 @@ func New(wc *WxConfig) *Server {
 	s.MsgQueue = make(chan interface{}, 1000)
 	go func() {
 		for {
-			select {
-			case <-s.stopCh:
-				return
-			case msg := <-s.MsgQueue:
-				e := s.SendMsg(msg)
-				if e.ErrCode != 0 {
-					log.Println("MsgSend err:", e.ErrMsg)
-				}
+			msg := <-s.MsgQueue
+			e := s.SendMsg(msg)
+			if e.ErrCode != 0 {
+				log.Println("MsgSend err:", e.ErrMsg)
 			}
 		}
 	}()
 
 	return s
+}
+
+// 依据交互数据类型，从请求体中解析消息体
+func (s *Server) DecodeMsgFromRequest(r *http.Request, msg interface{}) error {
+	if s.DateFormat == "XML" {
+		return xml.NewDecoder(r.Body).Decode(msg)
+	} else if s.DateFormat == "JSON" {
+		return json.NewDecoder(r.Body).Decode(msg)
+	} else {
+		panic(fmt.Errorf("invalid DataFormat：%s", s.DateFormat))
+	}
+}
+
+// 依据交互数据类型，从字符串中解析消息体
+func (s *Server) DecodeMsgFromString(str string, msg interface{}) error {
+	if s.DateFormat == "XML" {
+		return xml.Unmarshal([]byte(str), msg)
+	} else if s.DateFormat == "JSON" {
+		return json.Unmarshal([]byte(str), msg)
+	} else {
+		panic(fmt.Errorf("invalid DataFormat：%s", s.DateFormat))
+	}
 }
 
 // VerifyURL 验证URL,验证成功则返回标准请求载体（Msg已解密）
@@ -177,7 +196,7 @@ func (s *Server) VerifyURL(w http.ResponseWriter, r *http.Request) (ctx *Context
 
 	// 明文模式可直接解析body->消息
 	if !s.SafeMode && r.Method == "POST" {
-		if err := xml.NewDecoder(r.Body).Decode(ctx.Msg); err != nil {
+		if err := s.DecodeMsgFromRequest(r, ctx.Msg); err != nil {
 			Println("Decode WxMsg err:", err)
 		}
 	}
@@ -186,7 +205,7 @@ func (s *Server) VerifyURL(w http.ResponseWriter, r *http.Request) (ctx *Context
 	echostr := r.FormValue("echostr")
 	if s.SafeMode && r.Method == "POST" {
 		msgEnc := new(WxMsgEnc)
-		if err := xml.NewDecoder(r.Body).Decode(msgEnc); err != nil {
+		if err := s.DecodeMsgFromRequest(r, msgEnc); err != nil {
 			Println("Decode MsgEnc err:", err)
 		}
 		echostr = msgEnc.Encrypt
@@ -223,7 +242,7 @@ func (s *Server) VerifyURL(w http.ResponseWriter, r *http.Request) (ctx *Context
 
 	Println("Wechat ==>", echostr)
 	if s.SafeMode {
-		if err := xml.Unmarshal([]byte(echostr), ctx.Msg); err != nil {
+		if err := s.DecodeMsgFromString(echostr, ctx.Msg); err != nil {
 			log.Println("Msg parse err:", err)
 		}
 	}
@@ -286,13 +305,6 @@ func (s *Server) EncryptMsg(msg []byte, timeStamp, nonce string) (re *wxRespEnc,
 		Nonce:        CDATA(nonce),
 	}
 	return
-}
-
-// 关闭微信 client, 可多次调用
-func (s *Server) Stop() {
-	s.stopOnce.Do(func() {
-		close(s.stopCh)
-	})
 }
 
 // SetLog 设置log

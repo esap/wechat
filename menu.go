@@ -3,7 +3,7 @@ package wechat
 import (
 	"fmt"
 
-	"github.com/esap/wechat/util"
+	"github.com/rixingyike/wechat/util"
 )
 
 // WXAPIMenuGet 微信菜单接口，兼容企业微信和服务号

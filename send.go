@@ -5,19 +5,11 @@ import (
 	"fmt"
 	"unicode/utf8"
 
-	"github.com/esap/wechat/util"
+	"github.com/rixingyike/wechat/util"
 )
 
 // AddMsg 添加队列消息
 func (s *Server) AddMsg(v interface{}) {
-	select {
-	case <-s.stopCh:
-		// do not add message to queue if the server is down
-		Println("[*] 试图在微信服务关闭的情况下发消息")
-		return
-	default:
-	}
-
 	s.MsgQueue <- v
 }
 
@@ -73,8 +65,8 @@ func (s *Server) SendVideo(to string, mediaId, title, desc string) *WxErr {
 }
 
 // SendTextcard 发送客服extcard消息
-func (s *Server) SendTextcard(to string, title, desc, url, btntxt string) *WxErr {
-	return s.SendMsg(s.NewTextcard(to, title, desc, url, btntxt))
+func (s *Server) SendTextcard(to string, title, desc, url string) *WxErr {
+	return s.SendMsg(s.NewTextcard(to, title, desc, url))
 }
 
 // SendMusic 发送客服Music消息

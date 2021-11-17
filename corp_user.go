@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/esap/wechat/util"
+	"github.com/rixingyike/wechat/util"
 )
 
 const (
@@ -14,7 +14,7 @@ const (
 	CorpAPIGetUserOauth = CorpAPI + "user/getuserinfo?access_token=%s&code=%s"
 
 	// CorpAPIUserList 企业微信用户列表
-	CorpAPIUserList       = CorpAPI + `user/list?access_token=%s&department_id=%d&fetch_child=1`
+	CorpAPIUserList       = CorpAPI + `user/list?access_token=%s&department_id=1&fetch_child=1`
 	CorpAPIUserSimpleList = CorpAPI + `user/simplelist?access_token=%s&department_id=1&fetch_child=1`
 
 	// CorpAPIUserGet 企业微信用户接口
@@ -162,19 +162,11 @@ func (s *Server) SyncUserList() (err error) {
 
 // GetUserList 获取用户详情列表
 func (s *Server) GetUserList() (u userList, err error) {
-	for _, v := range s.DeptList.Department {
-		var tmp userList
-		url := fmt.Sprintf(CorpAPIUserList, s.GetUserAccessToken(), v.Id)
-		if err = util.GetJson(url, &tmp); err != nil {
-			return
-		}
-		if tmp.Error() != nil {
-			err = tmp.Error()
-			u.WxErr = tmp.WxErr
-		}else{
-			u.UserList = append(u.UserList, tmp.UserList...)
-		}
+	url := fmt.Sprintf(CorpAPIUserList, s.GetUserAccessToken())
+	if err = util.GetJson(url, &u); err != nil {
+		return
 	}
+	err = u.Error()
 	return
 }
 

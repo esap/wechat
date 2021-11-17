@@ -1,7 +1,7 @@
 package wechat
 
 import (
-	"github.com/esap/wechat/util"
+	"github.com/rixingyike/wechat/util"
 )
 
 const (

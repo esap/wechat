@@ -8,7 +8,7 @@ package main
 import (
 	"net/http"
 
-	"github.com/esap/wechat" // 微信SDK包
+	"github.com/rixingyike/wechat" // 微信SDK包
 )
 
 func main() {
@@ -30,7 +30,7 @@ func main() {
 	http.ListenAndServe(":9090", nil)
 }
 
-More info: https://github.com/esap/wechat
+More info: https://github.com/rixingyike/wechat
 
 */
 package wechat

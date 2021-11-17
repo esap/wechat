@@ -1,7 +1,7 @@
 # WeChat SDK
 [![Build Status](https://travis-ci.org/esap/wechat.svg?branch=master)](https://travis-ci.org/esap/wechat)
-[![Go Report Card](https://goreportcard.com/badge/github.com/esap/wechat)](https://goreportcard.com/report/github.com/esap/wechat)
-[![GoDoc](http://godoc.org/github.com/esap/wechat?status.svg)](http://godoc.org/github.com/esap/wechat)
+[![Go Report Card](https://goreportcard.com/badge/github.com/rixingyike/wechat)](https://goreportcard.com/report/github.com/rixingyike/wechat)
+[![GoDoc](http://godoc.org/github.com/rixingyike/wechat?status.svg)](http://godoc.org/github.com/rixingyike/wechat)
 
 **微信SDK的golang实现，短小精悍，同时兼容【企业微信/服务号/订阅号/小程序】**
 
@@ -15,7 +15,7 @@ package main
 import (
 	"net/http"
 
-	"github.com/esap/wechat" // 微信SDK包
+	"github.com/rixingyike/wechat" // 微信SDK包
 )
 
 func main() {
@@ -68,26 +68,6 @@ func main() {
 	}
 ```
 
-### 定制 HTTP client
-
-```go
-import "github.com/esap/wechat/util"
-
-func myCustomHTTPClient() *http.Client {
-	// 配置适合自己部署环境的 HTTP client, 例如超时, 代理(可能需要认证)等
-	tr := &http.Transport{
-		MaxIdleConns:       10,
-		IdleConnTimeout:    30 * time.Second,
-		DisableCompression: true,
-	}
-	return &http.Client{Transport: tr}
-}
-
-util.SetHTTPClientFactory(myCustomHTTPClient)
-
-```
-
-
 ## 主动推送消息
 
 用户关注后，企业微信可以主动推送消息，服务号需要用户48小时内进入过。
@@ -98,7 +78,7 @@ util.SetHTTPClientFactory(myCustomHTTPClient)
 	app.SendVoice(to, mediaId)
 	app.SendFile(to, mediaId)
 	app.SendVideo(to, mediaId, title, desc)
-	app.SendTextcard(to, title, desc, url, btntxt)
+	app.SendTextcard(to, title, desc, url)
 	app.SendMusic(to, mediaId, title, desc, musicUrl, qhMusicUrl)
 	app.SendNews(to, arts...)
 	app.SendMpNews(to, arts...)
@@ -235,7 +215,7 @@ func wxApiPost(c echo.Context) error {
 
 ####  模板消息
 
-[相关issue](https://github.com/esap/wechat/issues/20#issue-451068915)
+[相关issue](https://github.com/rixingyike/wechat/issues/20#issue-451068915)
 
 ```go
 	tlpdata := map[string]struct {
@@ -257,18 +237,6 @@ func wxApiPost(c echo.Context) error {
 		tlpdata,
 	)
 ```
-
-## 退出
-
-在多微信 app 的情况下, 修改了微信的配置之后, 需要动态地调整微信配置, 这时候需要结束老的实例, 可以调用实例的 Stop 方法.
-
-```go
-app.Stop() // Stop 可多次调用
-
-app.AddMsg(app.NewText("zhengzhou", "这条消息不会被发出, 因为在 Stop 方法后, 后台发送消息的 goroutine 已经退出"))  
-
-```
-
 
 ## License
 

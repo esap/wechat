@@ -5,7 +5,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/esap/wechat/util"
+	"github.com/rixingyike/wechat/util"
 )
 
 // CorpAPITagList 企业微信标签接口

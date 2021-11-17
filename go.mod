@@ -1,3 +1,3 @@
-module github.com/esap/wechat
+module github.com/rixingyike/wechat
 
 go 1.12

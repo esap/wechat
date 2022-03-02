@@ -65,8 +65,8 @@ func (s *Server) SendVideo(to string, mediaId, title, desc string) *WxErr {
 }
 
 // SendTextcard 发送客服extcard消息
-func (s *Server) SendTextcard(to string, title, desc, url string) *WxErr {
-	return s.SendMsg(s.NewTextcard(to, title, desc, url))
+func (s *Server) SendTextcard(to string, title, desc, url, btntxt string) *WxErr {
+	return s.SendMsg(s.NewTextcard(to, title, desc, url, btntxt))
 }
 
 // SendMusic 发送客服Music消息

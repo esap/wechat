@@ -179,14 +179,15 @@ type (
 		Title       CDATA `json:"title"`
 		Description CDATA `json:"description"`
 		Url         CDATA `json:"url"`
+		Btn         CDATA `json:"btntxt"`
 	}
 )
 
 // NewTextcard Textcard消息
-func (s *Server) NewTextcard(to, title, description, url string) Textcard {
+func (s *Server) NewTextcard(to, title, description, url, btntxt string) Textcard {
 	return Textcard{
 		s.newWxResp(TypeTextcard, to),
-		textcard{CDATA(title), CDATA(description), CDATA(url)},
+		textcard{CDATA(title), CDATA(description), CDATA(url), CDATA(btntxt)},
 	}
 }
 

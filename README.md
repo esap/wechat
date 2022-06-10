@@ -1,7 +1,7 @@
 # WeChat SDK
 [![Build Status](https://travis-ci.org/esap/wechat.svg?branch=master)](https://travis-ci.org/esap/wechat)
-[![Go Report Card](https://goreportcard.com/badge/github.com/rixingyike/wechat)](https://goreportcard.com/report/github.com/rixingyike/wechat)
-[![GoDoc](http://godoc.org/github.com/rixingyike/wechat?status.svg)](http://godoc.org/github.com/rixingyike/wechat)
+[![Go Report Card](https://goreportcard.com/badge/github.com/esap/wechat)](https://goreportcard.com/report/github.com/esap/wechat)
+[![GoDoc](http://godoc.org/github.com/esap/wechat?status.svg)](http://godoc.org/github.com/esap/wechat)
 
 **微信SDK的golang实现，短小精悍，同时兼容【企业微信/服务号/订阅号/小程序】**
 
@@ -15,7 +15,7 @@ package main
 import (
 	"net/http"
 
-	"github.com/rixingyike/wechat" // 微信SDK包
+	"github.com/esap/wechat" // 微信SDK包
 )
 
 func main() {
@@ -215,7 +215,7 @@ func wxApiPost(c echo.Context) error {
 
 ####  模板消息
 
-[相关issue](https://github.com/rixingyike/wechat/issues/20#issue-451068915)
+[相关issue](https://github.com/esap/wechat/issues/20#issue-451068915)
 
 ```go
 	tlpdata := map[string]struct {

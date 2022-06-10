@@ -3,7 +3,7 @@ package wechat
 import (
 	"fmt"
 
-	"github.com/rixingyike/wechat/util"
+	"github.com/esap/wechat/util"
 )
 
 // MPUserGetList 公众号用户接口

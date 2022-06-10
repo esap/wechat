@@ -5,7 +5,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/rixingyike/wechat/util"
+	"github.com/esap/wechat/util"
 )
 
 // CorpAPIDeptList 企业微信部门列表接口

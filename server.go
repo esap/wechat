@@ -16,7 +16,7 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/rixingyike/wechat/util"
+	"github.com/esap/wechat/util"
 )
 
 // WXAPI 订阅号，服务号，小程序接口，相关接口常量统一以此开头

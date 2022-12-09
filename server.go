@@ -35,6 +35,11 @@ const (
 	CorpAPIJsapi = CorpAPI + "get_jsapi_ticket?access_token="
 )
 
+const (
+	DataFormatXML  = "XML" // default format
+	DataFormatJSON = "JSON"
+)
+
 var (
 	// Debug is a flag to Println()
 	Debug bool = false
@@ -54,7 +59,7 @@ type WxConfig struct {
 	AppName              string
 	AppType              int                                  // 0-公众号,小程序; 1-企业微信
 	ExternalTokenHandler func(string, ...string) *AccessToken // 外部token获取函数
-	DateFormat           string                               // 数据格式：JSON、XML
+	DataFormat           string                               // 数据格式：JSON、XML
 }
 
 // Server 微信服务容器
@@ -72,7 +77,7 @@ type Server struct {
 	AesKey     []byte // 解密的AesKey
 	SafeMode   bool
 	EntMode    bool
-	DateFormat string // 通讯数据格式：JSON、XML
+	DataFormat string // 通讯数据格式：JSON、XML
 
 	RootUrl  string
 	MsgUrl   string
@@ -102,13 +107,18 @@ func Set(wc *WxConfig) *Server {
 		Token:                wc.Token,
 		EncodingAESKey:       wc.EncodingAESKey,
 		ExternalTokenHandler: wc.ExternalTokenHandler,
-		DateFormat:           wc.DateFormat,
+		DataFormat:           wc.DataFormat,
 	}
 }
 
 // New 微信服务容器
 func New(wc *WxConfig) *Server {
 	s := Set(wc)
+
+	// Set XML as default when data format is no setting.
+	if s.DataFormat == "" {
+		s.DataFormat = DataFormatXML
+	}
 
 	switch wc.AppType {
 	case 1:
@@ -162,23 +172,23 @@ func New(wc *WxConfig) *Server {
 
 // 依据交互数据类型，从请求体中解析消息体
 func (s *Server) DecodeMsgFromRequest(r *http.Request, msg interface{}) error {
-	if s.DateFormat == "XML" {
+	if s.DataFormat == DataFormatXML {
 		return xml.NewDecoder(r.Body).Decode(msg)
-	} else if s.DateFormat == "JSON" {
+	} else if s.DataFormat == DataFormatJSON {
 		return json.NewDecoder(r.Body).Decode(msg)
 	} else {
-		panic(fmt.Errorf("invalid DataFormat：%s", s.DateFormat))
+		panic(fmt.Errorf("invalid DataFormat：%s", s.DataFormat))
 	}
 }
 
 // 依据交互数据类型，从字符串中解析消息体
 func (s *Server) DecodeMsgFromString(str string, msg interface{}) error {
-	if s.DateFormat == "XML" {
+	if s.DataFormat == DataFormatXML {
 		return xml.Unmarshal([]byte(str), msg)
-	} else if s.DateFormat == "JSON" {
+	} else if s.DataFormat == DataFormatJSON {
 		return json.Unmarshal([]byte(str), msg)
 	} else {
-		panic(fmt.Errorf("invalid DataFormat：%s", s.DateFormat))
+		panic(fmt.Errorf("invalid DataFormat：%s", s.DataFormat))
 	}
 }
 

@@ -21,9 +21,15 @@ const (
 	TypeFile     = "file"     // 仅企业微信可用
 	TypeNews     = "news"
 	TypeMpNews   = "mpnews" // 仅企业微信可用
+	TypeEvent    = "event"  // 订阅或取消订阅
 )
 
-//WxErr 通用错误
+const (
+	EventSubscribe   = "subscribe"
+	EventUnsubscribe = "unsubscribe"
+)
+
+// WxErr 通用错误
 type WxErr struct {
 	ErrCode int
 	ErrMsg  string

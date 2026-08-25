@@ -34,9 +34,7 @@ func PKCS7UnPad(msg []byte) []byte {
 // AesEncrypt AES-CBC加密+PKCS#7打包，传入明文和密钥
 func AesEncrypt(src []byte, key []byte) ([]byte, error) {
 	k := len(key)
-	if len(src)%k != 0 {
-		src = PKCS7Pad(src, k)
-	}
+	src = PKCS7Pad(src, k)
 
 	block, err := aes.NewCipher(key)
 	if err != nil {
